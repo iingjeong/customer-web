@@ -11,7 +11,7 @@ export function LandingS6() {
       </div>
       <div className="beam" id="beam6" />
       <div className="ttl" id="tt6">
-        <div className="h" style={{ fontSize: 'clamp(40px,4.8vw,68px)' }}>
+        <div className="h" style={{ fontSize: '68px' }}>
           <span className="ml">
             <span>다른 계좌의 해외주식 순매수도</span>
           </span>

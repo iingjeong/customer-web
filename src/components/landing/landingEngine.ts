@@ -9,7 +9,7 @@ import { calc as calcAt, clamp, confirmDate, LIMIT, man, MY, won, withdrawDate, 
 import { BOARD_ROWS, BOARD_STATES } from './landingBoardData'
 import { createLandingMap } from './landingMap'
 import { MH, MW, SYM1 } from './landingMapData'
-import { R, SCN, TOTAL } from './landingScenes'
+import { BEAT_LOCK_SEC, BEAT_SEC, BEATS, FOLLOW_SEC, R, S11_BEATS, SCN, SCROLL_TOTAL, SMOOTH_LERP, TOTAL, tOfU, uOfT, WHEEL_MAX_AHEAD, WHEEL_MULT } from './landingScenes'
 import { lateTexts } from './landingTexts'
 
 export interface LandingMountOptions {
@@ -75,6 +75,32 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
 
   const RM = matchMedia('(prefers-reduced-motion: reduce)').matches
 
+  /* ===== 1920×1080 무대: 화면 크기에 맞춰 통째로 확대·축소 =====
+     무대 안 좌표는 모두 1920×1080 기준. 스크롤 길이(#pinA·#pinB 높이)만 실제 화면 높이(innerHeight)를 쓴다. */
+  const SW = 1920, SH = 1080
+  let SS = 1 // 무대 배율
+  let UI = 1 // 무대 밖 고정 UI(#hdr2·#passWrap) 배율 — 큰 화면에서는 무대와 같이 커지고, 작은 화면에서는 0.75 아래로 줄이지 않는다
+  let BX = 0, BY = 0 // 레터박스 폭(무대 좌표) — 배경 레이어가 이만큼 무대 밖으로 늘어나 남는 칸을 채운다
+  function fit() {
+    SS = Math.min(innerWidth / SW, innerHeight / SH) || 1
+    UI = Math.max(0.75, SS)
+    BX = Math.max(0, (innerWidth / SS - SW) / 2); BY = Math.max(0, (innerHeight / SS - SH) / 2)
+    root.style.setProperty('--ss', String(SS))
+    root.style.setProperty('--ui', String(UI))
+    root.style.setProperty('--bx', BX + 'px'); root.style.setProperty('--by', BY + 'px')
+    // FAQ·푸터(무대 밖 일반 스크롤 구간)는 가로 1920px 기준 레이아웃을 폭 배율로 키우고 줄인다 — 세로 길이는 zoom이 같이 바꿔 주므로 푸터가 잘리지 않는다
+    root.style.setProperty('--fw', String((document.documentElement.clientWidth || innerWidth) / SW))
+  }
+  fit()
+  // 모니터를 옮기거나 브라우저 배율을 바꿔 devicePixelRatio가 달라지면 지도를 다시 그린다(resize가 안 오는 경우 대비)
+  let dprMq: MediaQueryList | undefined, onDpr: (() => void) | undefined
+  const watchDpr = (again: () => void) => {
+    dprMq = matchMedia(`(resolution: ${devicePixelRatio}dppx)`)
+    onDpr = () => { again(); watchDpr(again) }
+    dprMq.addEventListener('change', onDpr, { once: true })
+  }
+  cleanups.push(() => { if (dprMq && onDpr) dprMq.removeEventListener('change', onDpr) })
+
   /* ===== 상태 ===== */
   type Rect = { x: number; y: number; w: number; h: number }
   const LG: { vw: number; vh: number; pad: number; r5?: Rect; l6?: Rect; k7: number; sv?: Rect; fly?: { x: number; y: number }; flyH?: number } = { vw: 0, vh: 0, pad: 96, k7: 1 }
@@ -93,7 +119,17 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
   type LenisLike = Pick<Lenis, 'on' | 'raf' | 'scrollTo'> & { destroy?: () => void }
   const lenis: LenisLike = RM
     ? ({ on() {}, raf() {}, scrollTo(y: number) { window.scrollTo(0, y) } } as unknown as LenisLike)
-    : new Lenis({ lerp: 0.1, wheelMultiplier: 1 })
+    : new Lenis({
+      lerp: SMOOTH_LERP, wheelMultiplier: WHEEL_MULT,
+      // 휠·트랙패드를 세게 돌려도 목표 위치가 현재 위치보다 WHEEL_MAX_AHEAD화면 넘게 앞서지 않게 이번 입력량을 줄인다
+      virtualScroll: (d) => {
+        if (!d.event.type.includes('wheel')) return true
+        const l = lenis as unknown as { targetScroll: number; animatedScroll: number }, lim = WHEEL_MAX_AHEAD * innerHeight
+        const before = l.targetScroll - l.animatedScroll, after = before + d.deltaY
+        if (Math.abs(after) > lim) { const nd = Math.sign(after) * lim - before; d.deltaY = Math.sign(nd) === Math.sign(d.deltaY) ? nd : 0 }
+        return true
+      },
+    })
   lenis.on('scroll', ScrollTrigger.update)
   const rafTick = (t: number) => lenis.raf(t * 1000)
   gsap.ticker.add(rafTick)
@@ -181,12 +217,13 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
   ;['late', 'lb5', 'lb6', 'lb7', 'lb8', 'lb9', 's5', 's6', 's7', 's8', 's9', 'tt5', 'd5', 'big5', 'd5b', 'seal5', 'rail5', 'rf5', 'dot5', 'cnt5',
     'ph11', 'w11', 'sum11', 'sum11bg', 'sum11c', 'ph6a', 'ph6b', 'beam6', 'beam6b', 'tt6', 'p6', 'list6', 'big6', 'pct6', 'col7', 'tt7', 'big7', 'rul7', 'rul7in', 'today7', 'rc7', 'paper', 'strike', 'save7',
 
-    'tt8', 'fl8', 'svg8', 'pm8', 'flyW', 'fly8', 'big8', 'tt9', 'list9', 'app9', 'kiroo', 'bub9', 'disc9', 'lkT', 'passD'].forEach((id) => { L$[id] = byId(id) })
+    'tt8', 'fl8', 'svg8', 'pm8', 'flyW', 'fly8', 'big8', 'tt9', 'list9', 'app9', 'kiroo', 'bub9', 'disc9', 'lkT', 'addr9', 'passD'].forEach((id) => { L$[id] = byId(id) })
   const LL = (n: string) => $$(`[data-l="${n}"]`)
   const ticks5 = $$('.tk5') // S5 rail ticks (13개, 마크업에서 그린 것)
   const rows6 = $$('.r6'), ems6 = rows6.map((r) => r.querySelector('em') as HTMLElement), items7 = $$('.i7')
   const lanes8 = $$('.ln8')
-  const items9 = $$('.l9'), panels9 = $$('.a9p'), tabs9 = $$('.a9tab span:not(.ex)'), TABS9 = [0, 0, 2, 1, 3, 0, -1]
+  // S9 화면별 켜질 머리글 탭·주소창 경로는 마크업(LandingS9의 data-tab·data-path)에서 읽는다
+  const items9 = $$('.l9'), panels9 = $$('.a9p'), tabs9 = $$('.a9tab span'), TABS9 = panels9.map((p_) => +(p_.dataset.tab ?? -1)), PATH9 = panels9.map((p_) => p_.dataset.path || '/home')
 
   /* S8 flow nodes */
   interface Lab { lab: HTMLElement; dir: 'up' | 'dn'; shift: number; px: number; py: number; flipped?: number; end?: number }
@@ -258,7 +295,7 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
   cleanups.push(() => { bakeSrc.onload = null; bakeSrc.removeAttribute('src') })
 
   function buildLate(vw: number, vh: number) {
-    const pad = parseFloat(getComputedStyle(root).getPropertyValue('--pad')) || 96 // --pad는 .landing에 정의(원본은 :root)
+    const pad = parseFloat(getComputedStyle(stageEl).getPropertyValue('--pad')) || 96 // 무대(.stg) 안 --pad는 96px 고정
     Object.assign(LG, { vw, vh, pad })
     paintLate()
     /* S5: text color follows the dawn gradient (white on dark top, ink on light bottom) */
@@ -307,11 +344,13 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     FLY.px = 0; FLY.py = mid + L; FLY.shift = 0; FLY.flipped = 1; FLY.dir = 'dn'; L$.fly8.textContent = won(calc(disp.A, my.r).save); L$.fly8.style.transform = 'none'; placeLab(FLY)
     fixOverlap()
     LG.fly = { x: pad + parseFloat(FLY.lab.style.left), y: top + parseFloat(FLY.lab.style.top) }
-    LG.flyH = L$.fly8.getBoundingClientRect().height || 25
+    LG.flyH = L$.fly8.getBoundingClientRect().height / SS || 25
     /* S9 character beside the app screen */
-    const ap = { x: L$.app9.offsetLeft, y: L$.app9.offsetTop, h: L$.app9.offsetHeight }
-    Object.assign(L$.kiroo.style, { left: (ap.x - 44) + 'px', top: (ap.y + ap.h - 70) + 'px' })
-    Object.assign(L$.bub9.style, { left: (ap.x + 40) + 'px', top: (ap.y + ap.h - 92) + 'px' })
+    // 끼루는 노트북 오른쪽 아래 모서리에 걸쳐 앉고, 말풍선은 그 왼쪽, 화면 밖(노트북 아래쪽)에 붙여 화면 내용을 가리지 않는다
+    const ap = { x: L$.app9.offsetLeft, y: L$.app9.offsetTop, w: L$.app9.offsetWidth, h: L$.app9.offsetHeight }
+    const kx = ap.x + ap.w - 52, ky = ap.y + ap.h - 72
+    Object.assign(L$.kiroo.style, { left: kx + 'px', top: ky + 'px' })
+    Object.assign(L$.bub9.style, { left: (kx - 10 - L$.bub9.offsetWidth) + 'px', top: (ap.y + ap.h + 12) + 'px' })
   }
   function paintLate() {
     const c = calcAt(disp.A, my.r, undefined, my.w), lt = lateTexts(disp.A, my.r, my.w)
@@ -326,11 +365,12 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     const m = seg(t, 10.5, 10.85) * 140 - 40
     L$.lb5.style.webkitMaskImage = L$.lb5.style.maskImage = `linear-gradient(to top,rgb(0,0,0) ${m}%,transparent ${m + 40}%)`
     L$.lb6.style.opacity = String(seg(t, 12.2, 12.5))
-    const x2 = seg(t, 14.2, 14.5) * vw
-    L$.lb7.style.clipPath = `inset(0 ${vw - x2}px 0 0)`
+    // 배경 레이어는 레터박스까지 늘어나 있으므로(BX·BY) 쓸어 가는 선도 화면 왼쪽 끝(-BX)에서 오른쪽 끝(vw+BX)까지 간다
+    const x2 = seg(t, 14.2, 14.5) * (vw + 2 * BX) - BX
+    L$.lb7.style.clipPath = `inset(0 ${vw + BX - x2}px 0 0)`
     L$.lb8.style.opacity = String(seg(t, 16.2, 16.5))
     L$.lb9.style.opacity = String(seg(t, 18.2, 18.5))
-    vis(L$.beam6b, x2 > 0 && x2 < vw ? 1 : 0, `translateX(${x2}px)`)
+    vis(L$.beam6b, x2 > -BX && x2 < vw + BX ? 1 : 0, `translateX(${x2}px)`)
 
     /* S5 — big withdrawal date + 1-year rail */
     const on5 = t < 12.5; vis(L$.s5, on5 ? 1 : 0)
@@ -340,7 +380,7 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
       const di = e3o(seg(t, 10.8, 11.1)); vis(L$.d5, di * (1 - out), `translateY(${(1 - di) * 24}px)`)
       vis(L$.rail5, seg(t, 10.85, 11.1) * (1 - out))
       const k = seg(t, 11.1, 12.0), ex = e2io(seg(t, 12.2, 12.5)), r = LG.r5!
-      const dy = k * r.h + ex * (vh - r.y - r.h + 60)
+      const dy = k * r.h + ex * (vh + BY - r.y - r.h + 60)
       L$.dot5.style.transform = `translateY(${dy}px)`; L$.dot5.style.visibility = t >= 11.0 ? 'visible' : 'hidden'; L$.dot5.style.opacity = '1'
       L$.rf5.style.height = k * 100 + '%'
       setT(L$.cnt5, `보유 ${Math.round(365 * k)}일`); L$.cnt5.style.color = (r.y + dy) / vh > 0.5 ? 'var(--ink)' : 'var(--color-on-navy)'
@@ -350,12 +390,12 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     /* S6 — scan beam over the security photo */
     const on6 = t >= 12.2 && t < 14.5; vis(L$.s6, on6 ? 1 : 0)
     if (on6) {
-      L$.s6.style.clipPath = x2 > 0 ? `inset(0 0 0 ${x2}px)` : ''
+      L$.s6.style.clipPath = x2 > -BX ? `inset(${-BY}px ${-BX}px ${-BY}px ${x2}px)` : ''
       const pi = seg(t, 12.2, 12.5); L$.ph6a.style.opacity = String(pi)
       revL(L$.tt6, 12.5, t); vis(L$.tt6, t >= 12.5 ? 1 : 0); L$.p6.style.opacity = String(seg(t, 12.6, 12.8))
-      const bx = seg(t, 12.8, 13.7) * vw
-      vis(L$.beam6, bx > 0 && bx < vw ? 1 : 0, `translateX(${bx}px)`)
-      L$.ph6b.style.clipPath = `inset(0 ${vw - bx}px 0 0)`; L$.ph6b.style.opacity = String(pi)
+      const bx = seg(t, 12.8, 13.7) * (vw + 2 * BX) - BX
+      vis(L$.beam6, bx > -BX && bx < vw + BX ? 1 : 0, `translateX(${bx}px)`)
+      L$.ph6b.style.clipPath = `inset(0 ${vw + BX - bx}px 0 0)`; L$.ph6b.style.opacity = String(pi)
       const l = LG.l6!
       rows6.forEach((row, i) => { row.style.visibility = bx >= l.x ? 'visible' : 'hidden'; ems6[i].style.opacity = String(clamp((bx - (l.x + (i + 1) / 5 * l.w)) / 40)) })
       const gk = seg(t, 13.7, 14.0); vis(L$.big6, gk > 0 ? 1 : 0, `translateY(${(1 - e3o(gk)) * 16}px)`)
@@ -364,7 +404,7 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     /* S7 — big deduction rate, ruler, printed receipt */
     const on7 = t >= 14.2 && t < 16.55; vis(L$.s7, on7 ? 1 : 0)
     if (on7) {
-      L$.s7.style.clipPath = x2 < vw ? `inset(0 ${vw - x2}px 0 0)` : ''
+      L$.s7.style.clipPath = x2 < vw + BX ? `inset(${-BY}px ${vw - x2}px ${-BY}px ${-BX}px)` : ''
       const out = seg(t, 16.2, 16.35)
       revL(L$.tt7, 14.5, t); vis(L$.tt7, t >= 14.5 ? 1 : 0)
       const bi = e3o(seg(t, 14.55, 14.8)); vis(L$.big7, bi, `translateY(${(1 - bi) * 20}px)`)
@@ -410,6 +450,7 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
         p_.style.visibility = kin > 0 && kout < 1 ? 'visible' : 'hidden'; p_.style.transform = `translateY(${((1 - kin) - kout) * 100}%)`
       })
       tabs9.forEach((e, i) => e.classList.toggle('on', i === TABS9[live ? idx : 0]))
+      setT(L$.addr9, PATH9[live ? idx : 0])
       vis(L$.kiroo, seg(t, 18.7, 18.85)); vis(L$.bub9, seg(t, 20.4, 20.5) * (1 - seg(t, 20.7, 20.8)))
       L$.disc9.style.opacity = String(seg(t, 18.8, 19.0))
     }
@@ -430,9 +471,25 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     const k = e2io(clamp((t - g.TX) / g.dX))
     Object.assign(V, { x: S.x * (1 - k), y: S.y * (1 - k), w: S.w + (g.vw - S.w) * k, h: S.h + (g.vh - S.h) * k, r: 6 * (1 - k), bg: 1, o: 1 - clamp((t - g.TX - g.dX * 0.33) / (g.dX * 0.67)) })
   }
+  // 레터박스(16:9가 아닐 때 무대 밖에 남는 칸) 색: 지금 보이는 장면 배경. [시작 시간, 위쪽 색, 아래쪽 색]
+  const BARS: Array<[number, string, string]> = [
+    [0, '--bg-s0', '--bg-s0'], [R(2.7), '--bg-s1', '--bg-s1'], [R(5.15), '--bg-s2', '--bg-s2'], [R(7.15), '--bg-s3', '--bg-s3'],
+    [R(8.85), '--bg-s4', '--bg-s4'], [10.7, '--landing-dawn-top', '--landing-dawn-bottom'], [12.35, '--bg-s6', '--bg-s6'],
+    [14.35, '--bg-s7', '--bg-s7'], [16.35, '--bg-s8', '--bg-s8'], [18.35, '--bg-s9', '--bg-s9'],
+  ]
+  const stageBox = byId('stage')
+  let barK = -1
+  function paintBars(t: number) {
+    let i = 0
+    BARS.forEach((b, k) => { if (t >= b[0]) i = k })
+    if (i === barK) return
+    barK = i
+    stageBox.style.setProperty('--lb-t', `var(${BARS[i][1]})`); stageBox.style.setProperty('--lb-b', `var(${BARS[i][2]})`)
+  }
   function onTL() {
     if (!tl) return
     const t = tl.time()
+    paintBars(t)
     monitorFrame(t); map.drawMap()
     renderLate(t)
     updBoard(t, boardLive())
@@ -455,13 +512,15 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     }
   }
   const words11 = $$('#w11 .ml>span')
+  // S11 요약 카드가 줄어 들어갈 패스포트 탭 위치(무대 좌표) — build11()에서 계산
+  const P11 = { dx: 72, dy: 62, w: 72, h: 88 }
   function render11(p: number) {
     paintLate()
     L$.ph11.style.clipPath = `inset(${(1 - e3o(seg(p, 0, 0.3))) * 100}% 0 0 0)`
     words11.forEach((s_, i) => { const k = e3o(seg(p, 0.3 + i * 0.3, 0.3 + i * 0.3 + 0.22)); s_.style.transform = `translateY(${(1 - k) * 112}%)` })
     const k = e3o(seg(p, 1.2, 1.5)), c = L$.sum11, w = c.offsetWidth || 380, h = c.offsetHeight || 360
-    const dx = (LG.pad || 96) - 24, dy = innerHeight * 0.08 - 24
-    vis(c, p >= 1.2 ? 1 : 0, `translate(${dx * (1 - k)}px,${dy * (1 - k)}px) scale(${72 / w + (1 - 72 / w) * k},${88 / h + (1 - 88 / h) * k})`)
+    const g = P11, tw = g.w / w, th = g.h / h
+    vis(c, p >= 1.2 ? 1 : 0, `translate(${g.dx * (1 - k)}px,${g.dy * (1 - k)}px) scale(${tw + (1 - tw) * k},${th + (1 - th) * k})`)
     L$.sum11bg.style.opacity = String(1 - k); L$.sum11c.style.opacity = String(seg(k, 0.6, 1))
   }
 
@@ -484,8 +543,9 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
   cleanups.push(() => passFx?.kill())
 
   /* ===== master timeline (one take) ===== */
-  const stageEl = $('#stage')
-  const rel = (el: Element) => { const s = stageEl.getBoundingClientRect(), r = el.getBoundingClientRect(); return { x: r.left - s.left, y: r.top - s.top, w: r.width, h: r.height } }
+  const stageEl = $('#stg')
+  // 화면에서 잰 위치를 무대(1920×1080) 좌표로 — 무대가 scale(SS)로 그려지므로 배율로 나눈다
+  const rel = (el: Element) => { const s = stageEl.getBoundingClientRect(), r = el.getBoundingClientRect(); return { x: (r.left - s.left) / SS, y: (r.top - s.top) / SS, w: r.width / SS, h: r.height / SS } }
   const r$ = (s: string) => rel($(s))
   const ANIM = '#hdr,#c0,#scrim,#bg1,#bg2,#bg2 img,#bg3,#bg4,#s1,#c1,#c1p,#card1,#seal,.kv b,.gln,#c2,#c2p,#card2,.c2r,.c2res,.c2n,#board,#c3,#mon,#monUI,#c4,#c4a,#c4lab,#hero,#hero img,#slogan,#pass,.ml>span'
 
@@ -493,10 +553,11 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     const prog = st ? st.progress : 0
     if (st) st.kill()
     if (tl) tl.kill()
-    const vw = innerWidth, vh = innerHeight, mob = vw <= 760
-    $('#pinA').style.height = (TOTAL + 1) * vh + 'px'
+    fit()
+    const vw = SW, vh = SH // 무대 크기(장면 배치용)
+    $('#pinA').style.height = (SCROLL_TOTAL + 1) * innerHeight + 'px' // 스크롤 길이는 실제 화면 높이 기준(장면별 길이는 landingScenes의 SCREENS)
     map.readColors(document.documentElement) // 캔버스 색은 build() 때 CSS 변수에서 읽는다
-    map.resize(vw, vh)
+    map.resize(vw, vh, SS)
     map.buildGrid()
     gsap.set($$(ANIM).filter((e) => !e.closest('#c0')), { clearProps: 'all' })
     gsap.set(['#hdr', '#c0', '#scrim'], { clearProps: 'all' })
@@ -506,7 +567,7 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     const TB = r$('#thumb'), CD = r$('#card1'), PS = r$('#pass'), BD = r$('#board')
 
     /* seat-back monitor geometry */
-    const mw = Math.min(1040, vw * (mob ? 0.92 : 0.78), ((vh * (mob ? 0.5 : 0.66)) - 28) * 16 / 9 + 28), mh = (mw - 28) * 9 / 16 + 28
+    const mw = Math.min(1040, vw * 0.78, ((vh * 0.66) - 28) * 16 / 9 + 28), mh = (mw - 28) * 9 / 16 + 28
     const mx = (vw - mw) / 2, my0 = vh - mh - Math.max(40, vh * 0.07)
     ;[$('#mon'), $('#monUI')].forEach((e) => Object.assign(e.style, { left: mx + 'px', top: my0 + 'px', width: mw + 'px', height: mh + 'px' }))
     Object.assign($('#c4').style, { left: mx + 'px', bottom: (vh - my0 + 32) + 'px' })
@@ -570,7 +631,9 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     /* → belt photo slides left, grey wall + ceiling, board lowers from above */
     tl.to('#bg2 img', { x: -vw * 0.18, duration: 0.6, ease: 'power1.inOut' }, 6.85)
     FADE(6.9, '#bg3', 1, 0.5)
-    tl.fromTo('#board', { autoAlpha: 1, y: -(BD.y + BD.h + 40) }, { autoAlpha: 1, y: 0, duration: 0.5, ease: 'power2.out' }, 6.9)
+    // 무대 위쪽에 대기하는 동안은 숨김 — 16:9가 아닌 화면에서 레터박스에 비치지 않게
+    tl.set('#board', { autoAlpha: 1 }, 6.9)
+    tl.fromTo('#board', { y: -(BD.y + BD.h + 40) }, { y: 0, duration: 0.5, ease: 'power2.out' }, 6.9)
     tl.fromTo('#board', { rotateY: -10, rotateX: 3 }, { rotateY: 0, rotateX: 0, duration: 1.5, ease: 'power1.out' }, 6.9)
 
     /* S3 — departure board: statuses roll top → bottom */
@@ -578,6 +641,7 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     OUT(8.47, '#c3', 0.12, 16)
     /* → board lifts away, seat-back monitor rises from below (monitor + map viewport: monitorFrame) */
     tl.to('#board', { y: -(BD.y + BD.h + 60), duration: 0.45, ease: 'power2.in' }, 8.55)
+    tl.set('#board', { autoAlpha: 0 }, 9.0)
     FADE(8.65, '#bg4', 1, 0.4)
     tl.set(C, { cx: MW / 2, cy: MH * 0.47, z: 1 }, 8.7)
     tl.set(A, { krDot: 0, sw: 2, ro: 1, dimOn: 1 }, 8.7)
@@ -599,9 +663,14 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     // L-6 이후: S5~S9(renderLate)
     tl.add(() => {}, TOTAL)
 
-    st = ScrollTrigger.create({ trigger: '#pinA', start: 'top top', end: 'bottom bottom', scrub: RM ? true : 0.6, animation: tl,
-      snap: RM ? { snapTo: SCN.map((s) => s.done / TOTAL), duration: 0.01, delay: 0.05 } : undefined })
-    stampN = -1; rowState = rowState.map(() => -1); tl.progress(prog); onTL()
+    // 스크롤 → 타임라인 시간: 장면마다 스크롤 길이가 달라서(SCREENS) 진행률을 tOfU로 바꿔 시간을 정한다.
+    // 예전 scrub 0.6과 같은 부드러움으로 따라가게 한다(움직임 줄이기면 바로)
+    const tlNow = tl
+    const follow = RM ? null : gsap.quickTo(tlNow, 'time', { duration: FOLLOW_SEC, ease: 'power3' })
+    st = ScrollTrigger.create({ trigger: '#pinA', start: 'top top', end: 'bottom bottom',
+      onUpdate: (self) => { const t = tOfU(self.progress * SCROLL_TOTAL); if (follow) follow(t); else tlNow.time(t) },
+      snap: RM ? { snapTo: SCN.map((s) => uOfT(s.done) / SCROLL_TOTAL), duration: 0.01, delay: 0.05 } : undefined })
+    stampN = -1; rowState = rowState.map(() => -1); tl.time(tOfU(prog * SCROLL_TOTAL)); onTL()
     build11(); updNav()
   }
 
@@ -612,7 +681,13 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     if (tl2) tl2.kill()
     const pinB = byId('pinB'), w11 = byId('w11'), sum11 = byId('sum11')
     pinB.style.height = innerHeight * 3 + 'px'
-    const pad = LG.pad || 96, avail = innerWidth - pad * 2 - (innerWidth <= 760 ? 0 : (sum11.offsetWidth || 380) + 40)
+    const pad = LG.pad || 96, avail = SW - pad * 2 - ((sum11.offsetWidth || 380) + 40)
+    {
+      // #s11이 화면에 붙어 있을 때 무대 왼쪽 위(화면 좌표) → 패스포트 탭 오른쪽 아래를 무대 좌표로
+      const ox = (innerWidth - SW * SS) / 2, oy = (innerHeight - SH * SS) / 2, pr = passWrap.getBoundingClientRect()
+      const sb = parseFloat(getComputedStyle(sum11).bottom) || 86
+      Object.assign(P11, { dx: (pr.right - ox) / SS - (SW - pad), dy: (pr.bottom - oy) / SS - (SH - sb), w: 72 * UI / SS, h: 88 * UI / SS })
+    }
     w11.style.fontSize = ''
     const fs = parseFloat(getComputedStyle(w11).fontSize), tw = w11.scrollWidth
     if (tw > avail) w11.style.fontSize = Math.max(48, fs * avail / tw) + 'px'
@@ -625,9 +700,11 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
 
   /* ===== passport navigation ===== */
   const pnList = byId('pnList'), passWrap = byId('passWrap'), faq = byId('faq')
+  // #faq에 zoom이 걸려 있어 offsetTop이 zoom 단위로 나오므로, 문서 맨 위부터의 실제 위치는 화면 좌표로 잰다
+  const faqY = () => Math.round(faq.getBoundingClientRect().top + window.scrollY)
   const navLis = [...pnList.children] as HTMLElement[]
-  const yOfT = (t: number) => (st ? st.start + t / TOTAL * (st.end - st.start) : 0)
-  const sceneY = (i: number) => (i < SCN.length ? yOfT(i ? SCN[i].a + 0.3 : 0) : faq.offsetTop)
+  const yOfT = (t: number) => (st ? st.start + uOfT(t) / SCROLL_TOTAL * (st.end - st.start) : 0)
+  const sceneY = (i: number) => (i < SCN.length ? yOfT(i ? SCN[i].a + 0.3 : 0) : faqY())
   const goScene = (i: number) => lenis.scrollTo(sceneY(i), { duration: 1.2 })
   const onNavClick = (e: Event) => {
     const li = (e.target as Element).closest('li')
@@ -642,28 +719,48 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
   cleanups.push(() => pnAmt.removeEventListener('click', onPnAmt))
   function curScene() {
     const y = scrollY
-    if (y >= faq.offsetTop - innerHeight * 0.5) return SCN.length
-    const t = st ? clamp((y - st.start) / ((st.end - st.start) || 1)) * TOTAL : 0
+    if (y >= faqY() - innerHeight * 0.5) return SCN.length
+    const t = st ? tOfU(clamp((y - st.start) / ((st.end - st.start) || 1)) * SCROLL_TOTAL) : 0
     let i = 0
     SCN.forEach((s, k) => { if (t >= s.a - 0.001) i = k })
     return i
   }
+  const sceneNo = byId('sceneNo')
   function updNav() {
     const i = curScene()
+    // 발표자용 현재 장면 번호(화면 구석): S0~S9, FAQ, S11
+    const lab = scrollY >= byId('pinB').offsetTop - innerHeight * 0.5 ? 'S11' : i < SCN.length ? SCN[i].k : 'FAQ'
+    if (sceneNo.textContent !== lab) sceneNo.textContent = lab
     navLis.forEach((li, k) => { li.classList.toggle('past', k < i); li.classList.toggle('cur', k === i) })
     passWrap.classList.toggle('gone', i === 0 || scrollY > byId('pinB').offsetTop - innerHeight * 0.4)
   }
   listen('scroll', updNav, { passive: true })
+  /* ===== 발표 모드: 키 한 번에 다음·이전 박자 지점으로(landingScenes의 BEATS) ===== */
+  const beatYs = () => {
+    const ys = SCN.flatMap((sc) => (BEATS[sc.k] || []).map((t) => yOfT(t)))
+    ys.push(faqY())
+    if (st2) { ys.push(st2.start); S11_BEATS.forEach((p) => ys.push(st2!.start + p / 2 * (st2!.end - st2!.start))) }
+    return ys.map(Math.round).sort((x, y) => x - y)
+  }
+  const easeIO = (x: number) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2)
+  let beatBusyUntil = 0
   listen('keydown', (e) => {
+    if (e.altKey || e.ctrlKey || e.metaKey) return
     const tg = e.target as Element | null
-    if (tg && tg.closest && tg.closest('input,textarea,select,button,a,[contenteditable],.qa')) return
-    const nxt = (e.key === ' ' && !e.shiftKey) || e.key === 'ArrowDown' || e.key === 'PageDown'
-    const prv = (e.key === ' ' && e.shiftKey) || e.key === 'ArrowUp' || e.key === 'PageUp'
+    // 입력창·아코디언(FAQ)에 포커스가 있으면 동작하지 않는다
+    if (tg && tg.closest && tg.closest('input,textarea,select,[contenteditable],.qa')) return
+    const nxt = (e.key === ' ' && !e.shiftKey) || e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === 'PageDown'
+    const prv = (e.key === ' ' && e.shiftKey) || e.key === 'ArrowUp' || e.key === 'ArrowLeft' || e.key === 'PageUp'
     if (!nxt && !prv) return
-    const pts = [...SCN.map((s_) => yOfT(s_.a)), faq.offsetTop, byId('pinB').offsetTop], y = scrollY
+    if (e.key === ' ' && tg && tg.closest && tg.closest('button,a')) return // 버튼·링크에 포커스가 있으면 Space는 그 버튼을 누르는 키
+    e.preventDefault()
+    const now = performance.now()
+    if (now < beatBusyUntil) return // 이동 중(잠금 시간)에는 추가 입력 무시 — 연타로 건너뛰지 않게
+    const y = scrollY, pts = beatYs()
     const tgt = nxt ? pts.find((p_) => p_ > y + 8) : [...pts].reverse().find((p_) => p_ < y - 8)
     if (tgt == null) return
-    e.preventDefault(); lenis.scrollTo(tgt, { duration: 1 })
+    beatBusyUntil = now + Math.max(BEAT_LOCK_SEC, BEAT_SEC) * 1000
+    lenis.scrollTo(tgt, { duration: BEAT_SEC, easing: easeIO, lock: true, force: true })
   })
 
   /* ===== FAQ accordion (one open at a time) ===== */
@@ -752,8 +849,8 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     window.scrollTo(0, savedY) // lenis가 없는 RM 모드에서도 같은 위치
     ScrollTrigger.update()
   } else if (opts.hash === '#faq') {
-    // 다른 페이지(커뮤니티 끼루 답변 근거 등)에서 /#faq 로 들어오면 FAQ 위치로 — 원본 landing-journey.html#faq 도 같은 위치(faq.offsetTop)에 선다
-    const y = faq.offsetTop
+    // 다른 페이지(커뮤니티 끼루 답변 근거 등)에서 /#faq 로 들어오면 FAQ 위치로 — 원본 landing-journey.html#faq 도 같은 위치(faqY())에 선다
+    const y = faqY()
     lenis.scrollTo(y, { immediate: true, force: true })
     window.scrollTo(0, y)
     ScrollTrigger.update()
@@ -785,10 +882,29 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
   const loadMap = () => (dead ? Promise.resolve() : map.loadMap(ac.signal))
   fontsReady.then(loadMap).then(() => { if (!dead && Mp.ready) rebuild() }).catch((e) => { if (e?.name !== 'AbortError') console.warn('map', e) })
   document.fonts.ready.then(() => { if (!dead && tl) rebuild() })
+  watchDpr(() => { if (!dead && tl) { fit(); rebuild() } })
   let rT: ReturnType<typeof setTimeout> | undefined
+  // 창 크기를 바꾸면 스크롤 길이(화면 높이 비례)가 다시 정해지는데 스크롤 위치(px)는 그대로라 다른 장면으로 튄다.
+  // 크기 변경이 시작될 때의 위치를 기억해 두었다가(고정 장면 안이면 진행률, 그 아래면 문서 전체 비율) 다시 짠 뒤 같은 자리로 돌려놓는다
+  let anchor: { pin: boolean; p: number } | null = null
+  const docMax = () => Math.max(1, document.documentElement.scrollHeight - innerHeight)
   listen('resize', () => {
+    if (!anchor) anchor = st && scrollY <= st.end ? { pin: true, p: st.progress } : { pin: false, p: scrollY / docMax() }
+    fit() // 배율은 바로, 장면 다시 짜기는 잠깐 멈춘 뒤
     clearTimeout(rT)
-    rT = setTimeout(() => { timers.delete(rT!); if (!dead) { ctx.add(() => { build(); ScrollTrigger.refresh() }) } }, 200)
+    rT = setTimeout(() => {
+      timers.delete(rT!)
+      if (dead) return
+      const a = anchor; anchor = null
+      ctx.add(() => {
+        build(); ScrollTrigger.refresh()
+        if (a && st && tl) {
+          const y = a.pin ? st.start + a.p * (st.end - st.start) : a.p * docMax()
+          lenis.scrollTo(y, { immediate: true, force: true }); window.scrollTo(0, y)
+          ScrollTrigger.update(); tl.time(tOfU(st.progress * SCROLL_TOTAL)); onTL(); updNav()
+        }
+      })
+    }, 200)
     timers.add(rT)
   })
 
