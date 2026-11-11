@@ -215,6 +215,8 @@ html.lenis,html.lenis body{height:auto}
 .landing .stamps{display:flex;gap:6px}
 .landing .st{width:20px;height:20px;border-radius:50%;border:1px dashed rgba(216,169,78,.5);position:relative}
 .landing .st i{position:absolute;inset:-1px;border-radius:50%;background:var(--gold);color:var(--navy);font:700 10px/20px var(--mono);font-style:normal;text-align:center;opacity:0}
+/* 도장이 찍히는 순간 한 번 퍼졌다 사라지는 잉크 테두리 — 엔진(stampFx)이 --ink-o(진하기)·--ink-s(크기)를 움직인다. 평소에는 보이지 않는다 */
+.landing .st::after{content:'';position:absolute;inset:-1px;border-radius:50%;border:2.5px solid var(--gold);opacity:var(--ink-o,0);transform:scale(var(--ink-s,1));pointer-events:none}
 .landing .po .sl{margin-top:10px;font:500 10px Pretendard;color:rgba(216,169,78,.95);height:12px}
 /* ===== S5–S9 (onTL-driven) ===== */
 .landing #late{position:absolute;inset:0;z-index:10;visibility:hidden;pointer-events:none}

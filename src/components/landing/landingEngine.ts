@@ -525,17 +525,27 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
   }
 
   /* ===== passport tab ===== */
-  const STAMPS = [R(5.3), R(6.6), R(8.45), 11.8, 13.75], STL = ['계좌 개설', '입고', '매도', '확정', '외부감시']
+  // 도장 4(확정)는 S5 장면 안 HOLD 도장(#seal5, 12.0~12.15)과 같이 찍히게 맞춘다(예전 11.8은 보유 일수를 세는 도중이었다).
+  // 패스포트는 펼쳐진 뒤 0.6초에 찍히므로 #seal5가 나타나기 시작하는 12.0 바로 뒤에서 시작한다(12.0 박자에 멈춰 있을 때는 아직 찍히지 않게 0.01 띄움)
+  const STAMPS = [R(5.3), R(6.6), R(8.45), 12.01, 13.75], STL = ['계좌 개설', '입고', '매도', '확정', '외부감시']
   const pass = byId('pass'), stI = $$('.st i'); let stampN = 0, passFx: gsap.core.Timeline | undefined
-  function setStamps(n: number) { stI.forEach((st_, i) => gsap.set(st_, { opacity: i < n ? 1 : 0, scale: 1 })); byId('pCount').textContent = `${n}/5`; byId('stLab').textContent = n ? `${STL[n - 1]} 도장` : '' }
+  // 도장마다 정해 둔 기울기(도) — 손으로 찍은 것처럼 조금씩 다르게. 잉크 테두리는 도장 칸(.st)의 ::after(landing.css)
+  const TILT = [-7, 5, -4, 8, -6], stBox = stI.map((i) => i.parentElement as HTMLElement)
+  function setStamps(n: number) { stI.forEach((st_, i) => gsap.set(st_, { opacity: i < n ? 1 : 0, scale: 1, rotation: TILT[i] })); gsap.set(stBox, { '--ink-o': 0, '--ink-s': 1 }); gsap.set(pass, { y: 0 }); byId('pCount').textContent = `${n}/5`; byId('stLab').textContent = n ? `${STL[n - 1]} 도장` : '' }
   function stampFx(n: number) {
     if (passFx) passFx.kill()
+    if (RM) { setStamps(n); return } // 움직임 줄이기: 펼침·찍힘 효과 없이 최종 상태만
     setStamps(n - 1); byId('pCount').textContent = `${n}/5`; byId('stLab').textContent = `${STL[n - 1]} 도장`
     ctx.add(() => {
+      const HIT = 0.6 // 도장이 종이에 닿는 순간(0.38에 내려오기 시작 + 0.22)
       passFx = gsap.timeline()
         .to(pass, { width: 160, height: 212, duration: 0.35, ease: 'power3.out' })
         .to('.pt', { autoAlpha: 0, duration: 0.12 }, 0).to('.po', { autoAlpha: 1, duration: 0.2 }, 0.12)
-        .fromTo(stI[n - 1], { opacity: 0, scale: 2.4 }, { opacity: 1, scale: 1, duration: 0.22, ease: 'power3.in' }, 0.38)
+        // 기울어진 채로 내려찍는다
+        .fromTo(stI[n - 1], { opacity: 0, scale: 2.4, rotation: TILT[n - 1] - 9 }, { opacity: 1, scale: 1, rotation: TILT[n - 1], duration: 0.22, ease: 'power3.in' }, 0.38)
+        // 닿는 순간: 잉크 테두리가 한 번 퍼졌다 사라지고, 패스포트가 2px 눌렸다 돌아온다(1회)
+        .fromTo(stBox[n - 1], { '--ink-o': 1, '--ink-s': 1 }, { '--ink-o': 0, '--ink-s': 1.6, duration: 0.5, ease: 'power2.out', immediateRender: false }, HIT)
+        .to(pass, { y: 2, duration: 0.05, ease: 'power2.out' }, HIT).to(pass, { y: 0, duration: 0.22, ease: 'power2.out' }, HIT + 0.05)
         .to('.po', { autoAlpha: 0, duration: 0.15 }, 1.4).to('.pt', { autoAlpha: 1, duration: 0.15 }, 1.5)
         .to(pass, { width: 72, height: 88, duration: 0.3, ease: 'power3.inOut' }, 1.4)
     })
