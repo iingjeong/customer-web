@@ -302,8 +302,7 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     const pad = parseFloat(getComputedStyle(stageEl).getPropertyValue('--pad')) || 96 // 무대(.stg) 안 --pad는 96px 고정
     Object.assign(LG, { vw, vh, pad })
     paintLate()
-    /* S5: text color follows the dawn gradient (white on dark top, ink on light bottom) */
-    ;[L$.d5.querySelector<HTMLElement>('#d5s')!, L$.big5, L$.d5b].forEach((el) => { const r = rel(el); el.style.color = (r.y + r.h / 2) / vh > 0.52 ? 'var(--ink)' : 'var(--color-on-navy)' })
+    /* S5: 밝은 아침 사진의 하늘 위 — 글자 색은 CSS(진한 글자·남색) 그대로 */
     const rr = rel(L$.rail5); LG.r5 = rr
     ticks5.forEach((tk, k) => tk.classList.toggle('dk', (rr.y + rr.h * k / 12) / vh > 0.5))
     /* S6 */
@@ -366,8 +365,8 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     vis(L$.late, 1)
     const c = paintLate(), vw = LG.vw, vh = LG.vh
     /* backgrounds: dawn rises from below → teal → sky (swept left→right) → white → ivory */
-    // S4→S5: 하늘은 야경 뒤 바탕(#hero, 같은 색)에서 먼저 드러나고, 다 덮인 뒤(10.66) S5 바탕이 그대로 이어받는다
-    const m = t >= 10.66 ? 100 : 0
+    // S4→S5: 아침 사진이 무대를 다 채운 뒤(10.42) S5 바탕(같은 사진)이 그대로 이어받는다
+    const m = t >= 10.42 ? 100 : 0
     L$.lb5.style.webkitMaskImage = L$.lb5.style.maskImage = `linear-gradient(to top,rgb(0,0,0) ${m}%,transparent ${m}%)`
     L$.lb6.style.opacity = String(seg(t, 12.2, 12.5))
     // 배경 레이어는 레터박스까지 늘어나 있으므로(BX·BY) 쓸어 가는 선도 화면 왼쪽 끝(-BX)에서 오른쪽 끝(vw+BX)까지 간다
@@ -381,14 +380,14 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     const on5 = t < 12.5; vis(L$.s5, on5 ? 1 : 0)
     if (on5) {
       const out = seg(t, 12.2, 12.4)
-      revL(L$.tt5, 10.62, t); vis(L$.tt5, (t >= 10.62 ? 1 : 0) * (1 - out)) // 하늘이 다 찰 무렵부터
+      revL(L$.tt5, 10.48, t); vis(L$.tt5, (t >= 10.48 ? 1 : 0) * (1 - out)) // 사진이 화면을 다 채운 직후부터
       const di = e3o(seg(t, 10.8, 11.1)); vis(L$.d5, di * (1 - out), `translateY(${(1 - di) * 24}px)`)
       vis(L$.rail5, seg(t, 10.85, 11.1) * (1 - out))
       const k = seg(t, 11.1, 12.0), ex = e2io(seg(t, 12.2, 12.5)), r = LG.r5!
       const dy = k * r.h + ex * (vh + BY - r.y - r.h + 60)
       L$.dot5.style.transform = `translateY(${dy}px)`; L$.dot5.style.visibility = t >= 11.0 ? 'visible' : 'hidden'; L$.dot5.style.opacity = '1'
       L$.rf5.style.height = k * 100 + '%'
-      setT(L$.cnt5, `보유 ${Math.round(365 * k)}일`); L$.cnt5.style.color = (r.y + dy) / vh > 0.5 ? 'var(--ink)' : 'var(--color-on-navy)'
+      setT(L$.cnt5, `보유 ${Math.round(365 * k)}일`); L$.cnt5.style.color = 'var(--ink)'
       ticks5.forEach((tk, i) => tk.classList.toggle('on', k >= i / 12 - 0.001 && t >= 11.1))
       const sk = seg(t, 12.0, 12.15); vis(L$.seal5, sk * (1 - out), // HOLD 도장(큰 챕터 도장이 없어져서 다시 모든 설정에서 보인다)
        `rotate(-12deg) scale(${2.2 - 1.2 * e3o(sk)})`)
@@ -469,10 +468,10 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
   /* ===== frame render ===== */
   const e2o = (q: number) => 1 - (1 - q) * (1 - q), e2io = (q: number) => q < 0.5 ? 2 * q * q : 1 - Math.pow(-2 * q + 2, 2) / 2
   let lastPct = -1, lastDay = -1
-  /* S4 → S5: 모니터 화면이 창이 된다(새 시간)
-     10.12~10.24 도착한 지도가 모니터 화면 안에서 서울 야경으로 바뀐다 · 10.24~10.42 카메라가 모니터 화면으로 다가가며 틀·좌석은 화면 밖으로
-     10.47~10.66 야경이 아래로 내려가며 위쪽부터 투명해져 뒤의 새벽 하늘(S5와 같은 색)이 화면을 덮는다 → S5 바탕이 그대로 이어받는다 */
-  const monUiEl = byId('monUI'), heroEl = byId('hero'), heroImg = $('#hero img')
+  /* S4 → S5: 노트북 웹 화면이 창이 된다(새 시간)
+     10.12~10.24 도착한 지도가 웹 화면 칸 안에서 밝은 서울 아침 사진으로 바뀐다 · 10.24~10.42 카메라가 그 칸으로 다가가 사진이 무대를 채운다
+     → S5 바탕(같은 사진·같은 자리)이 이어받고 그 하늘 위에 날짜·문구·1년 눈금이 나온다 */
+  const monUiEl = byId('monUI'), heroEl = byId('hero')
   const sv = (e: HTMLElement, o: number, tf = '') => { e.style.visibility = o > 0 ? 'visible' : 'hidden'; e.style.opacity = String(o); e.style.transform = tf }
   function monitorFrame(t: number) {
     const g = GEO; if (!g) return
@@ -490,9 +489,6 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     sv(heroEl, hv ? ho : 0)
     if (hv) {
       heroEl.style.clipPath = zk >= 1 ? '' : `inset(${Math.max(0, y0 + BY).toFixed(1)}px ${Math.max(0, g.vw + BX - x0 - w).toFixed(1)}px ${Math.max(0, g.vh + BY - y0 - h).toFixed(1)}px ${Math.max(0, x0 + BX).toFixed(1)}px round ${(2 * (1 - zk)).toFixed(1)}px)`
-      const hk = RM ? (t >= 10.6 ? 1 : 0) : seg(t, 10.47, 10.66), a = -40 + 110 * hk // 지평선(도시 불빛)이 천천히 내려가고, 위쪽 밤하늘은 부드럽게(40%) 새벽색으로
-      heroImg.style.transform = hk > 0 ? `translateY(${(100 * hk * hk).toFixed(2)}%)` : ''
-      heroImg.style.webkitMaskImage = heroImg.style.maskImage = hk > 0 ? `linear-gradient(to bottom,transparent ${a.toFixed(1)}%,rgb(0,0,0) ${(a + 40).toFixed(1)}%)` : ''
     }
     if (t < g.T1x) return                       // S0–S1: map viewport is tween-driven
     if (t < 8.55) { V.o = 0; return }
@@ -502,7 +498,7 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
   // 레터박스(16:9가 아닐 때 무대 밖에 남는 칸) 색: 지금 보이는 장면 배경. [시작 시간, 위쪽 색, 아래쪽 색]
   const BARS: Array<[number, string, string]> = [
     [0, '--bg-s0', '--bg-s0'], [R(2.7), '--bg-s1', '--bg-s1'], [R(5.15), '--bg-s2', '--bg-s2'], [7.35, '--bg-s3', '--bg-s3'],
-    [R(8.6), '--bg-s4', '--bg-s4'], [10.7, '--landing-dawn-top', '--landing-dawn-bottom'], [12.35, '--bg-s6', '--bg-s6'],
+    [R(8.6), '--bg-s4', '--bg-s4'], [10.42, '--bg-s4', '--bg-s4'], [12.35, '--bg-s6', '--bg-s6'],
     [14.35, '--bg-s7', '--bg-s7'], [16.35, '--bg-s8', '--bg-s8'], [18.35, '--bg-s9', '--bg-s9'],
   ]
   const stageBox = byId('stage')
@@ -668,7 +664,7 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     tzC2.style.opacity = String(o2); tzC2.style.visibility = (t >= 4.6 || (RM && t >= 4.5)) && o2 > 0 ? 'visible' : 'hidden'
     blurIn(bw2, 4.65, t, 0.04)
     // S3 문장(한 문장): 6.38부터 단어마다 선명해지고, 카메라가 화면으로 다가갈 때 왼쪽으로 물러난다
-    const o3 = 1 - (RM ? 0 : seg(t, 6.78, 6.92)) // 커지는 화면이 문장에 닿기 전에 먼저 사라진다(잘린 글자가 보이지 않게)
+    const o3 = 1 - (RM ? (t >= 6.8 ? 1 : 0) : seg(t, 6.78, 6.92)) // 커지는 화면이 문장에 닿기 전에 먼저 사라진다(잘린 글자가 보이지 않게)
     tzC3.style.visibility = t >= 6.36 && o3 > 0 ? 'visible' : 'hidden'; tzC3.style.opacity = String(o3); tzC3.style.filter = o3 < 1 ? `blur(${(8 * (1 - o3)).toFixed(2)}px)` : ''
     tzC3.style.transform = `translateY(-50%) translateX(${(-240 * zk).toFixed(1)}px)`
     blurIn(bw3, 6.38, t, 0.03, 0.18)
@@ -897,7 +893,7 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
   }
   const set = (v: boolean) => { if (v !== shown) { shown = v; bar.classList.toggle('on', v) } if (v) tone() }
   // 화면 맨 위(0~88px)에 깔린 장면으로 색 세트 결정 — S0~S9는 고정 타임라인 진행 위치로, 이후는 섹션 위치로
-  const DARK: Record<string, number> = { S5: 1, S6: 1 } // S0~S2는 흰 바탕, S4는 밝은 기내
+  const DARK: Record<string, number> = { S6: 1 } // S0~S5는 밝은 장면
   const sceneNow = () => {
     if (st && tl && window.scrollY < st.end - 44) {
       const t = tl.time()
