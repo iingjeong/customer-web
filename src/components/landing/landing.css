@@ -7,7 +7,7 @@
  /* 장면별 배경 (디자인 시스템 v2) */
  --bg-s0:var(--color-surface); --bg-s1:var(--color-surface); --bg-s2:var(--color-surface); --bg-s3:var(--color-surface); --bg-s4:var(--color-surface);
  --bg-s5:linear-gradient(180deg,var(--landing-dawn-top),var(--landing-dawn-bottom)); --bg-s6:var(--color-surface); --bg-s7:var(--color-surface); --bg-s8:var(--color-surface);
- --bg-s9:var(--landing-bg-s9); --bg-s10:var(--color-surface); --bg-s11:var(--color-surface);
+ --bg-s9:var(--color-surface); --bg-s10:var(--color-surface); --bg-s11:var(--color-surface);
  --navy:var(--color-navy); --gold:var(--color-gold); --ink:var(--color-ink); --sub:var(--color-sub); --line:var(--color-line);
  --mono:'IBM Plex Mono',Pretendard,monospace; --pad:96px;
 }
@@ -324,14 +324,20 @@ html.lenis,html.lenis body{height:auto}
 .landing #big8 .l2{font:500 15px/1.4 Pretendard;color:var(--landing-text-sub);display:flex;gap:8px;align-items:center}
 .landing #s9{color:var(--ink)}
 .landing #tt9{top:97px}
-.landing #list9{position:absolute;left:var(--pad);top:237px;width:calc((1920px - var(--pad)*2)*.5 - 12px);margin:0;padding:0;list-style:none;display:flex;flex-direction:column}
+.landing #tt9 .h2{font:700 64px/1.3 Pretendard;letter-spacing:-.02em}
+.landing #list9{position:absolute;left:var(--pad);top:300px;width:calc((1920px - var(--pad)*2)*.5 - 12px);margin:0;padding:0;list-style:none;display:flex;flex-direction:column}
 .landing .l9{position:relative;display:flex;align-items:baseline;gap:18px;padding:12px 0;font:600 30px/1.25 Pretendard;color:rgba(26,34,51,.28);white-space:nowrap;transition:color .25s}
 .landing .l9 small{font:600 14px Pretendard;width:24px;flex:none;font-variant-numeric:tabular-nums}
-.landing .l9::before{content:'';position:absolute;left:-26px;top:50%;width:16px;height:2px;background:var(--gold);opacity:0;transition:opacity .25s}
+.landing .l9::before{content:'';position:absolute;left:-26px;top:50%;width:16px;height:2px;background:var(--navy);opacity:0;transition:opacity .25s}
 .landing .l9.on{color:var(--ink)}
 .landing .l9.on::before{opacity:1}
 /* S9 노트북(브라우저 창) 화면 — 16:10, 848×530(무대 기준), 오른쪽 열에 붙임. 화면 안 글자는 발표용으로 16px 이상 */
-.landing #app9{position:absolute;width:848px;height:530px;left:calc(1920px - var(--pad) - 848px);top:200px;background:var(--color-surface);border:1px solid var(--line);border-radius:4px;box-shadow:0 12px 32px rgba(16,24,40,.14);overflow:hidden;display:flex;flex-direction:column;visibility:hidden}
+/* S9 노트북: 오프닝~S2 노트북과 같은 모양(얇은 검은 화면 테두리 + 경첩 + 키보드 몸체), 같은 기울기(엔진)·같은 그림자. 화면 안 내용 크기는 그대로 */
+.landing #app9{position:absolute;box-sizing:border-box;width:876px;height:558px;left:calc(1920px - var(--pad) - 876px - 56px);top:186px;background:var(--color-surface);border:14px solid var(--landing-seat-bezel);border-radius:18px 18px 6px 6px;box-shadow:inset 0 0 0 1px var(--landing-seat-bezel-edge);filter:drop-shadow(0 14px 20px rgba(16,24,40,.16));overflow:visible;display:flex;flex-direction:column;visibility:hidden}
+.landing #app9>.a9bar{border-radius:6px 6px 0 0}
+.landing #app9>.a9scr{border-radius:0 0 6px 6px}
+.landing #app9::before{content:'';position:absolute;left:-14px;right:-14px;top:calc(100% + 14px);height:8px;background:linear-gradient(180deg,var(--landing-rod-dark),var(--landing-rod-mid))}
+.landing #app9::after{content:'';position:absolute;left:-60px;right:-60px;top:calc(100% + 22px);height:92px;clip-path:polygon(46px 0,calc(100% - 46px) 0,100% 86%,100% 100%,0 100%,0 86%);border-bottom:12px solid var(--landing-ceil-line);background:repeating-linear-gradient(90deg,var(--landing-ceil) 0 3px,transparent 3px 40px) 140px 9px/calc(100% - 280px) 44px no-repeat,repeating-linear-gradient(180deg,var(--landing-ceil) 0 3px,var(--landing-ceil-line) 3px 11px) 140px 9px/calc(100% - 280px) 44px no-repeat,var(--landing-ceil)}
 .landing .a9bar{flex:none;height:42px;display:flex;align-items:center;gap:16px;padding:0 16px;background:var(--landing-surface-soft);border-bottom:1px solid var(--line)}
 .landing .a9dots{display:flex;gap:7px}
 .landing .a9dots i{width:10px;height:10px;border-radius:50%;background:var(--line)}
@@ -397,7 +403,7 @@ html.lenis,html.lenis body{height:auto}
 .landing #faq{position:relative;background:var(--color-surface);color:var(--ink);padding:140px var(--pad) 160px}
 .landing .fq{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:24px;max-width:1440px;margin:0 auto}
 .landing .fqL{grid-column:1/6;display:flex;flex-direction:column;gap:24px;align-items:flex-start}
-.landing .fqL h2{font:800 64px/1.1 Pretendard;letter-spacing:-.035em}
+.landing .fqL h2{font:700 64px/1.3 Pretendard;letter-spacing:-.02em}
 .landing .fqL a{font:600 17px Pretendard;color:var(--navy)}
 .landing .fqL a:hover{color:var(--landing-navy-deep)}
 .landing .fqR{grid-column:6/13;border-top:1px solid var(--ink)}

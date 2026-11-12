@@ -336,7 +336,7 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     const ap = { x: L$.app9.offsetLeft, y: L$.app9.offsetTop, w: L$.app9.offsetWidth, h: L$.app9.offsetHeight }
     const kx = ap.x + ap.w - 52, ky = ap.y + ap.h - 72
     Object.assign(L$.kiroo.style, { left: kx + 'px', top: ky + 'px' })
-    Object.assign(L$.bub9.style, { left: (kx - 10 - L$.bub9.offsetWidth) + 'px', top: (ap.y + ap.h + 12) + 'px' })
+    Object.assign(L$.bub9.style, { left: (kx - 10 - L$.bub9.offsetWidth) + 'px', top: (ap.y + ap.h + 118) + 'px' }) // 노트북 키보드 몸체 아래
   }
   function paintLate() {
     const c = calcAt(disp.A, my.r, undefined, my.w), lt = lateTexts(disp.A, my.r, my.w)
@@ -431,7 +431,7 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
       // S8이 빠지는 동안(18.2~18.4) 제목·목록·노트북이 이어 들어온다 — 예전에는 18.4~18.55가 빈 화면이었다
       revL(L$.tt9, 18.3, t); vis(L$.tt9, t >= 18.3 ? 1 : 0)
       vis(L$.list9, seg(t, 18.38, 18.58))
-      const ai = e3o(seg(t, 18.42, 18.62)); vis(L$.app9, ai, `translateY(${(1 - ai) * 24}px)`)
+      const ai = e3o(seg(t, 18.42, 18.62)); vis(L$.app9, ai, `translateY(${(1 - ai) * 24}px) ${TILT3}`) // 오프닝~S2 노트북과 같은 기울기
       const live = t >= 18.8, idx = clamp(Math.floor((t - 18.8) / 0.4), 0, 6)
       items9.forEach((e, i) => e.classList.toggle('on', live && i === idx))
       panels9.forEach((p_, i) => {
