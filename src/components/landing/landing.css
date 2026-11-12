@@ -306,20 +306,21 @@ html.lenis,html.lenis body{height:auto}
 .landing .pr.sv b{font:700 40px var(--mono);color:var(--ink)}
 .landing .fn7{font-size:14px;line-height:1.55;color:var(--landing-text-sub);word-break:keep-all}
 .landing #tt8{color:var(--ink);max-width:998px}
+.landing #tt8 .h{font:700 64px/1.3 Pretendard;letter-spacing:-.02em}
 .landing #tt8 .p2{color:var(--landing-text-sub)}
 .landing #fl8{position:absolute}
 .landing #svg8{position:absolute;left:0;top:0;overflow:visible}
-.landing #svg8 path{fill:none;stroke:var(--gold);stroke-width:2;stroke-dasharray:1;stroke-dashoffset:1}
+.landing #svg8 path{fill:none;stroke:var(--navy);stroke-width:2;stroke-dasharray:1;stroke-dashoffset:1}
 .landing .nd{position:absolute;width:0;height:0;visibility:hidden}
-.landing .nd i{position:absolute;left:-6px;top:-6px;width:12px;height:12px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 4px var(--color-surface)}
+.landing .nd i{position:absolute;left:-6px;top:-6px;width:12px;height:12px;border-radius:50%;background:var(--navy);box-shadow:0 0 0 4px var(--color-surface)}
 .landing .nlab{position:absolute;display:flex;flex-direction:column;gap:2px;white-space:nowrap;visibility:hidden;color:var(--ink)}
 .landing .nlab.end{align-items:flex-end;text-align:right}
-.landing .nlab b{font:800 20px/1.15 Pretendard;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
-.landing .nlab small{font:500 14px/1.4 Pretendard;color:var(--landing-text-sub);display:flex;gap:6px;align-items:center}
-.landing #fly8{display:inline-block;color:var(--landing-gold-text);transform-origin:0 0}
+.landing .nlab b{font:800 28px/1.15 Pretendard;color:var(--ink);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.landing .nlab small{font:500 20px/1.4 Pretendard;color:var(--sub);display:flex;gap:6px;align-items:center}
+.landing #fly8{display:inline-block;color:var(--ink);transform-origin:0 0}
 .landing #big8{position:absolute;right:var(--pad);bottom:65px;display:flex;flex-direction:column;align-items:flex-end;text-align:right;color:var(--ink);visibility:hidden}
-.landing #big8 b{font:800 72px/1 Pretendard;letter-spacing:-.035em;font-variant-numeric:tabular-nums}
-.landing #big8 .l1{font:700 20px/1.4 Pretendard;margin-top:10px}
+.landing #big8 b{font:800 96px/1 Pretendard;letter-spacing:-.035em;font-variant-numeric:tabular-nums}
+.landing #big8 .l1{font:700 24px/1.4 Pretendard;margin-top:10px;color:var(--sub)}
 .landing #big8 .l2{font:500 15px/1.4 Pretendard;color:var(--landing-text-sub);display:flex;gap:8px;align-items:center}
 .landing #s9{color:var(--ink)}
 .landing #tt9{top:97px}
