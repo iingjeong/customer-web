@@ -1,29 +1,6 @@
 export function LandingCopy() {
   return (
     <>
-      <div className="blk" id="c0">
-        <div className="h">
-          <span className="ml">
-            <span>국내로 잇는 투자,</span>
-          </span>
-          <span className="ml">
-            <span>내일로 이어지는 가치</span>
-          </span>
-        </div>
-      </div>
-      <div className="blk" id="c2">
-        <div className="h">
-          <span className="ml">
-            <span>입고 수량은</span>
-          </span>
-          <span className="ml">
-            <span>세 수량 중</span>
-          </span>
-          <span className="ml">
-            <span>가장 작은 값이에요</span>
-          </span>
-        </div>
-      </div>
       <div className="blk" id="c3">
         <div className="row">
           <div className="h">
@@ -47,15 +24,6 @@ export function LandingCopy() {
         </div>
       </div>
       <i id="slogan" hidden />
-      {/* S0→S1: 서울 위치의 금색 조준선(원+십자)과 동심원 눈금 3개(장식). 위치·크기·보이기는 엔진(s01Frame) */}
-      <div id="aim" aria-hidden="true">
-        <i className="aim-r" />
-        <i className="aim-r" />
-        <i className="aim-r" />
-        <i className="aim-c" />
-        <i className="aim-h" />
-        <i className="aim-v" />
-      </div>
     </>
   )
 }
