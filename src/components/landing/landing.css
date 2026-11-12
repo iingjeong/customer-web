@@ -37,7 +37,8 @@ html.lenis,html.lenis body{height:auto}
 .landing #bg1{background:var(--bg-s1)}
 .landing #bg2{background:var(--bg-s2)}
 .landing #bg2 img{left:0;width:125%;filter:grayscale(1) blur(4px);transform:scale(1.04)}
-.landing #bg2 i{background:rgba(255,255,255,.8)}
+/* 사진 전체를 덮던 흰 막(80%)은 없앴다 — 제목이 있는 왼쪽에만 옅은 그라데이션 */
+.landing #bg2 i{background:linear-gradient(90deg,rgba(255,255,255,.78) 0,rgba(255,255,255,.62) 24%,rgba(255,255,255,0) 48%)}
 .landing #bg3{background:var(--bg-s3)}
 .landing .ceil{position:absolute;left:0;right:0;top:0;height:12%;background:var(--landing-ceil);border-bottom:1px solid var(--landing-ceil-line)}
 .landing .ceil span{position:absolute;top:50%;width:72px;height:14px;margin:-7px 0 0 -36px;border-radius:50%;background:var(--color-surface);box-shadow:0 0 12px rgba(255,255,255,.95),inset 0 -2px 4px rgba(200,205,212,.6)}
@@ -54,7 +55,10 @@ html.lenis,html.lenis body{height:auto}
 .landing .ex{display:inline-flex;align-items:center;font:600 11px/1 Pretendard;padding:4px 6px;border:1px solid currentColor;border-radius:4px;opacity:.7}
 .landing .num{font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
 .landing .blk{position:absolute;z-index:9;pointer-events:none;display:flex;flex-direction:column;gap:24px}
-@keyframes landing-rise{from{transform:translateY(110%)}to{transform:none}}
+@keyframes landing-rise{from{transform:translateY(28%);opacity:0}to{transform:none;opacity:1}}
+/* 무대(S0~S9) 제목은 줄을 잘라 밀어 올리지 않는다 — 스크롤을 멈추면 한글 아래 획이 잘려 다른 글자처럼 보였다("세 수량 중" → "세 스랴 즈").
+   조금 올라오며 서서히 나타나게 바꿨으므로 줄 자르기를 끈다. S11(#stg11)의 영문 큰 글자는 예전 방식 그대로 */
+.landing #stg .ml{overflow:visible}
 @keyframes landing-blink{50%{opacity:0}}
 .landing #c0 .ml>span{animation:landing-rise 1s cubic-bezier(.2,.7,.2,1) both}
 .landing #c0 .ml:nth-child(2)>span{animation-delay:.12s}
@@ -249,8 +253,8 @@ html.lenis,html.lenis body{height:auto}
 .landing #warn5{position:absolute;left:var(--pad);right:var(--pad);bottom:54px;border-top:1px solid rgba(26,34,51,.35);padding-top:14px;font:500 17px/1.5 Pretendard;color:var(--ink);word-break:keep-all}
 .landing .ph6{position:absolute;inset:0;overflow:hidden}
 .landing .ph6 img{position:absolute;left:-8px;top:-8px;width:calc(100% + 16px);height:calc(100% + 16px);object-fit:cover}
-.landing .ph6 i{position:absolute;inset:0;background:rgba(15,35,38,.7)}
-.landing #ph6b i{background:rgba(15,35,38,.55)}
+/* 사진 전체를 덮던 청록 막(70%·55%)은 없앴다 — 글자가 있는 왼쪽 위(제목)와 오른쪽(목록·비율)에만 옅은 그라데이션 */
+.landing .ph6 i{position:absolute;inset:0;background:linear-gradient(270deg,rgba(15,35,38,.78) 0,rgba(15,35,38,.68) 36%,rgba(15,35,38,0) 56%),linear-gradient(180deg,rgba(15,35,38,.8) 0,rgba(15,35,38,.72) 26%,rgba(15,35,38,0) 40%)}
 .landing .beam{position:absolute;top:0;bottom:0;left:0;width:3px;margin-left:-3px;background:var(--landing-teal);box-shadow:0 0 14px rgba(95,211,198,.85);visibility:hidden}
 .landing .beam::before{content:'';position:absolute;right:3px;top:0;bottom:0;width:40px;background:linear-gradient(270deg,rgba(95,211,198,.32),rgba(95,211,198,0))}
 .landing #beam6b{z-index:5}

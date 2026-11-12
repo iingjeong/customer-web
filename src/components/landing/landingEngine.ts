@@ -211,7 +211,8 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
   function revL(el: HTMLElement, t0: number, t: number) {
     let sp = spCache.get(el)
     if (!sp) { sp = [...el.querySelectorAll<HTMLElement>('.ml>span')]; spCache.set(el, sp) }
-    sp.forEach((s_, i) => { const k = e3o(seg(t, t0 + i * 0.06, t0 + i * 0.06 + 0.22)); s_.style.transform = `translateY(${(1 - k) * 112}%)` })
+    // 줄을 잘라 밀어 올리지 않고(멈추면 한글 획이 잘려 다른 글자처럼 보였다) 조금 올라오며 나타난다
+    sp.forEach((s_, i) => { const k = e3o(seg(t, t0 + i * 0.06, t0 + i * 0.06 + 0.22)); s_.style.transform = `translateY(${(1 - k) * 28}%)`; s_.style.opacity = String(k) })
   }
   const L$: Record<string, HTMLElement> = {}
   ;['late', 'lb5', 'lb6', 'lb7', 'lb8', 'lb9', 's5', 's6', 's7', 's8', 's9', 'tt5', 'd5', 'big5', 'd5b', 'seal5', 'rail5', 'rf5', 'dot5', 'cnt5',
@@ -289,7 +290,8 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
       for (let i = 0; i < p.length; i += 4) { let g = p[i] / 255; if (inv) g = 1 - g; p[i] = lo[0] + (hi[0] - lo[0]) * g; p[i + 1] = lo[1] + (hi[1] - lo[1]) * g; p[i + 2] = lo[2] + (hi[2] - lo[2]) * g }
       x.putImageData(d, 0, 0); return c.toDataURL('image/jpeg', 0.86)
     }
-    $<HTMLImageElement>('#ph6a img').src = make(false); $<HTMLImageElement>('#ph6b img').src = make(true)
+    // 스캔 전(#ph6a)은 원래 색 사진 그대로 둔다(청록 이중톤으로 덮지 않음). 스캔 빔이 지나간 쪽(#ph6b)만 반전 이중톤 — 검색대 화면 효과
+    $<HTMLImageElement>('#ph6b img').src = make(true)
   }
   bakeSrc.src = import.meta.env.BASE_URL + 'assets/photo-security.jpg'
   cleanups.push(() => { bakeSrc.onload = null; bakeSrc.removeAttribute('src') })
@@ -392,7 +394,8 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     if (on6) {
       L$.s6.style.clipPath = x2 > -BX ? `inset(${-BY}px ${-BX}px ${-BY}px ${x2}px)` : ''
       const pi = seg(t, 12.2, 12.5); L$.ph6a.style.opacity = String(pi)
-      revL(L$.tt6, 12.5, t); vis(L$.tt6, t >= 12.5 ? 1 : 0); L$.p6.style.opacity = String(seg(t, 12.6, 12.8))
+      // 제목은 S5가 다 빠지기 전(12.38)에 올라오기 시작한다 — 장면 사이에 빈 화면이 생기지 않게
+      revL(L$.tt6, 12.38, t); vis(L$.tt6, t >= 12.38 ? 1 : 0); L$.p6.style.opacity = String(seg(t, 12.5, 12.7))
       const bx = seg(t, 12.8, 13.7) * (vw + 2 * BX) - BX
       vis(L$.beam6, bx > -BX && bx < vw + BX ? 1 : 0, `translateX(${bx}px)`)
       L$.ph6b.style.clipPath = `inset(0 ${vw + BX - bx}px 0 0)`; L$.ph6b.style.opacity = String(pi)
@@ -406,8 +409,8 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     if (on7) {
       L$.s7.style.clipPath = x2 < vw + BX ? `inset(${-BY}px ${vw - x2}px ${-BY}px ${-BX}px)` : ''
       const out = seg(t, 16.2, 16.35)
-      revL(L$.tt7, 14.5, t); vis(L$.tt7, t >= 14.5 ? 1 : 0)
-      const bi = e3o(seg(t, 14.55, 14.8)); vis(L$.big7, bi, `translateY(${(1 - bi) * 20}px)`)
+      revL(L$.tt7, 14.4, t); vis(L$.tt7, t >= 14.4 ? 1 : 0) // 쓸어 가는 선(14.2~14.5)이 끝나기 전에 제목이 먼저 — 빈 화면 방지
+      const bi = e3o(seg(t, 14.45, 14.7)); vis(L$.big7, bi, `translateY(${(1 - bi) * 20}px)`)
       L$.col7.style.opacity = String(1 - out)
       vis(L$.rul7, (t >= 14.8 ? 1 : 0) * (1 - out)); L$.rul7in.style.clipPath = `inset(-40px ${(1 - e2io(seg(t, 14.8, 15.1))) * 100}% -10px 0)`
       const td = seg(t, 15.0, 15.15); L$.today7.style.transform = `scaleY(${td})`; L$.today7.style.opacity = String(td)
@@ -426,7 +429,8 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
       const k = e2io(seg(t, 16.2, 16.5)), src = LG.sv!, tg = LG.fly!, sc = LG.flyH ? src.h / LG.flyH : 1
       L$.fly8.style.transform = `translate(${(src.x - tg.x) * (1 - k)}px,${(src.y - tg.y) * (1 - k)}px) scale(${sc + (1 - sc) * k})`
       setT(L$.fly8, won(c.save)); FLY.lab.style.visibility = 'visible'; FLY.lab.querySelector<HTMLElement>('small')!.style.opacity = String(seg(t, 16.5, 16.65))
-      revL(L$.tt8, 16.5, t); vis(L$.tt8, t >= 16.5 ? 1 : 0)
+      // S7이 빠지는 동안(16.2~16.35) 제목이 이어 올라온다 — 예전 16.5에서는 0.2만큼 흰 화면만 남았다
+      revL(L$.tt8, 16.24, t); vis(L$.tt8, t >= 16.24 ? 1 : 0)
       const fp = seg(t, 16.8, 17.7)
       L$.pm8.style.strokeDashoffset = String(1 - seg(fp, 0, 0.35))
       lanes8.forEach((p_) => { p_.style.strokeDashoffset = String(1 - seg(fp, 0.35, 1)) })
@@ -440,9 +444,10 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     /* S9 — service list + one live app screen */
     const on9 = t >= 18.2; vis(L$.s9, on9 ? 1 : 0)
     if (on9) {
-      revL(L$.tt9, 18.5, t); vis(L$.tt9, t >= 18.5 ? 1 : 0)
-      vis(L$.list9, seg(t, 18.55, 18.75))
-      const ai = e3o(seg(t, 18.6, 18.8)); vis(L$.app9, ai, `translateY(${(1 - ai) * 24}px)`)
+      // S8이 빠지는 동안(18.2~18.4) 제목·목록·노트북이 이어 들어온다 — 예전에는 18.4~18.55가 빈 화면이었다
+      revL(L$.tt9, 18.3, t); vis(L$.tt9, t >= 18.3 ? 1 : 0)
+      vis(L$.list9, seg(t, 18.38, 18.58))
+      const ai = e3o(seg(t, 18.42, 18.62)); vis(L$.app9, ai, `translateY(${(1 - ai) * 24}px)`)
       const live = t >= 18.8, idx = clamp(Math.floor((t - 18.8) / 0.4), 0, 6)
       items9.forEach((e, i) => e.classList.toggle('on', live && i === idx))
       panels9.forEach((p_, i) => {
@@ -519,7 +524,8 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
   const MID11 = 0.58 // 도장이 먼저 보이는 중간 크기(카드의 0.58배 — 제 크기의 도장 5개가 한 줄에 들어가는 폭)
   function render11(p: number) {
     paintLate()
-    L$.ph11.style.clipPath = `inset(${(1 - e3o(seg(p, 0, 0.3))) * 100}% 0 0 0)`
+    // 사진은 처음부터 다 보인다 — 예전에는 아래에서 열리느라(0~0.3) FAQ 다음이 반 화면 넘게 흰 빈 화면이었다
+    L$.ph11.style.clipPath = 'none'
     // 사진이 아주 천천히 다가온다(1.06 → 1) — 움직임 줄이기면 확대 없음
     const z = RM ? 1 : 1.06 - 0.06 * e2o(seg(p, 0, 2))
     ph11img.style.transform = z === 1 ? '' : `scale(${z})`
@@ -605,13 +611,13 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     Object.assign(A, { sw: -0.2, krDot: 0, ro: 0, krLit: 0, lit: 0, dimOn: 0 }); P.v = 0; K.v = 0; K.last = -1
 
     gsap.set(['#bg1', '#bg2', '#bg3', '#bg4', '#s1', '#c1', '#c1p', '#card1', '#seal', '.kv b', '#c2', '#c2p', '#card2', '.c2res', '.c2n', '#board', '#c3', '#mon', '#monUI', '#c4', '#c4a', '#c4lab', '#hero', '#slogan', '#pass'], { autoAlpha: 0 })
-    gsap.set('.ml>span', { yPercent: 0 })
+    gsap.set('#stg .ml>span', { yPercent: 0, opacity: 1 })
 
     tl = gsap.timeline({ paused: true, defaults: { ease: 'none' }, onUpdate: onTL })
     wrapTL(tl)
     const FADE = (t: number, sel: string, to: number, d = 0.6) => tl!.fromTo(sel, { autoAlpha: to ? 0 : 1 }, { autoAlpha: to, duration: d }, t)
     const q = (sel: string | string[]) => $$(String(sel))
-    const REV = (t: number, sel: string) => { tl!.set(sel, { autoAlpha: 1 }, t); tl!.fromTo($$(sel + ' .ml>span'), { yPercent: 112 }, { yPercent: 0, duration: 0.2, stagger: 0.06, ease: 'power3.out' }, t) }
+    const REV = (t: number, sel: string) => { tl!.set(sel, { autoAlpha: 1 }, t); tl!.fromTo($$(sel + ' .ml>span'), { yPercent: 28, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.2, stagger: 0.06, ease: 'power3.out' }, t) }
     const IN = (t: number, sel: string | string[], d = 0.18, y = 14) => tl!.fromTo(q(sel), { autoAlpha: 0, y }, { autoAlpha: 1, y: 0, duration: d, ease: 'power2.out' }, t)
     const OUT = (t: number, sel: string | string[], d = 0.16, y = -10) => tl!.to(q(sel), { autoAlpha: 0, y, duration: d, ease: 'power1.in' }, t)
 
@@ -619,11 +625,12 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     tl.to('#hdr', { autoAlpha: 0, y: -8, duration: 0.22 }, 0.05)
     tl.to(C, { z: 1.35, cy: MH * 0.46, duration: 2.0, ease: 'power1.inOut' }, 0.1)
     tl.fromTo(A, { sw: -0.2 }, { sw: 1.2, duration: 1.1, ease: 'power1.inOut', immediateRender: false }, 0.6)
-    tl.to(['#c0', '#scrim'], { autoAlpha: 0, duration: 0.18 }, 1.95)
+    // 슬로건은 S1 카드가 뜬 뒤(2.45)까지 남긴다 — 예전 1.95에는 어두운 지도만 남는 구간이 있었다
+    tl.to(['#c0', '#scrim'], { autoAlpha: 0, duration: 0.18 }, 2.45)
     /* → map shrinks into the card thumbnail while night turns to ivory */
     FADE(2.4, '#bg1', 1)
-    tl.set('#s1', { autoAlpha: 1 }, 2.4)
-    tl.fromTo('#card1', { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.3 }, 2.5)
+    tl.set('#s1', { autoAlpha: 1 }, 2.3) // 카드(2.32)보다 먼저 켠다
+    tl.fromTo('#card1', { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.3 }, 2.32) // 예전 2.5 — 배경이 바뀌는 동안 카드가 없어 빈 화면이 생겼다
     tl.to(V, { x: TB.x, y: TB.y, w: TB.w, h: TB.h, r: 10, bg: 1, duration: 0.7, ease: 'power2.inOut' }, 2.3)
     tl.to(C, { cx: MW * 0.5, cy: (Mp.seoul[1] || MH * 0.4), z: 1.25, duration: 0.7, ease: 'power2.inOut' }, 2.3)
     tl.to(A, { krDot: 1, duration: 0.25 }, 2.75)
