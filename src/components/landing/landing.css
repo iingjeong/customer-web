@@ -188,8 +188,10 @@ html.lenis,html.lenis body{height:auto}
 .landing #c4 .h{font-size:96px;line-height:1.08;letter-spacing:-.04em;max-width:none}
 .landing .stack{display:grid}
 .landing .stack>*{grid-area:1/1}
-.landing #hero{position:absolute;inset:0;z-index:8;pointer-events:none;overflow:hidden}
-.landing #hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform-origin:50% 50%}
+/* 서울 야경 — 뒤 바탕은 S5 새벽 하늘과 같은 색. 사진이 아래로 내려가며 위쪽부터 투명해져 하늘이 드러난다(엔진 monitorFrame) */
+.landing #hero{position:absolute;inset:0;z-index:8;pointer-events:none;overflow:hidden;background:linear-gradient(180deg,var(--landing-dawn-top),var(--landing-dawn-bottom))}
+/* 사진은 위로 25% 더 길게(지평선이 내려갈 때 사진 윗변이 보이지 않게). 사진 아래쪽(도시)은 그대로 화면 아래에 맞춘다 */
+.landing #hero img{position:absolute;left:0;right:0;bottom:0;top:-25%;width:100%;height:125%;object-fit:cover;object-position:50% 100%;transform-origin:50% 50%}
 .landing #slogan{left:var(--pad);bottom:var(--pad);color:var(--color-on-navy)}
 .landing #slogan .lab{color:var(--gold)}
 .landing #slogan .h{}

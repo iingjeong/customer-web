@@ -366,8 +366,8 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     vis(L$.late, 1)
     const c = paintLate(), vw = LG.vw, vh = LG.vh
     /* backgrounds: dawn rises from below → teal → sky (swept left→right) → white → ivory */
-    // S4→S5: 하늘색이 경계선이 또렷한 채 아래에서 차오른다(번지는 빛 없이, 짧게)
-    const m = e3o(seg(t, 10.52, 10.68)) * 100
+    // S4→S5: 하늘은 야경 뒤 바탕(#hero, 같은 색)에서 먼저 드러나고, 다 덮인 뒤(10.66) S5 바탕이 그대로 이어받는다
+    const m = t >= 10.66 ? 100 : 0
     L$.lb5.style.webkitMaskImage = L$.lb5.style.maskImage = `linear-gradient(to top,rgb(0,0,0) ${m}%,transparent ${m}%)`
     L$.lb6.style.opacity = String(seg(t, 12.2, 12.5))
     // 배경 레이어는 레터박스까지 늘어나 있으므로(BX·BY) 쓸어 가는 선도 화면 왼쪽 끝(-BX)에서 오른쪽 끝(vw+BX)까지 간다
@@ -381,7 +381,7 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     const on5 = t < 12.5; vis(L$.s5, on5 ? 1 : 0)
     if (on5) {
       const out = seg(t, 12.2, 12.4)
-      revL(L$.tt5, 10.5, t); vis(L$.tt5, (t >= 10.5 ? 1 : 0) * (1 - out))
+      revL(L$.tt5, 10.62, t); vis(L$.tt5, (t >= 10.62 ? 1 : 0) * (1 - out)) // 하늘이 다 찰 무렵부터
       const di = e3o(seg(t, 10.8, 11.1)); vis(L$.d5, di * (1 - out), `translateY(${(1 - di) * 24}px)`)
       vis(L$.rail5, seg(t, 10.85, 11.1) * (1 - out))
       const k = seg(t, 11.1, 12.0), ex = e2io(seg(t, 12.2, 12.5)), r = LG.r5!
@@ -390,7 +390,7 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
       L$.rf5.style.height = k * 100 + '%'
       setT(L$.cnt5, `보유 ${Math.round(365 * k)}일`); L$.cnt5.style.color = (r.y + dy) / vh > 0.5 ? 'var(--ink)' : 'var(--color-on-navy)'
       ticks5.forEach((tk, i) => tk.classList.toggle('on', k >= i / 12 - 0.001 && t >= 11.1))
-      const sk = RM ? seg(t, 12.0, 12.15) : 0; vis(L$.seal5, sk * (1 - out), // HOLD 도장은 큰 챕터 도장(04)과 같은 순간이라 움직임 줄이기에서만
+      const sk = seg(t, 12.0, 12.15); vis(L$.seal5, sk * (1 - out), // HOLD 도장(큰 챕터 도장이 없어져서 다시 모든 설정에서 보인다)
        `rotate(-12deg) scale(${2.2 - 1.2 * e3o(sk)})`)
     }
     /* S6 — scan beam over the security photo */
@@ -469,19 +469,40 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
   /* ===== frame render ===== */
   const e2o = (q: number) => 1 - (1 - q) * (1 - q), e2io = (q: number) => q < 0.5 ? 2 * q * q : 1 - Math.pow(-2 * q + 2, 2) / 2
   let lastPct = -1, lastDay = -1
+  /* S4 → S5: 모니터 화면이 창이 된다(새 시간)
+     10.12~10.24 도착한 지도가 모니터 화면 안에서 서울 야경으로 바뀐다 · 10.24~10.42 카메라가 모니터 화면으로 다가가며 틀·좌석은 화면 밖으로
+     10.47~10.66 야경이 아래로 내려가며 위쪽부터 투명해져 뒤의 새벽 하늘(S5와 같은 색)이 화면을 덮는다 → S5 바탕이 그대로 이어받는다 */
+  const monEl = byId('mon'), monUiEl = byId('monUI'), heroEl = byId('hero'), heroImg = $('#hero img')
+  const sv = (e: HTMLElement, o: number, tf = '') => { e.style.visibility = o > 0 ? 'visible' : 'hidden'; e.style.opacity = String(o); e.style.transform = tf }
   function monitorFrame(t: number) {
     const g = GEO; if (!g) return
     A.sil = t < g.T4 ? 1 : 0
-    const on = t >= g.T4 && t < g.TX, rise = e2o(clamp((t - g.T4) / g.dR))
-    gsap.set('#mon', { autoAlpha: on ? rise : 0, y: 0 })
-    gsap.set('#monUI', { autoAlpha: on ? e2o(clamp((t - R(8.98)) / (R(9.12) - R(8.98)))) : 0, y: 0 })
+    const S = g.SCR, cx = S.x + S.w / 2, cy = S.y + S.h / 2
+    const zk = RM ? (t >= 10.3 ? 1 : 0) : e2io(seg(t, 10.24, 10.42))
+    const fill = Math.max((g.vw + 2 * BX) / S.w, (g.vh + 2 * BY) / S.h), s = 1 + (fill - 1) * zk
+    const tx = (g.vw / 2 - cx) * zk, ty = (g.vh / 2 - cy) * zk
+    const tf = zk > 0 ? `translate(${tx.toFixed(1)}px,${ty.toFixed(1)}px) scale(${s.toFixed(4)})` : ''
+    const on = t >= g.T4 && t < 10.44, rise = e2o(clamp((t - g.T4) / g.dR))
+    // 모니터 틀은 안내판이 줄어드는 동안 올라오고, 화면 위 정보 띠는 안내판이 화면 속에 다 들어간 뒤 나타나 카메라가 다가가기 전에 사라진다
+    monEl.style.transformOrigin = monUiEl.style.transformOrigin = `${(cx - (S.x - 14)).toFixed(1)}px ${(cy - (S.y - 14)).toFixed(1)}px`
+    sv(monEl, on ? rise : 0, tf)
+    sv(monUiEl, on ? e2o(clamp((t - R(8.98)) / (R(9.12) - R(8.98)))) * (1 - seg(t, 10.18, 10.26)) : 0, tf)
+    // 지금 모니터 화면이 무대에서 차지하는 사각형
+    const x0 = cx + tx - S.w / 2 * s, y0 = cy + ty - S.h / 2 * s, w = S.w * s, h = S.h * s
+    // 서울 야경: 모니터 화면 모양대로 잘려 보이다가 화면과 함께 커진다. 하늘이 다 덮이면(10.7) S5 바탕이 이어받는다
+    const hv = t >= 10.1 && t < 10.7
+    const ho = RM ? (t >= 10.3 ? 1 : 0) : seg(t, 10.12, 10.24)
+    sv(heroEl, hv ? ho : 0)
+    if (hv) {
+      heroEl.style.clipPath = zk >= 1 ? '' : `inset(${Math.max(0, y0 + BY).toFixed(1)}px ${Math.max(0, g.vw + BX - x0 - w).toFixed(1)}px ${Math.max(0, g.vh + BY - y0 - h).toFixed(1)}px ${Math.max(0, x0 + BX).toFixed(1)}px round ${(2 * (1 - zk)).toFixed(1)}px)`
+      const hk = RM ? (t >= 10.6 ? 1 : 0) : seg(t, 10.47, 10.66), a = -40 + 110 * hk // 지평선(도시 불빛)이 천천히 내려가고, 위쪽 밤하늘은 부드럽게(40%) 새벽색으로
+      heroImg.style.transform = hk > 0 ? `translateY(${(100 * hk * hk).toFixed(2)}%)` : ''
+      heroImg.style.webkitMaskImage = heroImg.style.maskImage = hk > 0 ? `linear-gradient(to bottom,transparent ${a.toFixed(1)}%,rgb(0,0,0) ${(a + 40).toFixed(1)}%)` : ''
+    }
     if (t < g.T1x) return                       // S0–S1: map viewport is tween-driven
     if (t < g.T4) { V.o = 0; return }
-    const S = g.SCR
-    // 지도는 안내판이 모니터 화면 속으로 다 줄어든 뒤 나타난다(줄어드는 안내판 위로 비치지 않게)
-    if (t < g.TX) { Object.assign(V, { x: S.x, y: S.y, w: S.w, h: S.h, r: 2, bg: 1, o: e2o(clamp((t - R(8.92)) / (R(9.04) - R(8.92)))) }); return }
-    const k = e2io(clamp((t - g.TX) / g.dX))
-    Object.assign(V, { x: S.x * (1 - k), y: S.y * (1 - k), w: S.w + (g.vw - S.w) * k, h: S.h + (g.vh - S.h) * k, r: 2 * (1 - k), bg: 1, o: 1 - clamp((t - g.TX - g.dX * 0.33) / (g.dX * 0.67)) })
+    // 지도는 안내판이 모니터 화면 속으로 다 줄어든 뒤 나타나고(줄어드는 안내판 위로 비치지 않게), 야경이 다 들어오면 사라진다
+    Object.assign(V, { x: x0, y: y0, w, h, r: 2 * (1 - zk), bg: 1, o: t >= 10.44 ? 0 : e2o(clamp((t - R(8.92)) / (R(9.04) - R(8.92)))) * (1 - seg(t, 10.24, 10.3)) })
   }
   // 레터박스(16:9가 아닐 때 무대 밖에 남는 칸) 색: 지금 보이는 장면 배경. [시작 시간, 위쪽 색, 아래쪽 색]
   const BARS: Array<[number, string, string]> = [
@@ -753,8 +774,6 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     tl.to(A, { lit: 1.06, duration: 0.5 }, 10.6)
     /* → screen grows to full frame (11.15), ₩ fade while Seoul at night appears */
     OUT(11.1, ['#c4a', '#c4lab'])
-    tl.to('#hero', { autoAlpha: 1, duration: 0.4 }, 11.3)
-    tl.fromTo('#hero img', { scale: 1.15 }, { scale: 1, duration: 0.85, ease: 'power1.out' }, 11.3)
     // L-6 이후: S5~S9(renderLate)
     tl.add(() => {}, TOTAL)
 
