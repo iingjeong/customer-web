@@ -515,7 +515,7 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     if (stampN < 0) { setStamps(n); stampN = n; return }
     if (n !== stampN) {
       if (n === stampN + 1) stampFx(n)
-      else { if (passFx) passFx.kill(); endBig(); gsap.set(pass, { width: 72, height: 88 }); gsap.set('.po', { autoAlpha: 0 }); gsap.set('.pt', { autoAlpha: 1 }); setStamps(n) } // 뒤로 가거나 여러 단계를 한 번에 넘기면 효과 없이 맞춘다
+      else { endBig(); gsap.set(pass, { width: 72, height: 88 }); gsap.set('.po', { autoAlpha: 0 }); gsap.set('.pt', { autoAlpha: 1 }); setStamps(n) } // 뒤로 가거나 여러 단계를 한 번에 넘기면 효과 없이 맞춘다
       stampN = n
     }
   }
@@ -550,7 +550,7 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
   /* ===== passport tab + 챕터 도장 ===== */
   // 도장 5개는 각 단계의 마지막 박자 바로 앞(-0.01)에서 찍힌다 — 발표 모드로 그 박자에 다 도착한 뒤. 박자: S1 4.25 · S2 6.2 · S3 8.15 · S5 12.17 · S6 14.05
   const STAMPS = [4.24, 6.19, 8.14, 12.16, 14.04], STL = ['계좌 개설', '입고', '매도', '확정', '외부감시']
-  const pass = byId('pass'), stI = $$('.st i'); let stampN = 0, passFx: gsap.core.Timeline | undefined
+  const pass = byId('pass'), stI = $$('.st i'); let stampN = 0
   // 도장마다 정해 둔 기울기(도) — 손으로 찍은 것처럼 조금씩 다르게
   const TILT = [-7, 5, -4, 8, -6], stBox = stI.map((i) => i.parentElement as HTMLElement)
   function setStamps(n: number) { stI.forEach((st_, i) => gsap.set(st_, { opacity: i < n ? 1 : 0, scale: 1, rotation: TILT[i] })); gsap.set(stBox, { '--ink-o': 0, '--ink-s': 1 }); gsap.set(pass, { y: 0 }); byId('pCount').textContent = `${n}/5`; byId('stLab').textContent = n ? `${STL[n - 1]} 도장` : '' }
@@ -561,7 +561,6 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
   // 찍히는 중인 큰 도장을 바로 끝낸다(탭은 지금까지 지나온 도장 수로)
   function endBig() { if (bigFx) { const b = bigFx; bigFx = undefined; b.kill(); setStamps(Math.max(0, stampN)) } gsap.set(sfx, { autoAlpha: 0 }); gsap.set(sfxDim, { opacity: 0 }); gsap.set(stageBox, { y: 0 }) }
   function stampFx(n: number) {
-    if (passFx) passFx.kill()
     // 움직임 줄이기, 앞 도장이 아직 찍히는 중, 또는 휠로 빠르게 지나가는 중이면(스크롤 속도) 효과 없이 탭에 바로 채운다
     const busy = !!bigFx, fast = Math.abs((lenis as unknown as { velocity?: number }).velocity || 0) > 6
     endBig()
@@ -587,7 +586,7 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
         .add(() => {}, 1.7 * k)
     })
   }
-  cleanups.push(() => { bigFx?.kill(); passFx?.kill() })
+  cleanups.push(() => { bigFx?.kill() })
 
   /* ===== master timeline (one take) ===== */
   const stageEl = $('#stg')
@@ -1028,7 +1027,6 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
       get st2() { return st2 },
       get GEO() { return GEO },
       Mp, V, C, A, P, map, my, disp, K, LG,
-      get passFx() { return passFx },
       get bigFx() { return bigFx },
       get nudges() { return nudges },
       NODES, FLY,
