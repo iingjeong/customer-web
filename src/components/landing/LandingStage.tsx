@@ -1,5 +1,4 @@
 import { LandingBackdrop } from './LandingBackdrop'
-import { LandingBoard } from './LandingBoard'
 import { LandingCopy } from './LandingCopy'
 import { LandingHdr } from './LandingHeader'
 import { LandingLate } from './LandingLate'
@@ -15,7 +14,6 @@ export function LandingStage({ t, loggedIn }: { t: LandingTexts; loggedIn: boole
       <div id="stage">
         <div className="stg" id="stg">
         <LandingBackdrop />
-        <LandingBoard t={t} />
         <LandingMon />
         <LandingScene1 t={t} />
         <LandingMap />

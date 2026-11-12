@@ -158,7 +158,7 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
       if (anim && changed && !RM) ctx.add(() => { gsap.fromTo([el.parentElement!, flEls[i], krwEls[i]], { rotationX: -88, transformPerspective: 320, transformOrigin: '50% 0%' }, { rotationX: 0, duration: 0.3, ease: 'power3.out', overwrite: true }) })
     })
   }
-  const boardLive = () => !!tl && tl.time() > R(7.25) && tl.time() < R(8.65)
+  const boardLive = () => !!tl && tl.time() > 6.6 && tl.time() < 8.5
   // 시계(#clkH/#clkM)는 React 훅(useLandingClock)이 열 때와 10초마다 실제 시각으로 갱신한다(원본 tick()과 같음)
 
   /* ===== numbers ===== */
@@ -524,7 +524,7 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     const t = tl.time()
     paintBars(t)
     if (GEO && t < GEO.T1x) s01Frame()
-    tzFrame(t); s3Frame(t)
+    tzFrame(t)
     monitorFrame(t); map.drawMap()
     renderLate(t)
     updBoard(t, boardLive())
@@ -585,7 +585,6 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
   const stageEl = $('#stg')
   // 화면에서 잰 위치를 무대(1920×1080) 좌표로 — 무대가 scale(SS)로 그려지므로 배율로 나눈다
   const rel = (el: Element) => { const s = stageEl.getBoundingClientRect(), r = el.getBoundingClientRect(); return { x: (r.left - s.left) / SS, y: (r.top - s.top) / SS, w: r.width / SS, h: r.height / SS } }
-  const r$ = (s: string) => rel($(s))
   const ANIM = '#hdr,#tz,#bg3,#bg4,#seal,.kv b,.gln,.c2r,.c2res,.c2n,#board,#c3,#mon,#monUI,#c4,#c4a,#c4lab,#hero,#hero img,#slogan,#pass,.ml>span'
 
   /** 새 시간(장면표 단위, S0 0~2.5·S1 2.5~4.5) → 타임라인에 넣는 옛 시간(R()의 역함수, S1까지만) */
@@ -601,23 +600,23 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
      움직임 줄이기: 각 장면의 끝난 상태(완성 화면)만 */
   function s01Frame() { Object.assign(V, { o: 0 }) } // 지도는 S4 기내 모니터부터
   const tzHero = byId('tzHero'), tzImg = $('#tzHero .tzh-ph img'), tzW = $('#tzHero .tzh-w'), tzDev = byId('tzDev')
-  const tzP1 = byId('tzP1'), tzP2 = byId('tzP2'), tzP3 = byId('tzP3'), tzC3 = byId('c3t'), tzDark = $('#tzDev .lt-dark'), tzC1 = byId('c1'), tzC2 = byId('c2'), tzC1p = byId('c1p'), tzS1 = byId('s1')
+  const tzP1 = byId('tzP1'), tzP2 = byId('tzP2'), tzP3 = byId('tzP3'), tzC3 = byId('c3t'), tzC1 = byId('c1'), tzC2 = byId('c2'), tzC1p = byId('c1p'), tzS1 = byId('s1')
   const bw1 = $$('#c1 .bw'), bw2 = $$('#c2 .bw'), bw3 = $$('#c3t .bw')
   // 노트북 기울기: 토스 휴대폰 각도(측정한 matrix3d ≈ Z 10°, X 21°)에서 가져와 가로 노트북에 맞게 줄였다
   const TILT3 = 'perspective(2400px) rotateX(18deg) rotateZ(-5deg)'
   // 노트북 화면(.lt-scr) 크기·위치(노트북 기준점 = 가운데에서 잰 값, landing.css: 몸체 1140×870, 화면 테두리 14px, 화면 높이 700)
   const SCR_W = 1112, SCR_H = 700, SCR_CY = 14 + SCR_H / 2 - 870 / 2, SCR_FILL = 1920 / SCR_W
-  let zk = 0 // 카메라가 화면으로 다가간 정도(0~1) — s3Frame이 보드를 그 화면 모양대로 자른다
+  let zk = 0 // 카메라가 노트북 화면으로 다가간 정도(0~1)
   const lerp = (a: number, b: number, k: number) => a + (b - a) * k
   const blurIn = (els: HTMLElement[], t0: number, t: number, step = 0.05, d = 0.22) => els.forEach((e, i) => {
     const k = RM ? 1 : e3o(seg(t, t0 + i * step, t0 + i * step + d))
     e.style.opacity = String(k); e.style.filter = k >= 1 ? '' : `blur(${(16 * (1 - k)).toFixed(2)}px)`
   })
   function tzFrame(t: number) {
-    const on = t < 7.4, tzBox = tzHero.parentElement!
+    const on = t < 8.5, tzBox = tzHero.parentElement!
     tzBox.style.visibility = on ? 'visible' : 'hidden'
     tzBox.style.opacity = on ? '1' : '0' // 자식이 visibility를 따로 켜 두므로 불투명도로도 확실히 숨긴다
-    zk = RM ? (t >= 6.8 ? 1 : 0) : e2io(seg(t, 6.8, 7.35)) // 노트북이 꺼진 뒤에도 s3Frame이 쓰므로 먼저 계산
+    zk = RM ? (t >= 6.8 ? 1 : 0) : e2io(seg(t, 6.8, 7.35))
     if (!on) return
     // A: 사진 카드 → 화면 가득
     const a = RM ? (t >= 2.34 ? 1 : 0) : e2o(seg(t, 0, 2.34)) // 사진이 아주 천천히 다가온다(1.06 → 1)
@@ -640,7 +639,6 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
       const tx = (960 - ox) * zk, ty = (540 - oy - SCR_CY * s) * zk
       tzDev.style.transform = `translate(${tx.toFixed(1)}px,${ty.toFixed(1)}px) perspective(2400px) rotateX(${(18 * (1 - zk)).toFixed(3)}deg) rotateZ(${(-5 * (1 - zk)).toFixed(3)}deg) scale(${s.toFixed(4)})`
     } else tzDev.style.transform = `translateY(${lerp(1080, 0, r).toFixed(1)}px) ${TILT3}`
-    tzDark.style.opacity = String(seg(zk, 0.15, 0.45))
     // 왼쪽 글자(흰 바탕이 드러난 뒤)
     const s1on = t >= 3.6
     tzS1.style.visibility = s1on ? 'visible' : 'hidden'
@@ -669,25 +667,6 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     tzP3.style.transform = `translateY(${(100 * (1 - sw3)).toFixed(2)}%)`; tzP3.style.visibility = sw3 > 0 ? 'visible' : 'hidden'
   }
 
-  /* ===== S3: 커지는 노트북 화면 안에서 전광판이 나타난다 =====
-     보드(#board)는 노트북 화면의 지금 모양(기울기·크기 그대로 투영한 네 꼭짓점)으로 잘려 보인다. 화면이 무대를 다 채우면(새 7.35) 자르기를 푼다.
-     따로 검은 막을 덮지 않는다 — 어두워지는 것은 화면이 커지는 것뿐 */
-  const boardEl = byId('board')
-  let BDr = { x: 0, y: 0 }
-  function s3Frame(t: number) {
-    if (t < 6.8 || t >= 9.0) return // 그 밖은 타임라인(autoAlpha)이 보드를 다룬다
-    if (zk >= 1 || RM) { boardEl.style.clipPath = ''; boardEl.style.opacity = '1'; return }
-    boardEl.style.opacity = String(seg(zk, 0.4, 0.7))
-    let m: DOMMatrix
-    try { m = new DOMMatrix(tzDev.style.transform) } catch { boardEl.style.clipPath = ''; return }
-    const ox = tzDev.offsetLeft + tzDev.offsetWidth / 2, oy = tzDev.offsetTop + tzDev.offsetHeight / 2
-    const pts = [[-SCR_W / 2, SCR_CY - SCR_H / 2], [SCR_W / 2, SCR_CY - SCR_H / 2], [SCR_W / 2, SCR_CY + SCR_H / 2], [-SCR_W / 2, SCR_CY + SCR_H / 2]].map(([x, y]) => {
-      const p = m.transformPoint(new DOMPoint(x, y, 0, 1))
-      return `${(p.x / p.w + ox - BDr.x).toFixed(1)}px ${(p.y / p.w + oy - BDr.y).toFixed(1)}px`
-    })
-    boardEl.style.clipPath = `polygon(${pts.join(',')})`
-  }
-
   function build() {
     const prog = st ? st.progress : 0
     if (st) st.kill()
@@ -700,8 +679,6 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     map.buildGrid()
     gsap.set($$(ANIM), { clearProps: 'all' })
 
-    const BD = r$('#board')
-    BDr = { x: BD.x, y: BD.y }
 
     /* seat-back monitor geometry */
     const mw = Math.min(1220, vw * 0.8, ((vh * 0.66) - 28) * 16 / 9 + 28), mh = (mw - 28) * 9 / 16 + 28 // 기내 모니터가 화면의 40% 이상
@@ -711,13 +688,12 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     const SCR = { x: mx + 14, y: my0 + 14, w: mw - 28, h: mh - 28 }, MOFF = vh - my0 + 80
     GEO = { SCR, MOFF, vw, vh, T1x: R(4.93), T4: R(8.7), TX: R(11.15), dR: R(9.15) - R(8.7), dX: R(11.6) - R(11.15) }
     buildLate(vw, vh)
-    gsap.set('#board', { transformPerspective: 1400, transformOrigin: '0% 50%' })
 
     Object.assign(V, { x: 0, y: 0, w: vw, h: vh, r: 0, bg: 0, o: 1 })
     Object.assign(C, { cx: MW / 2, cy: MH / 2, z: 1 })
     Object.assign(A, { sw: -0.2, krDot: 0, ro: 0, krLit: 0, lit: 0, dimOn: 0 }); P.v = 0; K.v = 0; K.last = -1
 
-    gsap.set(['#bg1', '#bg2', '#bg3', '#bg4', '#seal', '.kv b', '.c2res', '.c2n', '#board', '#c3', '#mon', '#monUI', '#c4', '#c4a', '#c4lab', '#hero', '#slogan', '#pass'], { autoAlpha: 0 })
+    gsap.set(['#bg1', '#bg2', '#bg3', '#bg4', '#seal', '.kv b', '.c2res', '.c2n', '#c3', '#mon', '#monUI', '#c4', '#c4a', '#c4lab', '#hero', '#slogan', '#pass'], { autoAlpha: 0 })
     gsap.set($$('#stg .ml>span'), { yPercent: 0, opacity: 1 })
 
     tl = gsap.timeline({ paused: true, defaults: { ease: 'none' }, onUpdate: onTL })
@@ -741,24 +717,16 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     tl.to([rws[0], rws[2]], { opacity: 0.28, duration: at(4.9, 5.0).d }, at(4.9, 5.0).p)
     tl.fromTo('.c2res', { autoAlpha: 0, y: 10 }, { autoAlpha: 1, y: 0, duration: at(4.95, 5.08).d, ease: 'power3.out' }, at(4.95, 5.08).p)
     tl.fromTo('.c2n', { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.1 }, 6.42)
-    /* → S3: 노트북 화면이 매도 주문 화면이 되고(tzFrame), 카메라가 화면으로 다가가는 동안 그 화면 안에 전광판이 나타난다(s3Frame).
-       화면이 무대를 다 채우면(새 7.35) 검은 바탕으로 바꾼다. 행은 위에서부터 차례로 켜진다 */
+    /* → S3: 노트북 화면이 매도 페이지(안내판)가 되고, 카메라가 그 화면으로 계속 다가가 웹 화면이 무대를 채운다(tzFrame) — 한 번의 연속 움직임.
+       다가가는 동안 행이 위에서부터 차례로 켜진다 */
     const n3 = (t: number) => 6.85 + (t - 6.5) * 0.85 // 새 시간(S3 6.5~8.5) → 옛 시간
-    tl.set('#board', { autoAlpha: 1 }, n3(6.8))
-    tl.set('#bg3', { autoAlpha: 1 }, n3(7.35))
-    tl.fromTo(q('#board .rows > .br'), { opacity: 0.12 }, { opacity: 1, duration: 0.04, stagger: (n3(7.42) - n3(7.0) - 0.04) / 11, immediateRender: false }, n3(7.0))
+    tl.fromTo(q('#board .rows > .br'), { opacity: 0.25 }, { opacity: 1, duration: 0.04, stagger: (n3(7.3) - n3(6.85) - 0.04) / 11, immediateRender: false }, n3(6.85))
 
     /* S3 — 매도 보드: 상태가 위에서 아래로 넘어간다(TH). 문장은 보드 아래 흰 글자로 흐림 10px → 선명 */
     tl.fromTo('#c3', { autoAlpha: 0, filter: 'blur(10px)' }, { autoAlpha: 1, filter: 'blur(0px)', duration: n3(7.36) - n3(7.2), ease: 'power2.out', immediateRender: false }, n3(7.2))
     OUT(8.47, '#c3', 0.12, 16)
     /* → board lifts away, seat-back monitor rises from below (monitor + map viewport: monitorFrame) */
     // 보드 기준점은 왼쪽 가운데(0% 50%): 그 기준으로 모니터 화면(SCR) 자리·크기에 맞춘다
-    // S3 → S4: 다 '원화 확정'된 안내판이 같은 비율로 줄어들며 좌석 모니터 화면(SCR) 한가운데로 들어간다(S3에서 노트북 화면이 안내판이 된 것의 반대).
-    // 화면 속에 들어간 뒤 지도(모니터 화면)로 겹쳐 바뀐다. 바탕은 S3와 같은 밤 팔레트라 밝기·색이 튀지 않는다
-    { const s = Math.min(SCR.w / BD.w, SCR.h / BD.h)
-      tl.to('#board', { x: SCR.x - BD.x + (SCR.w - BD.w * s) / 2, y: SCR.y + SCR.h / 2 - (BD.y + BD.h / 2), scale: s, duration: 0.4, ease: 'power3.inOut' }, 8.6)
-      tl.to('#board', { opacity: 0, duration: 0.1 }, 8.98) }
-    tl.set('#board', { autoAlpha: 0 }, 9.1)
     tl.set('#bg4', { autoAlpha: 1 }, 8.6)
     tl.set(C, { cx: MW / 2, cy: MH * 0.47, z: 1 }, 8.7)
     tl.set(A, { krDot: 0, sw: 2, ro: 1, dimOn: 1 }, 8.7)

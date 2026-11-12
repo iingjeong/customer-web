@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react'
 import { Icon } from './LandingIcon'
 import { LandingCard2 } from './LandingScene2'
-import { BOARD_ROWS, BOARD_STATES } from './landingBoardData'
+import { LandingBoard } from './LandingBoard'
 import type { LandingTexts } from './landingTexts'
 
 // 오프닝~S2(토스 메인과 같은 화면 문법 — landing-toss-ref.md 참고). 그리는 값은 모두 엔진 tzFrame(t)이 스크롤 시간에서 계산한다.
@@ -135,34 +135,10 @@ export function LandingScene1({ t }: { t: LandingTexts }) {
             <LandingCard2 />
           </div>
           <div className="tzd-pg" id="tzP3">
-            <div className="lt-sell">
-              <div className="lt-sh">
-                매도
-                <em>Sell</em>
-              </div>
-              <div className="lt-row lt-th">
-                <span>주문 시각<small>Order</small></span>
-                <span>종목<small>Stock</small></span>
-                <span>시장<small>Market</small></span>
-                <span className="r">수량<small>Qty</small></span>
-                <span className="r">원화 금액<small>KRW</small></span>
-                <span>현황<small>Remarks</small></span>
-              </div>
-              {BOARD_ROWS.slice(0, 6).map((r) => (
-                <div className="lt-row" key={r.n}>
-                  <span className="lt-n">{r.t}</span>
-                  <span>{r.n}</span>
-                  <span><b className="lt-mk">{r.m}</b></span>
-                  <span className="r lt-n">{r.q}</span>
-                  <span className="r">-</span>
-                  <span>{BOARD_STATES[0]}</span>
-                </div>
-              ))}
-            </div>
+            {/* S3 매도 안내판 — 리턴증권 웹의 매도 화면. 카메라가 노트북 화면으로 다가가면 이 화면이 그대로 무대를 채운다 */}
+            <LandingBoard t={t} />
           </div>
         </div>
-            {/* 화면이 커지며 어두워진다(전광판으로 바뀌는 바탕) */}
-            <i className="lt-dark" />
           </div>
         </div>
         <i className="lt-hinge" />
