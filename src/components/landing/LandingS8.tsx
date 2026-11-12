@@ -4,7 +4,7 @@ export function LandingS8({ t }: { t: LandingTexts }) {
   return (
     <section className="sc" id="s8" data-screen-label="S8 Invest">
       <div className="ttl" id="tt8">
-        <div className="h" style={{ fontSize: '68px' }}>
+        <div className="h">
           <span className="ml">
             <span>돌아온 자금은</span>
           </span>
