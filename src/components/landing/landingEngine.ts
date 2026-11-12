@@ -737,8 +737,9 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
 
     /* S2 — 입고 카드(기기 화면 안): 세 수량 → 가장 작은 값 */
     const rws = $$('.c2r')
-    tl.to([rws[0], rws[2]], { opacity: 0.28, duration: 0.15 }, 6.1)
-    tl.fromTo('.c2res', { autoAlpha: 0, y: 10 }, { autoAlpha: 1, y: 0, duration: 0.14 }, 6.3)
+    // 세 수량은 입고 카드가 화면에 들어오면서 바로 보이고, 이어서 곧바로 입고 수량 100주가 확정된다(기다리는 구간 없음)
+    tl.to([rws[0], rws[2]], { opacity: 0.28, duration: at(4.9, 5.0).d }, at(4.9, 5.0).p)
+    tl.fromTo('.c2res', { autoAlpha: 0, y: 10 }, { autoAlpha: 1, y: 0, duration: at(4.95, 5.08).d, ease: 'power3.out' }, at(4.95, 5.08).p)
     tl.fromTo('.c2n', { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.1 }, 6.42)
     /* → S3: 노트북 화면이 매도 주문 화면이 되고(tzFrame), 카메라가 화면으로 다가가는 동안 그 화면 안에 전광판이 나타난다(s3Frame).
        화면이 무대를 다 채우면(새 7.35) 검은 바탕으로 바꾼다. 행은 위에서부터 차례로 켜진다 */

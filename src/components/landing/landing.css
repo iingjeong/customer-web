@@ -519,10 +519,16 @@ html.lenis,html.lenis body{height:auto}
 .landing #tzDev #card1 #seal small{font-size:9px;letter-spacing:.16em;white-space:nowrap}
 .landing #tzDev #thumb{display:none}
 .landing #tzDev #card1 small{font-size:17px}
-.landing #tzDev #card2{width:600px;zoom:1.25;box-shadow:0 2px 8px rgba(16,24,40,.10)}
-.landing #tzDev #card2 small,.landing #tzDev #card2 .ex,.landing #tzDev #card2 .c2r span,.landing #tzDev #card2 .c2res span{font-size:20px}
+.landing #tzDev #card2{width:600px;zoom:1.15;box-shadow:0 2px 8px rgba(16,24,40,.10)}
+.landing #tzDev #card2 small,.landing #tzDev #card2 .ex,.landing #tzDev #card2 .c2r span,.landing #tzDev #card2 .c2res span{font-size:21px}
 .landing #tzDev #card2 .c2r{padding:12px 0}
-.landing #tzDev #card2 .c2res b{font-size:64px}
+/* 입고 수량: 남색 상자 대신 흰 카드 안에 얇은 구분선 + 라벨 + 진한 큰 숫자 '100'과 작은 '주' */
+.landing #tzDev #card2 .c2res{flex-direction:column;align-items:flex-start;gap:6px;margin-top:12px;padding:16px 0 0;border-radius:0;background:transparent;color:var(--ink);border-top:1px solid var(--ink)}
+.landing #tzDev #card2 .c2res span{font-weight:700;color:var(--sub)}
+.landing #tzDev #card2 .c2res b{font-size:72px;color:var(--ink);letter-spacing:-.03em}
+.landing #tzDev #card2 .c2res b em{font-size:.36em;font-weight:700}
+/* 세 수량 중 입고되는 100주 줄만 진하게(나머지 두 줄은 엔진이 연하게) */
+.landing #tzDev #card2 .c2r[data-r="1"] span{font-weight:700}
 .landing #stampFx{display:none}
 /* ===== S3: 노트북 화면이 전광판이 된다 — 매도 주문 웹 화면 → 카메라가 화면으로 다가감 → 커지는 화면 안에서 어두운 전광판(엔진 tzFrame·s3Frame) ===== */
 .landing #tzDev .lt-sell{width:1000px;color:var(--ink)}
