@@ -470,18 +470,15 @@ html.lenis,html.lenis body{height:auto}
 
 /* ===== 오프닝~S2: 토스 메인과 같은 화면 문법(값은 landing-toss-ref.md에 적은 토스 측정값). 움직임은 엔진 tzFrame(t) ===== */
 .landing #tz{position:absolute;inset:0;z-index:4;pointer-events:none}
-/* A: 사진 — 처음엔 둥근 카드(위 88px = 머리 높이, 옆 16px, 아래 24px, 모서리 40px), 스크롤에 따라 화면 가득. 엔진이 clip-path를 바꾼다 */
-.landing #tzHero{position:absolute;inset:0;overflow:hidden;clip-path:inset(88px 16px 24px 16px round 40px)}
+/* A: 사진 — 처음엔 둥근 카드(위 88px = 머리 높이, 옆 16px, 아래 24px, 모서리 24px — 토스 40px보다 한 단계 작게), 스크롤에 따라 화면 가득. 엔진이 clip-path를 바꾼다 */
+.landing #tzHero{position:absolute;inset:0;overflow:hidden;clip-path:inset(88px 16px 24px 16px round 24px)}
 .landing #tzHero .tzh-ph{position:absolute;inset:0}
 .landing #tzHero .tzh-ph img{width:100%;height:100%;object-fit:cover;display:block;transform:scale(1.2);transform-origin:50% 50%}
 /* 글자 뒤 아래쪽 그늘(토스: 높이 324px, 불투명도 0.5) */
 .landing #tzHero .tzh-sh{position:absolute;left:0;right:0;bottom:0;height:324px;background:linear-gradient(to top,rgba(0,0,0,1),rgba(0,0,0,0));opacity:.5}
-/* 흰 큰 글자 92px/700 — 단어 덩어리를 왼쪽(72px)·가운데(960px부터)·오른쪽(72px 안쪽 끝)으로 흩어 놓는다 */
-.landing #tzHero .tzh-w{position:absolute;left:0;right:0;top:914px;height:110px;margin:0;font:700 92px/110px Pretendard;letter-spacing:-.02em;color:var(--color-on-navy);white-space:nowrap}
-.landing #tzHero .tzh-w span{position:absolute;top:0}
-.landing #tzHero .tzh-w span:nth-child(1){left:72px}
-.landing #tzHero .tzh-w span:nth-child(2){left:960px}
-.landing #tzHero .tzh-w span:nth-child(3){right:72px}
+/* 슬로건: 두 줄 문장 그대로 왼쪽 정렬(우리 여백 96px 그리드), 흰 글자 88px/700 */
+.landing #tzHero .tzh-w{position:absolute;left:96px;bottom:112px;margin:0;font:700 88px/1.14 Pretendard;letter-spacing:-.025em;color:var(--color-on-navy);white-space:nowrap}
+.landing #tzHero .tzh-w span{display:block}
 /* C: 왼쪽 제목(64px/700, 진한 글자)·설명(24px) — 넓은 여백 */
 .landing #s1{position:absolute;inset:0;z-index:2}
 .landing #s1w{position:absolute;left:96px;top:0;bottom:0;width:560px}
@@ -490,19 +487,32 @@ html.lenis,html.lenis body{height:auto}
 .landing #s1w .bl{display:block;white-space:nowrap}
 .landing #s1w .bw{display:inline-block;margin-right:.26em}
 .landing #c1p{margin-top:32px;font:500 24px/1.6 Pretendard;color:var(--ink);opacity:.2;max-width:none}
-/* B: 기기(태블릿, 가로) — 흰 바탕 위에 기울어져 떠 있다. 토스 휴대폰과 같은 기울기(matrix3d)는 엔진이 넣는다 */
-.landing #tzDev{position:absolute;left:720px;top:130px;width:1080px;height:820px;color:var(--ink);padding:20px;border-radius:56px;background:var(--landing-seat);box-shadow:0 60px 120px rgba(2,32,71,.16);z-index:3}
-.landing #tzDev .tzd-scr{position:relative;width:100%;height:100%;border-radius:40px;overflow:hidden;background:var(--landing-surface-soft)}
+/* B: 노트북 — 얇은 검은 화면 테두리(14px) + 경첩 + 키보드 몸체. 기울기는 엔진(토스 휴대폰 각도에서 가져옴), 그림자는 짧고 옅게(놓여 있는 느낌) */
+.landing #tzDev{position:absolute;left:676px;top:92px;width:1140px;height:870px;color:var(--ink);z-index:3;filter:drop-shadow(0 14px 20px rgba(16,24,40,.16))}
+.landing #tzDev .lt-lid{position:relative;width:1140px;height:728px;padding:14px;border-radius:18px 18px 6px 6px;background:var(--landing-seat-bezel);box-shadow:inset 0 0 0 1px var(--landing-seat-bezel-edge)}
+.landing #tzDev .lt-scr{position:relative;width:100%;height:100%;border-radius:6px;overflow:hidden;display:flex;flex-direction:column;background:var(--landing-surface-soft)}
+.landing #tzDev .lt-hinge{display:block;position:relative;width:1140px;height:10px;background:linear-gradient(180deg,var(--landing-rod-dark),var(--landing-rod-mid))}
+.landing #tzDev .lt-base{position:relative;left:-60px;width:1260px;height:120px;background:var(--landing-ceil);clip-path:polygon(60px 0,1200px 0,100% 86%,100% 100%,0 100%,0 86%);border-bottom:16px solid var(--landing-ceil-line)}
+.landing #tzDev .lt-kb{position:absolute;left:120px;right:120px;top:12px;height:58px;clip-path:polygon(24px 0,calc(100% - 24px) 0,100% 100%,0 100%);background:repeating-linear-gradient(90deg,var(--landing-ceil) 0 3px,transparent 3px 52px),repeating-linear-gradient(180deg,var(--landing-ceil) 0 3px,var(--landing-ceil-line) 3px 14.5px)}
+.landing #tzDev .lt-pad{position:absolute;left:50%;top:76px;width:220px;height:22px;margin-left:-110px;border-radius:3px;box-shadow:inset 0 0 0 1px var(--landing-ceil-line)}
+/* 리턴증권 웹 머리글(S9 .a9web과 같은 모양) */
+.landing #tzDev .lt-web{flex:none;height:60px;display:flex;align-items:center;gap:32px;padding:0 24px;background:var(--color-surface);border-bottom:1px solid var(--line)}
+.landing #tzDev .lt-web img{height:22px;display:block}
+.landing #tzDev .lt-tab{display:flex;gap:24px;align-self:stretch;font:600 17px Pretendard;color:var(--landing-text-faint-2)}
+.landing #tzDev .lt-tab span{display:flex;align-items:center;border-bottom:2px solid transparent;margin-bottom:-1px}
+.landing #tzDev .lt-tab span.on{color:var(--ink);border-color:var(--navy)}
+.landing #tzDev .tzd-scr{position:relative;flex:1;overflow:hidden}
 .landing #tzDev .tzd-pg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
-/* 기기 화면 안의 카드: 글자가 24px 이상 되게 1.45배(기본 16px 기준). 지도 칸은 없앤다(지도는 기기 안에서 그리지 않음) */
-.landing #tzDev #card1{position:relative;filter:drop-shadow(0 8px 87px rgba(2,32,71,.047))}
+/* 웹 화면 안의 카드: 글자가 24px 이상 되게 확대(기본 16~17px 기준). 지도 칸은 없앤다. 카드 그림자는 짧고 옅게 */
+.landing #tzDev #card1{position:relative;filter:drop-shadow(0 2px 8px rgba(16,24,40,.10))}
 .landing #tzDev #card1 .tk,.landing #tzDev #card1 #seal{zoom:1.45}
 .landing #tzDev #card1 .tk{width:650px;--thh:0px}
-/* 개설 완료 도장: 기기 화면 안 오른쪽 위(흰 바탕용 테두리) */
-.landing #tzDev #seal{right:-20px;top:-62px;background:var(--color-surface);box-shadow:inset 0 0 0 4px var(--color-surface),inset 0 0 0 5px var(--gold)}
+/* 개설 완료 도장(여권 도장): 확인서 오른쪽 위 모서리에 걸쳐 찍힌다(흰 바탕용 테두리) */
+.landing #tzDev #seal{right:-14px;top:-18px;background:var(--color-surface);box-shadow:inset 0 0 0 4px var(--color-surface),inset 0 0 0 5px var(--gold)}
 .landing #tzDev #thumb{display:none}
 .landing #tzDev #card1 small{font-size:17px}
-.landing #tzDev #card2{width:600px;zoom:1.45;box-shadow:0 8px 87px rgba(2,32,71,.047)}
-.landing #tzDev #card2 small,.landing #tzDev #card2 .ex,.landing #tzDev #card2 .c2r span,.landing #tzDev #card2 .c2res span{font-size:17px}
-.landing #tzDev #card2 .c2res b{font-size:72px}
+.landing #tzDev #card2{width:600px;zoom:1.25;box-shadow:0 2px 8px rgba(16,24,40,.10)}
+.landing #tzDev #card2 small,.landing #tzDev #card2 .ex,.landing #tzDev #card2 .c2r span,.landing #tzDev #card2 .c2res span{font-size:20px}
+.landing #tzDev #card2 .c2r{padding:12px 0}
+.landing #tzDev #card2 .c2res b{font-size:64px}
 .landing #stampFx{display:none}

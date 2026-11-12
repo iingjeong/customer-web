@@ -568,9 +568,9 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
   const nt = (t: number) => (t <= 2.5 ? t * 2.95 / 2.5 : t <= 4.5 ? 2.95 + (t - 2.5) * 1.9 / 2 : t + 0.35)
 
   /* ===== 오프닝~S2: 토스 메인과 같은 화면 문법(landing-toss-ref.md). 시간 t는 장면표 단위(S0 0~2.5 · S1 2.5~4.5 · S2 4.5~6.5) =====
-     A 0~2.34   둥근 사진 카드(위 88·옆 16·아래 24, 모서리 40) → 화면 가득(토스: 1.5화면 동안 power3.out, 사진 1.2배 → 1배)
+     A 0~2.34   둥근 사진 카드(위 88·옆 16·아래 24, 모서리 24) → 화면 가득(토스: 1.5화면 동안 power3.out, 사진 1.2배 → 1배)
      B 2.5~3.0  기울어진 기기가 아래에서 올라와 사진 위에 겹친다
-       3.0~3.45 사진이 둥근 카드(inset 180·160, 모서리 80)로 줄어든다(토스 측정 곡선 ≈ power3.out)
+       3.0~3.45 사진이 둥근 카드(inset 180·160, 모서리 24)로 줄어든다(토스 측정 곡선 ≈ power3.out)
        3.5~4.2  사진 카드가 위로 빠지고 흰 바탕에 기기만 남는다
      C 3.7~     제목 단어마다 흐림 16px → 선명(토스: blur ≈ 16 × (1 − 불투명도)), 설명은 회색 20% → 진하게
        4.5~4.85 기기 화면이 확인서 → 입고 카드로 넘어가고 제목이 바뀐다
@@ -579,7 +579,7 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
   const tzHero = byId('tzHero'), tzImg = $('#tzHero .tzh-ph img'), tzW = $('#tzHero .tzh-w'), tzDev = byId('tzDev')
   const tzP1 = byId('tzP1'), tzP2 = byId('tzP2'), tzC1 = byId('c1'), tzC2 = byId('c2'), tzC1p = byId('c1p'), tzS1 = byId('s1')
   const bw1 = $$('#c1 .bw'), bw2 = $$('#c2 .bw')
-  // 토스 휴대폰 화면의 기울기(측정한 matrix3d에서 이동값만 뺌 ≈ Z 10°, X 21°). 가로 기기라 Z 회전은 반으로 줄였다
+  // 노트북 기울기: 토스 휴대폰 각도(측정한 matrix3d ≈ Z 10°, X 21°)에서 가져와 가로 노트북에 맞게 줄였다
   const TILT3 = 'perspective(2400px) rotateX(18deg) rotateZ(-5deg)'
   const lerp = (a: number, b: number, k: number) => a + (b - a) * k
   const blurIn = (els: HTMLElement[], t0: number, t: number, step = 0.05, d = 0.22) => els.forEach((e, i) => {
@@ -594,7 +594,7 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     const a = RM ? (t >= 2.34 ? 1 : 0) : e3o(seg(t, 0, 2.34))
     // B: 다시 둥근 카드로(3.0~3.45), 위로 빠짐(3.5~4.2)
     const b = RM ? (t >= 3.0 ? 1 : 0) : e3o(seg(t, 3.0, 3.45)), up = RM ? (t >= 3.5 ? 1 : 0) : e3o(seg(t, 3.5, 4.2))
-    const top = b > 0 ? 180 * b : 88 * (1 - a), side = b > 0 ? 160 * b : 16 * (1 - a), bot = b > 0 ? 180 * b : 24 * (1 - a), rad = b > 0 ? 80 * b : 40 * (1 - a)
+    const top = b > 0 ? 180 * b : 88 * (1 - a), side = b > 0 ? 160 * b : 16 * (1 - a), bot = b > 0 ? 180 * b : 24 * (1 - a), rad = 24 * (b > 0 ? b : 1 - a) // 모서리는 토스(40·80)보다 작게 24
     tzHero.style.clipPath = `inset(${top.toFixed(1)}px ${side.toFixed(1)}px ${bot.toFixed(1)}px ${side.toFixed(1)}px round ${rad.toFixed(1)}px)`
     tzHero.style.transform = up > 0 ? `translateY(${(-1080 * up).toFixed(1)}px)` : ''
     tzHero.style.visibility = up >= 1 ? 'hidden' : 'visible'

@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react'
+import { Icon } from './LandingIcon'
 import { LandingCard2 } from './LandingScene2'
 import type { LandingTexts } from './landingTexts'
 
@@ -20,8 +21,7 @@ export function LandingScene1({ t }: { t: LandingTexts }) {
         <i className="tzh-sh" />
         <p className="tzh-w">
           <span>국내로 잇는 투자,</span>
-          <span>내일로</span>
-          <span>이어지는 가치</span>
+          <span>내일로 이어지는 가치</span>
         </p>
       </div>
       <div id="s1">
@@ -39,7 +39,36 @@ export function LandingScene1({ t }: { t: LandingTexts }) {
           </div>
         </div>
       </div>
+      {/* 노트북 — 화면 위쪽은 S9 노트북과 같은 브라우저 창(점 3개·주소창)과 리턴증권 웹 머리글. 그 아래 웹 화면 안에 확인서·입고 카드가 놓인다.
+          S9의 .a9tab·#addr9는 엔진이 S9 화면용으로 고르므로 여기서는 같은 모양의 다른 이름(lt-*)을 쓴다 */}
       <div id="tzDev">
+        <div className="lt-lid">
+          <div className="lt-scr">
+            <div className="a9bar">
+              <span className="a9dots" aria-hidden="true">
+                <i />
+                <i />
+                <i />
+              </span>
+              <span className="a9addr">
+                returns.co.kr
+                <span>/account</span>
+              </span>
+            </div>
+            <div className="lt-web">
+              <img src="/assets/wordmark.png" alt="Returns." />
+              <div className="lt-tab">
+                <span>홈</span>
+                <span className="on">내 계좌</span>
+                <span>주식 패키지</span>
+                <span>커뮤니티</span>
+              </div>
+              <span className="a9icons">
+                <Icon name="search" />
+                <Icon name="bell" />
+                <span className="ex">예시</span>
+              </span>
+            </div>
         <div className="tzd-scr">
           <div className="tzd-pg" id="tzP1">
             <div id="card1">
@@ -99,6 +128,13 @@ export function LandingScene1({ t }: { t: LandingTexts }) {
           <div className="tzd-pg" id="tzP2">
             <LandingCard2 />
           </div>
+        </div>
+          </div>
+        </div>
+        <i className="lt-hinge" />
+        <div className="lt-base">
+          <i className="lt-kb" />
+          <i className="lt-pad" />
         </div>
       </div>
     </div>
