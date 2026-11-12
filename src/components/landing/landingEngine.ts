@@ -472,23 +472,18 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
   /* S4 → S5: 모니터 화면이 창이 된다(새 시간)
      10.12~10.24 도착한 지도가 모니터 화면 안에서 서울 야경으로 바뀐다 · 10.24~10.42 카메라가 모니터 화면으로 다가가며 틀·좌석은 화면 밖으로
      10.47~10.66 야경이 아래로 내려가며 위쪽부터 투명해져 뒤의 새벽 하늘(S5와 같은 색)이 화면을 덮는다 → S5 바탕이 그대로 이어받는다 */
-  const monEl = byId('mon'), monUiEl = byId('monUI'), heroEl = byId('hero'), heroImg = $('#hero img')
+  const monUiEl = byId('monUI'), heroEl = byId('hero'), heroImg = $('#hero img')
   const sv = (e: HTMLElement, o: number, tf = '') => { e.style.visibility = o > 0 ? 'visible' : 'hidden'; e.style.opacity = String(o); e.style.transform = tf }
   function monitorFrame(t: number) {
     const g = GEO; if (!g) return
-    A.sil = t < g.T4 ? 1 : 0
-    const S = g.SCR, cx = S.x + S.w / 2, cy = S.y + S.h / 2
+    A.sil = 0
+    // S4는 노트북(곧은 자세) 웹 화면의 내용 칸. S5로 갈 때는 노트북 자세가 그 칸을 무대 가득으로 키운다
+    const p = laptopPose(t, 1), rc = poseRect(p, CT), x0 = rc.x, y0 = rc.y, w = rc.w, h = rc.h
     const zk = RM ? (t >= 10.3 ? 1 : 0) : e2io(seg(t, 10.24, 10.42))
-    const fill = Math.max((g.vw + 2 * BX) / S.w, (g.vh + 2 * BY) / S.h), s = 1 + (fill - 1) * zk
-    const tx = (g.vw / 2 - cx) * zk, ty = (g.vh / 2 - cy) * zk
-    const tf = zk > 0 ? `translate(${tx.toFixed(1)}px,${ty.toFixed(1)}px) scale(${s.toFixed(4)})` : ''
-    const on = t >= g.T4 && t < 10.44, rise = e2o(clamp((t - g.T4) / g.dR))
-    // 모니터 틀은 안내판이 줄어드는 동안 올라오고, 화면 위 정보 띠는 안내판이 화면 속에 다 들어간 뒤 나타나 카메라가 다가가기 전에 사라진다
-    monEl.style.transformOrigin = monUiEl.style.transformOrigin = `${(cx - (S.x - 14)).toFixed(1)}px ${(cy - (S.y - 14)).toFixed(1)}px`
-    sv(monEl, on ? rise : 0, tf)
-    sv(monUiEl, on ? e2o(clamp((t - R(8.98)) / (R(9.12) - R(8.98)))) * (1 - seg(t, 10.18, 10.26)) : 0, tf)
-    // 지금 모니터 화면이 무대에서 차지하는 사각형
-    const x0 = cx + tx - S.w / 2 * s, y0 = cy + ty - S.h / 2 * s, w = S.w * s, h = S.h * s
+    const tf = `translate(${(x0 - g.SCR.x).toFixed(1)}px,${(y0 - g.SCR.y).toFixed(1)}px) scale(${(w / g.SCR.w).toFixed(4)})`
+    monUiEl.style.transformOrigin = '0 0'
+    // 정보 띠는 노트북이 곧은 자세로 돌아와 비행 화면이 들어온 뒤(8.78~8.9) 나타나고, 카메라가 다가가기 전에 사라진다
+    sv(monUiEl, t >= 8.7 && t < 10.44 ? seg(t, 8.78, 8.9) * (1 - seg(t, 10.18, 10.26)) : 0, tf)
     // 서울 야경: 모니터 화면 모양대로 잘려 보이다가 화면과 함께 커진다. 하늘이 다 덮이면(10.7) S5 바탕이 이어받는다
     const hv = t >= 10.1 && t < 10.7
     const ho = RM ? (t >= 10.3 ? 1 : 0) : seg(t, 10.12, 10.24)
@@ -500,9 +495,9 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
       heroImg.style.webkitMaskImage = heroImg.style.maskImage = hk > 0 ? `linear-gradient(to bottom,transparent ${a.toFixed(1)}%,rgb(0,0,0) ${(a + 40).toFixed(1)}%)` : ''
     }
     if (t < g.T1x) return                       // S0–S1: map viewport is tween-driven
-    if (t < g.T4) { V.o = 0; return }
-    // 지도는 안내판이 모니터 화면 속으로 다 줄어든 뒤 나타나고(줄어드는 안내판 위로 비치지 않게), 야경이 다 들어오면 사라진다
-    Object.assign(V, { x: x0, y: y0, w, h, r: 2 * (1 - zk), bg: 1, o: t >= 10.44 ? 0 : e2o(clamp((t - R(8.92)) / (R(9.04) - R(8.92)))) * (1 - seg(t, 10.24, 10.3)) })
+    if (t < 8.55) { V.o = 0; return }
+    // 지도는 노트북 웹 화면이 비행 화면으로 바뀌는 동안 나타나고(8.58~8.68), S5 사진이 다 들어오면 사라진다
+    Object.assign(V, { x: x0, y: y0, w, h, r: 0, bg: 1, o: t >= 10.44 ? 0 : seg(t, 8.58, 8.68) * (1 - seg(t, 10.24, 10.3)) })
   }
   // 레터박스(16:9가 아닐 때 무대 밖에 남는 칸) 색: 지금 보이는 장면 배경. [시작 시간, 위쪽 색, 아래쪽 색]
   const BARS: Array<[number, string, string]> = [
@@ -600,20 +595,45 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
      움직임 줄이기: 각 장면의 끝난 상태(완성 화면)만 */
   function s01Frame() { Object.assign(V, { o: 0 }) } // 지도는 S4 기내 모니터부터
   const tzHero = byId('tzHero'), tzImg = $('#tzHero .tzh-ph img'), tzW = $('#tzHero .tzh-w'), tzDev = byId('tzDev')
-  const tzP1 = byId('tzP1'), tzP2 = byId('tzP2'), tzP3 = byId('tzP3'), tzC3 = byId('c3t'), tzC1 = byId('c1'), tzC2 = byId('c2'), tzC1p = byId('c1p'), tzS1 = byId('s1')
+  const tzP1 = byId('tzP1'), tzP2 = byId('tzP2'), tzP3 = byId('tzP3'), tzP4 = byId('tzP4'), tzC3 = byId('c3t'), tzC1 = byId('c1'), tzC2 = byId('c2'), tzC1p = byId('c1p'), tzS1 = byId('s1')
   const bw1 = $$('#c1 .bw'), bw2 = $$('#c2 .bw'), bw3 = $$('#c3t .bw')
   // 노트북 기울기: 토스 휴대폰 각도(측정한 matrix3d ≈ Z 10°, X 21°)에서 가져와 가로 노트북에 맞게 줄였다
   const TILT3 = 'perspective(2400px) rotateX(18deg) rotateZ(-5deg)'
   // 노트북 화면(.lt-scr) 크기·위치(노트북 기준점 = 가운데에서 잰 값, landing.css: 몸체 1140×870, 화면 테두리 14px, 화면 높이 700)
   const SCR_W = 1112, SCR_H = 700, SCR_CY = 14 + SCR_H / 2 - 870 / 2, SCR_FILL = 1920 / SCR_W
   let zk = 0 // 카메라가 노트북 화면으로 다가간 정도(0~1)
+  // 노트북 자세: tx·ty 이동, s 배율, rx·rz 기울기. 기준점 = 노트북 가운데
+  type Pose = { tx: number; ty: number; s: number; rx: number; rz: number }
+  const lerpP = (a: Pose, b: Pose, k: number): Pose => ({ tx: lerp(a.tx, b.tx, k), ty: lerp(a.ty, b.ty, k), s: lerp(a.s, b.s, k), rx: lerp(a.rx, b.rx, k), rz: lerp(a.rz, b.rz, k) })
+  const devO = () => ({ ox: tzDev.offsetLeft + tzDev.offsetWidth / 2, oy: tzDev.offsetTop + tzDev.offsetHeight / 2 })
+  // S4 웹 화면 내용 칸(브라우저 줄 42 + 웹 머리글 60 아래, 노트북 기준 좌표) — 지도·정보 띠·S5 사진이 여기에 맞춰진다
+  const CT = { x: 14, y: 14 + 102, w: SCR_W, h: SCR_H - 102 }
+  function laptopPose(t: number, r: number): Pose {
+    const { ox, oy } = devO()
+    const rest: Pose = { tx: 0, ty: lerp(1080, 0, r), s: 1, rx: 18, rz: -5 }
+    const flat: Pose = { tx: 0, ty: 0, s: 1, rx: 0, rz: 0 }
+    const f3: Pose = { tx: 960 - ox, ty: 540 - oy - SCR_CY * SCR_FILL, s: SCR_FILL, rx: 0, rz: 0 }
+    const s5 = Math.max((1920 + 2 * BX) / CT.w, (1080 + 2 * BY) / CT.h), cy5 = CT.y + CT.h / 2 - 870 / 2
+    const f5: Pose = { tx: 960 - ox, ty: 540 - oy - cy5 * s5, s: s5, rx: 0, rz: 0 }
+    const st = (a: number) => (RM ? (t >= a ? 1 : 0) : 0)
+    if (t >= 10.24) return lerpP(flat, f5, RM ? st(10.3) : e2io(seg(t, 10.24, 10.42)))
+    if (t >= 8.4) return lerpP(f3, flat, RM ? st(8.5) : e2io(seg(t, 8.4, 8.75)))
+    if (t >= 6.8) return lerpP(rest, f3, zk)
+    return rest
+  }
+  const poseTf = (p: Pose) => `translate(${p.tx.toFixed(1)}px,${p.ty.toFixed(1)}px) perspective(2400px) rotateX(${p.rx.toFixed(3)}deg) rotateZ(${p.rz.toFixed(3)}deg) scale(${p.s.toFixed(4)})`
+  /** 기울기 없는 자세에서 노트북 기준 사각형 → 무대 사각형 */
+  const poseRect = (p: Pose, rc: { x: number; y: number; w: number; h: number }) => {
+    const { ox, oy } = devO(), L = tzDev.offsetLeft, T = tzDev.offsetTop
+    return { x: ox + p.tx + (L + rc.x - ox) * p.s, y: oy + p.ty + (T + rc.y - oy) * p.s, w: rc.w * p.s, h: rc.h * p.s }
+  }
   const lerp = (a: number, b: number, k: number) => a + (b - a) * k
   const blurIn = (els: HTMLElement[], t0: number, t: number, step = 0.05, d = 0.22) => els.forEach((e, i) => {
     const k = RM ? 1 : e3o(seg(t, t0 + i * step, t0 + i * step + d))
     e.style.opacity = String(k); e.style.filter = k >= 1 ? '' : `blur(${(16 * (1 - k)).toFixed(2)}px)`
   })
   function tzFrame(t: number) {
-    const on = t < 8.5, tzBox = tzHero.parentElement!
+    const on = t < 10.7, tzBox = tzHero.parentElement!
     tzBox.style.visibility = on ? 'visible' : 'hidden'
     tzBox.style.opacity = on ? '1' : '0' // 자식이 visibility를 따로 켜 두므로 불투명도로도 확실히 숨긴다
     zk = RM ? (t >= 6.8 ? 1 : 0) : e2io(seg(t, 6.8, 7.35))
@@ -633,12 +653,8 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     // 기기: 아래에서 올라온다(2.5~3.0)
     const r = RM ? (t >= 2.5 ? 1 : 0) : e3o(seg(t, 2.5, 3.0))
     tzDev.style.visibility = r > 0 ? 'visible' : 'hidden'
-    // S3: 카메라가 노트북 화면으로 다가간다(6.8~7.35) — 기울기가 풀리며 화면이 무대를 꽉 채우고, 테두리·키보드 몸체는 화면 밖으로
-    if (zk > 0) {
-      const s = 1 + (SCR_FILL - 1) * zk, ox = tzDev.offsetLeft + tzDev.offsetWidth / 2, oy = tzDev.offsetTop + tzDev.offsetHeight / 2
-      const tx = (960 - ox) * zk, ty = (540 - oy - SCR_CY * s) * zk
-      tzDev.style.transform = `translate(${tx.toFixed(1)}px,${ty.toFixed(1)}px) perspective(2400px) rotateX(${(18 * (1 - zk)).toFixed(3)}deg) rotateZ(${(-5 * (1 - zk)).toFixed(3)}deg) scale(${s.toFixed(4)})`
-    } else tzDev.style.transform = `translateY(${lerp(1080, 0, r).toFixed(1)}px) ${TILT3}`
+    // 노트북 자세(S3 화면 가득 → S4 곧은 자세 → S5 내용 칸 가득): laptopPose
+    tzDev.style.transform = t < 6.8 && zk === 0 ? `translateY(${lerp(1080, 0, r).toFixed(1)}px) ${TILT3}` : poseTf(laptopPose(t, r))
     // 왼쪽 글자(흰 바탕이 드러난 뒤)
     const s1on = t >= 3.6
     tzS1.style.visibility = s1on ? 'visible' : 'hidden'
@@ -664,7 +680,10 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     const sw3 = RM ? (t >= 6.3 ? 1 : 0) : e3o(seg(t, 6.3, 6.6))
     if (sw3 > 0) tzP2.style.transform = `translateY(${(-100 * sw3).toFixed(2)}%)`
     tzP2.style.visibility = sw > 0 && sw3 < 1 ? 'visible' : 'hidden'
-    tzP3.style.transform = `translateY(${(100 * (1 - sw3)).toFixed(2)}%)`; tzP3.style.visibility = sw3 > 0 ? 'visible' : 'hidden'
+    // S3 → S4: 노트북이 물러나는 동안 매도 화면이 위로 빠지고 비행 화면이 아래에서(8.5~8.72)
+    const sw4 = RM ? (t >= 8.5 ? 1 : 0) : e3o(seg(t, 8.5, 8.72))
+    tzP3.style.transform = `translateY(${(100 * (1 - sw3) - 100 * sw4).toFixed(2)}%)`; tzP3.style.visibility = sw3 > 0 && sw4 < 1 ? 'visible' : 'hidden'
+    tzP4.style.transform = `translateY(${(100 * (1 - sw4)).toFixed(2)}%)`; tzP4.style.visibility = sw4 > 0 ? 'visible' : 'hidden'
   }
 
   function build() {
@@ -680,12 +699,9 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     gsap.set($$(ANIM), { clearProps: 'all' })
 
 
-    /* seat-back monitor geometry */
-    const mw = Math.min(1220, vw * 0.8, ((vh * 0.66) - 28) * 16 / 9 + 28), mh = (mw - 28) * 9 / 16 + 28 // 기내 모니터가 화면의 40% 이상
-    const mx = (vw - mw) / 2, my0 = vh - mh - Math.max(40, vh * 0.07)
-    ;[$('#mon'), $('#monUI')].forEach((e) => Object.assign(e.style, { left: mx + 'px', top: my0 + 'px', width: mw + 'px', height: mh + 'px' }))
-    Object.assign($('#c4').style, { left: mx + 'px', bottom: (vh - my0 + 32) + 'px' })
-    const SCR = { x: mx + 14, y: my0 + 14, w: mw - 28, h: mh - 28 }, MOFF = vh - my0 + 80
+    /* S4 화면: 노트북(곧은 자세) 웹 화면의 내용 칸 */
+    const SCR = poseRect({ tx: 0, ty: 0, s: 1, rx: 0, rz: 0 }, CT), MOFF = 80
+    Object.assign($('#monUI').style, { left: SCR.x + 'px', top: SCR.y + 'px', width: SCR.w + 'px', height: SCR.h + 'px' })
     GEO = { SCR, MOFF, vw, vh, T1x: R(4.93), T4: R(8.7), TX: R(11.15), dR: R(9.15) - R(8.7), dX: R(11.6) - R(11.15) }
     buildLate(vw, vh)
 
@@ -699,8 +715,6 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     tl = gsap.timeline({ paused: true, defaults: { ease: 'none' }, onUpdate: onTL })
     wrapTL(tl)
     const q = (sel: string | string[]) => $$(String(sel))
-    const REV = (t: number, sel: string) => { tl!.set(sel, { autoAlpha: 1 }, t); tl!.fromTo($$(sel + ' .ml>span'), { yPercent: 28, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.2, stagger: 0.06, ease: 'power3.out' }, t) }
-    const IN = (t: number, sel: string | string[], d = 0.18, y = 14) => tl!.fromTo(q(sel), { autoAlpha: 0, y }, { autoAlpha: 1, y: 0, duration: d, ease: 'power2.out' }, t)
     const OUT = (t: number, sel: string | string[], d = 0.16, y = -10) => tl!.to(q(sel), { autoAlpha: 0, y, duration: d, ease: 'power1.in' }, t)
 
     const at = (a: number, b: number) => ({ p: nt(a), d: nt(b) - nt(a) })
@@ -732,7 +746,9 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     tl.set(A, { krDot: 0, sw: 2, ro: 1, dimOn: 1 }, 8.7)
 
     /* S4 — inflight map: NY & Tokyo → Seoul */
-    tl.set('#c4', { autoAlpha: 1 }, 8.82); IN(8.82, '#c4lab'); REV(8.84, '#c4a') // 안내판이 제목 아래로 줄어든 뒤(S4 시작 직후)
+    // S4 제목: 노트북이 물러나며 왼쪽 열이 드러날 때(S1·S2 제목과 같은 흐림 16px → 선명)
+    tl.set('#c4', { autoAlpha: 1 }, 8.8); tl.set('#c4a', { autoAlpha: 1 }, 8.8)
+    tl.fromTo(q('#c4a .ml>span'), { opacity: 0, filter: 'blur(16px)' }, { opacity: 1, filter: 'blur(0px)', duration: 0.2, stagger: 0.08, ease: 'power3.out', immediateRender: false }, 8.8)
     tl.fromTo(P, { v: 0 }, { v: 1, duration: 1.15, ease: 'power1.inOut', immediateRender: false }, 9.2)
     tl.fromTo(A, { krLit: 0 }, { krLit: 1.15, duration: 0.4, immediateRender: false }, 10.0)
 

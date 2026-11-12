@@ -138,6 +138,8 @@ export function LandingScene1({ t }: { t: LandingTexts }) {
             {/* S3 매도 안내판 — 리턴증권 웹의 매도 화면. 카메라가 노트북 화면으로 다가가면 이 화면이 그대로 무대를 채운다 */}
             <LandingBoard t={t} />
           </div>
+          {/* S4 비행 화면 — 지도(캔버스)와 위·아래 정보 띠(#monUI)가 이 자리에 맞춰 그려진다 */}
+          <div className="tzd-pg" id="tzP4" />
         </div>
           </div>
         </div>

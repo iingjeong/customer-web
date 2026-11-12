@@ -21,6 +21,8 @@ export interface MapState {
   seoul: Pt
   krB: [Pt, Pt] | null
   KD: number
+  /** public/assets/world-map.svg의 대륙 면(같은 투영) */
+  landSvg: Path2D | null
 }
 
 const NB = [[1, 0], [-1, 0], [0, 1], [0, -1], [2, 0], [-2, 0], [0, 2], [0, -2], [1, 1], [-1, -1], [1, -1], [-1, 1], [3, 0], [-3, 0], [0, 3], [0, -3]]
@@ -42,8 +44,9 @@ export function createLandingMap(cv: HTMLCanvasElement) {
   const col = { cell: '', land: '', gold: '', plane: '', scrim: '0,0,0' }
   const readColors = (root: Element) => {
     const cs = getComputedStyle(root), v = (n: string) => cs.getPropertyValue(n).trim()
-    col.cell = v('--landing-map-cell'); col.land = v('--landing-map-land'); col.gold = v('--color-gold')
-    col.plane = v('--color-on-navy'); col.scrim = rgbParts(v('--color-photo-base'))
+    // 밝은 지도: 흰 바탕, 연한 회색 대륙, 남색 경로선·비행기·서울 점
+    col.cell = v('--landing-map-cell'); col.land = v('--landing-ceil-line'); col.gold = v('--color-navy')
+    col.plane = v('--color-navy'); col.scrim = rgbParts(v('--color-surface'))
   }
 
   const symOf = (code: string) => { const s = CODE_SYM[code] || (DOLLAR.has(code) ? '$' : '¤'); return FONT_OK[s] === false ? '¤' : s }
@@ -73,7 +76,7 @@ export function createLandingMap(cv: HTMLCanvasElement) {
   }
   const snap = (v: number) => Math.round(v * DPR) / DPR
 
-  const Mp: MapState = { ready: false, cls: null, land: null, fi: [], g: { X: [], Y: [], S: [], AL: [], T: [], D: [], KO: [], n: 0 }, dense: [], routes: {}, seoul: [0, 0], krB: null, KD: 1 }
+  const Mp: MapState = { ready: false, cls: null, land: null, fi: [], g: { X: [], Y: [], S: [], AL: [], T: [], D: [], KO: [], n: 0 }, dense: [], routes: {}, seoul: [0, 0], krB: null, KD: 1, landSvg: null }
   const V = { x: 0, y: 0, w: 0, h: 0, r: 0, bg: 0, o: 1 }      // map viewport on screen
   const C = { cx: MW / 2, cy: MH / 2, z: 1 }                   // camera (z=1 → world at 90% of viewport width)
   // rv: 오프닝에서 빛이 지나간 곳(지도 가로 위치 < rv)만 기호가 켜진다(1.2 이상이면 전부 켜짐). krR: 서울 금색 점 반지름(px)
@@ -93,6 +96,11 @@ export function createLandingMap(cv: HTMLCanvasElement) {
     const res = await fetch(import.meta.env.BASE_URL + 'data/world-atlas.json', { signal })
     const w = await res.json()
     if (signal.aborted) return
+    // 대륙 면은 SVG 지도 파일(같은 투영으로 만든 것)에서 읽는다
+    try {
+      const sv = await (await fetch(import.meta.env.BASE_URL + 'assets/world-map.svg', { signal })).text()
+      const dm = sv.match(/ d="([^"]+)"/); if (dm) Mp.landSvg = new Path2D(dm[1])
+    } catch (e) { if ((e as Error)?.name === 'AbortError') return }
     const proj = geoNaturalEarth1().rotate([-150, 0]).fitExtent([[8, 8], [MW - 8, MH - 8]], { type: 'Sphere' })
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const feats = (feature(w, w.objects.countries) as any).features.filter((f: { id: string }) => parseInt(f.id, 10) !== 10) as Array<{ id: string; properties?: { name?: string } }>
@@ -189,9 +197,12 @@ export function createLandingMap(cv: HTMLCanvasElement) {
     if (V.bg > 0) { ctx.globalAlpha = V.o; ctx.fillStyle = `rgba(${col.scrim},${V.bg})`; ctx.fillRect(V.x, V.y, V.w, V.h) }
     const G = Mp.g, fpx = Math.round(7 * rel * 2) / 2, m = fpx * 2
     const dense = clamp((Mp.KD * s - 7) / 6)
-    const sil = A.sil ? clamp((5.4 - fpx) / 1.2) : 0
+    // 밝은 지도: 대륙은 연한 회색 단색 면(SVG), 점으로 찍은 기호·₩는 그리지 않는다
+    const landP = Mp.landSvg || Mp.land
+    if (landP) { ctx.save(); ctx.globalAlpha = V.o; ctx.translate(ox, oy); ctx.scale(s, s); ctx.fillStyle = col.land; ctx.fill(landP); ctx.restore() }
+    const sil = 0
     if (sil > 0 && Mp.land) { ctx.save(); ctx.globalAlpha = V.o * sil; ctx.translate(ox, oy); ctx.scale(s, s); ctx.fillStyle = col.land; ctx.fill(Mp.land); ctx.restore() }
-    const glyph = sil < 1 && fpx >= 2
+    const glyph = false
     const gold: number[] = []
     ctx.fillStyle = col.cell
     for (let i = 0; i < G.n; i++) {
@@ -220,7 +231,7 @@ export function createLandingMap(cv: HTMLCanvasElement) {
       for (let i = 0; i < gold.length; i += 3) { ctx.globalAlpha = V.o * gold[i + 2]; if (sp) ctx.drawImage(sp, snap(gold[i] - sp.w / 2), snap(gold[i + 1] - sp.w / 2), sp.w, sp.w) }
     }
     // dense ₩ (Korea zoom)
-    if (dense > 0) {
+    if (dense > 0 && glyph) {
       const df = Mp.KD * s * 0.8
       ctx.font = `600 ${df}px ${MAPFONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
       for (const p of Mp.dense) {
@@ -238,7 +249,7 @@ export function createLandingMap(cv: HTMLCanvasElement) {
       ctx.strokeStyle = col.gold; ctx.lineCap = 'round'
       for (const k in Mp.routes) {
         const Rt = Mp.routes[k], pos = routePos(Rt, P.v)
-        ctx.globalAlpha = V.o * A.ro * 0.8; ctx.lineWidth = 1.5; ctx.setLineDash([3, 5])
+        ctx.globalAlpha = V.o * A.ro * 0.6; ctx.lineWidth = 1.5; ctx.setLineDash([4, 6])
         ctx.beginPath(); ctx.moveTo(ox + pos.x * s, oy + pos.y * s)
         for (let i = pos.i; i < Rt.pts.length; i++) ctx.lineTo(ox + Rt.pts[i][0] * s, oy + Rt.pts[i][1] * s)
         ctx.stroke(); ctx.setLineDash([])

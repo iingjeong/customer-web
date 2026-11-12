@@ -239,8 +239,4 @@
   --landing-mk-tse: #c4302b; /* 전광판 시장 TSE */
   --landing-mk-lse: #5e626b; /* 전광판 시장 LSE */
   --landing-mk-hkex: #dd7a1f; /* 전광판 시장 HKEX */
-  --landing-night-bg: #111c2e; /* 밤 팔레트(S3~S4): 화면 배경 */
-  --landing-night-surface: #16243a; /* 밤 팔레트: 안내판 면 */
-  --landing-night-line: #22324c; /* 밤 팔레트: 행 구분선·테두리·안내판 머리줄 띠 */
-  --landing-night-sub: #9aa8bd; /* 밤 팔레트: 보조 글자(안내판 면 대비 4.5:1 이상) */
 }
