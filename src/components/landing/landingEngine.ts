@@ -142,7 +142,7 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
 
   /* ===== S3 departure board ===== */
   const ROWS = BOARD_ROWS, STATES = BOARD_STATES
-  const TH = ROWS.map((_, i) => { const b = 7.4 + i * 0.05; return [R(b), R(b + 0.25), R(b + 0.45)] })
+  const TH = ROWS.map((_, i) => { const b = 7.55 + i * 0.02; return [R(b), R(b + 0.2), R(b + 0.4)] }) // 옛 시간 7.55~8.17 = 새 시간 7.32~8.29
   const rowEls = $$('#rows .br')
   const flEls = rowEls.map((r) => r.children[1] as HTMLElement), krwEls = rowEls.map((r) => r.children[5] as HTMLElement), stEls = rowEls.map((r) => r.children[6].firstElementChild as HTMLElement)
   let rowState = ROWS.map(() => -1)
@@ -482,7 +482,7 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
   }
   // 레터박스(16:9가 아닐 때 무대 밖에 남는 칸) 색: 지금 보이는 장면 배경. [시작 시간, 위쪽 색, 아래쪽 색]
   const BARS: Array<[number, string, string]> = [
-    [0, '--bg-s0', '--bg-s0'], [R(2.7), '--bg-s1', '--bg-s1'], [R(5.15), '--bg-s2', '--bg-s2'], [R(7.15), '--bg-s3', '--bg-s3'],
+    [0, '--bg-s0', '--bg-s0'], [R(2.7), '--bg-s1', '--bg-s1'], [R(5.15), '--bg-s2', '--bg-s2'], [7.22, '--bg-s3', '--bg-s3'],
     [R(8.85), '--bg-s4', '--bg-s4'], [10.7, '--landing-dawn-top', '--landing-dawn-bottom'], [12.35, '--bg-s6', '--bg-s6'],
     [14.35, '--bg-s7', '--bg-s7'], [16.35, '--bg-s8', '--bg-s8'], [18.35, '--bg-s9', '--bg-s9'],
   ]
@@ -500,7 +500,7 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     const t = tl.time()
     paintBars(t)
     if (GEO && t < GEO.T1x) s01Frame()
-    tzFrame(t)
+    tzFrame(t); s3Frame(t)
     monitorFrame(t); map.drawMap()
     renderLate(t)
     updBoard(t, boardLive())
@@ -550,8 +550,8 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
   }
 
   /* ===== passport tab + 챕터 도장 ===== */
-  // 도장 5개는 각 단계의 마지막 박자 바로 앞(-0.01)에서 찍힌다 — 발표 모드로 그 박자에 다 도착한 뒤. 박자: S1 4.25 · S2 6.2 · S3 8.15 · S5 12.17 · S6 14.05
-  const STAMPS = [4.24, 6.19, 8.14, 12.16, 14.04], STL = ['계좌 개설', '입고', '매도', '확정', '외부감시']
+  // 도장 5개는 각 단계의 마지막 박자 바로 앞(-0.01)에서 찍힌다 — 발표 모드로 그 박자에 다 도착한 뒤. 박자: S1 4.25 · S2 6.2 · S3 8.3 · S5 12.17 · S6 14.05
+  const STAMPS = [4.24, 6.19, 8.29, 12.16, 14.04], STL = ['계좌 개설', '입고', '매도', '확정', '외부감시']
   const pass = byId('pass'), stI = $$('.st i'); let stampN = 0
   // 도장마다 정해 둔 기울기(도) — 손으로 찍은 것처럼 조금씩 다르게
   const TILT = [-7, 5, -4, 8, -6], stBox = stI.map((i) => i.parentElement as HTMLElement)
@@ -587,9 +587,11 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     e.style.opacity = String(k); e.style.filter = k >= 1 ? '' : `blur(${(16 * (1 - k)).toFixed(2)}px)`
   })
   function tzFrame(t: number) {
-    const on = t < 6.75
-    tzHero.parentElement!.style.visibility = on ? 'visible' : 'hidden'
-    if (!on) return
+    const on = t < 6.6, tzBox = tzHero.parentElement!
+    tzBox.style.visibility = on ? 'visible' : 'hidden'
+    if (!on) { tzBox.style.opacity = '0'; return } // 자식이 visibility를 따로 켜 두므로 불투명도로도 확실히 숨긴다
+    const ex = RM ? (t >= 6.3 ? 1 : 0) : Math.pow(seg(t, 6.3, 6.55), 3) // 빨라지며 빠진다(power3.in)
+    tzBox.style.opacity = String(1 - ex); tzBox.style.transform = ex > 0 ? `translateY(${(-120 * ex).toFixed(1)}px)` : ''
     // A: 사진 카드 → 화면 가득
     const a = RM ? (t >= 2.34 ? 1 : 0) : e3o(seg(t, 0, 2.34))
     // B: 다시 둥근 카드로(3.0~3.45), 위로 빠짐(3.5~4.2)
@@ -619,6 +621,29 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     tzP1.style.transform = sw > 0 ? `translateY(${(-100 * sw).toFixed(2)}%)` : ''
     tzP2.style.transform = `translateY(${(100 * (1 - sw)).toFixed(2)}%)`
     tzP1.style.visibility = sw >= 1 ? 'hidden' : 'visible'; tzP2.style.visibility = sw > 0 ? 'visible' : 'hidden'
+  }
+
+  /* ===== S3 도입: 토스 D 전환(landing-toss-ref.md D). t는 새 시간
+     6.5~6.77 문장이 단어마다 흐림 → 선명(가운데 한 줄) · 6.8~7.0 두 덩어리로 갈라지며(±18 → ±145px) 그 사이에 검은 둥근 막대
+     7.0~7.22 막대가 토스 측정 크기 순서대로 커져 화면 가득(모서리 24 → 0, 토스 65~91보다 작게) · 7.04~7.22 글자는 흐려지며 양옆 밖으로 */
+  const s3d = byId('s3d'), s3bar = byId('s3bar'), s3L = $('#s3d .s3d-l'), s3R = $('#s3d .s3d-r'), bw3 = $$('#s3d .bw')
+  const BARK: Array<[number, number, number]> = [[220, 110, 24], [540, 724, 24], [1121, 765, 24], [1544, 782, 20], [1810, 977, 12], [1920, 1080, 0]]
+  function s3Frame(t: number) {
+    const on = t >= 6.48 && t < 7.24
+    s3d.style.visibility = on ? 'visible' : 'hidden'
+    if (!on) return
+    blurIn(bw3, 6.5, t, 0.02, 0.15)
+    const sp = RM ? 1 : e3o(seg(t, 6.82, 7.0)), fly = RM ? 1 : Math.pow(seg(t, 7.04, 7.22), 3)
+    const off = 127 * sp + 845 * fly
+    s3L.style.transform = `translateX(${(-off).toFixed(1)}px)`; s3R.style.transform = `translateX(${off.toFixed(1)}px)`
+    ;[s3L, s3R].forEach((e) => { e.style.opacity = String(1 - fly); e.style.filter = fly > 0 ? `blur(${(8 * fly).toFixed(2)}px)` : '' })
+    let w: number, h: number, r: number
+    if (t < 7.0 && !RM) { w = BARK[0][0] * sp; h = BARK[0][1] * sp; r = Math.min(24, h / 2) }
+    else {
+      const g = (RM ? 1 : e3o(seg(t, 7.0, 7.22))) * (BARK.length - 1), i = Math.min(BARK.length - 2, Math.floor(g)), k = g - i
+      ;[w, h, r] = [0, 1, 2].map((j) => lerp(BARK[i][j], BARK[i + 1][j], k)) as [number, number, number]
+    }
+    Object.assign(s3bar.style, { width: w.toFixed(1) + 'px', height: h.toFixed(1) + 'px', borderRadius: r.toFixed(1) + 'px', transform: `translate(${(-w / 2).toFixed(1)}px,${(-h / 2).toFixed(1)}px)` })
   }
 
   function build() {
@@ -673,17 +698,17 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     tl.to([rws[0], rws[2]], { opacity: 0.28, duration: 0.15 }, 6.1)
     tl.fromTo('.c2res', { autoAlpha: 0, y: 10 }, { autoAlpha: 1, y: 0, duration: 0.14 }, 6.3)
     tl.fromTo('.c2n', { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.1 }, 6.42)
-    /* → 카메라가 뒤로 빠진다: 입고 장면이 작아지며 물러나고, 검은 보드가 앞으로 나온다(짧게) */
-    tl.fromTo('#tz', { autoAlpha: 1, scale: 1 }, { scale: 0.86, autoAlpha: 0, duration: 0.36, ease: 'power3.in', immediateRender: false }, 6.75)
-    FADE(6.82, '#bg3', 1, 0.3)
-    tl.set('#board', { autoAlpha: 1 }, 6.86)
-    tl.fromTo('#board', { scale: 1.14, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.36, ease: 'power3.out' }, 6.86)
+    /* → S3 도입(s3Frame): 입고 화면이 위로 빠지고, 문장이 갈라지며 검은 막대가 화면을 덮는다. 다 덮일 때(새 7.22) 검은 바탕으로 바꾸고 보드가 뜬다 */
+    const n3 = (t: number) => 6.85 + (t - 6.5) * 0.85 // 새 시간(S3 6.5~8.5) → 옛 시간
+    tl.set('#bg3', { autoAlpha: 1 }, n3(7.22))
+    tl.set('#board', { autoAlpha: 1 }, n3(7.12)) // 검은 화면만 남는 순간이 없게 막대가 커지는 동안 그 위로 보드가 떠오른다(#s3d는 보드 아래 층)
+    tl.fromTo('#board', { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: n3(7.32) - n3(7.12), ease: 'power3.out', immediateRender: false }, n3(7.12))
 
-    /* S3 — departure board: statuses roll top → bottom */
-    REV(7.4, '#c3')
+    /* S3 — 매도 보드: 상태가 위에서 아래로 넘어간다(TH). 문장은 보드 아래 흰 글자로 흐림 10px → 선명 */
+    tl.fromTo('#c3', { autoAlpha: 0, filter: 'blur(10px)' }, { autoAlpha: 1, filter: 'blur(0px)', duration: n3(7.44) - n3(7.28), ease: 'power2.out', immediateRender: false }, n3(7.28))
     OUT(8.47, '#c3', 0.12, 16)
     /* → board lifts away, seat-back monitor rises from below (monitor + map viewport: monitorFrame) */
-    tl.to(q('#board .pnl > *, #board .bstrip > *'), { opacity: 0, duration: 0.1, ease: 'power3.out' }, 8.5) // 불이 꺼진다
+    tl.to(q('#board .pnl > *, #board .bstrip > *'), { opacity: 0.3, duration: 0.1, ease: 'power3.out' }, 8.5) // 불이 흐려진다(검은 바탕이라 다 끄면 빈 화면)
     // 보드 기준점은 왼쪽 가운데(0% 50%): 그 기준으로 모니터 화면(SCR) 자리·크기에 맞춘다
     { const sy = SCR.h / BD.h
       tl.to('#board', { x: SCR.x - BD.x, y: SCR.y - BD.y - BD.h / 2 + BD.h * sy / 2, scaleX: SCR.w / BD.w, scaleY: sy, duration: 0.4, ease: 'power3.inOut' }, 8.6) }

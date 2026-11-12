@@ -5,7 +5,7 @@
    - 글꼴 Pretendard는 원본처럼 정적판(landing 마운트 때 <link>로 추가). keyframes 이름에는 landing- 을 붙임. */
 .landing{
  /* 장면별 배경 (디자인 시스템 v2) */
- --bg-s0:var(--color-surface); --bg-s1:var(--color-surface); --bg-s2:var(--color-surface); --bg-s3:var(--landing-surface-soft); --bg-s4:var(--landing-surface-soft);
+ --bg-s0:var(--color-surface); --bg-s1:var(--color-surface); --bg-s2:var(--color-surface); --bg-s3:var(--landing-pnl-bottom); --bg-s4:var(--landing-surface-soft);
  --bg-s5:linear-gradient(180deg,var(--landing-dawn-top),var(--landing-dawn-bottom)); --bg-s6:var(--landing-bg-s6); --bg-s7:var(--landing-bg-s7); --bg-s8:var(--color-surface);
  --bg-s9:var(--landing-bg-s9); --bg-s10:var(--color-surface); --bg-s11:var(--color-surface);
  --navy:var(--color-navy); --gold:var(--color-gold); --ink:var(--color-ink); --sub:var(--color-sub); --line:var(--color-line);
@@ -161,7 +161,7 @@ html.lenis,html.lenis body{height:auto}
 .landing .bstrip b{font:500 calc(var(--rh)*.52)/1 var(--cn);color:var(--landing-amber)}
 .landing .bstrip .ex{margin-left:auto;color:var(--color-on-navy)}
 .landing .bsh{display:none}
-.landing #c3{left:var(--pad);right:calc(var(--pad) + 72px);bottom:76px;color:var(--ink)}
+.landing #c3{left:var(--pad);right:calc(var(--pad) + 72px);bottom:76px;color:var(--color-on-navy)}
 .landing #c3 .h{font-size:56px;max-width:none}
 .landing #c3 .row{display:flex;justify-content:space-between;align-items:flex-end;gap:32px}
 .landing #c3 .lab{color:var(--navy)}
@@ -474,8 +474,8 @@ html.lenis,html.lenis body{height:auto}
 .landing #tzHero{position:absolute;inset:0;overflow:hidden;clip-path:inset(88px 16px 24px 16px round 24px)}
 .landing #tzHero .tzh-ph{position:absolute;inset:0}
 .landing #tzHero .tzh-ph img{width:100%;height:100%;object-fit:cover;display:block;transform:scale(1.2);transform-origin:50% 50%}
-/* 글자 뒤 아래쪽 그늘(토스: 높이 324px, 불투명도 0.5) */
-.landing #tzHero .tzh-sh{position:absolute;left:0;right:0;bottom:0;height:324px;background:linear-gradient(to top,rgba(0,0,0,1),rgba(0,0,0,0));opacity:.5}
+/* 글자 뒤 아래쪽 그늘(토스: 높이 324px, 불투명도 0.5 — 두 줄 슬로건이 밝은 사진 위에서 읽히게 420px·0.6) */
+.landing #tzHero .tzh-sh{position:absolute;left:0;right:0;bottom:0;height:420px;background:linear-gradient(to top,rgba(0,0,0,1),rgba(0,0,0,0));opacity:.6}
 /* 슬로건: 두 줄 문장 그대로 왼쪽 정렬(우리 여백 96px 그리드), 흰 글자 88px/700 */
 .landing #tzHero .tzh-w{position:absolute;left:96px;bottom:112px;margin:0;font:700 88px/1.14 Pretendard;letter-spacing:-.025em;color:var(--color-on-navy);white-space:nowrap}
 .landing #tzHero .tzh-w span{display:block}
@@ -516,3 +516,15 @@ html.lenis,html.lenis body{height:auto}
 .landing #tzDev #card2 .c2r{padding:12px 0}
 .landing #tzDev #card2 .c2res b{font-size:64px}
 .landing #stampFx{display:none}
+/* ===== S3: 토스 D 전환 — 문장이 갈라지고 검은 둥근 막대(모서리 24 → 0)가 화면을 덮는다. 그 뒤 검은 화면 위 매도 보드(흰·앰버 글자) ===== */
+.landing #s3d{position:absolute;inset:0;z-index:2;pointer-events:none;visibility:hidden}
+.landing #s3bar{position:absolute;left:960px;top:540px;width:0;height:0;border-radius:24px;background:var(--landing-pnl-bottom)}
+.landing #s3d p{position:absolute;top:540px;margin:-39px 0 0;font:700 60px/78px Pretendard;letter-spacing:-.025em;color:var(--ink);white-space:nowrap}
+.landing #s3d .s3d-l{right:calc(50% + 16px)}
+.landing #s3d .s3d-r{left:calc(50% + 16px)}
+.landing #s3d .bw{display:inline-block}
+/* 검은 화면 위 보드: 천장·걸이·금속 테두리 없이 화면에 바로 뜬 전광판 */
+.landing #bg3 .ceil,.landing #board .rod{display:none}
+.landing #board .frm{background:var(--landing-pnl-bottom);box-shadow:none}
+/* 빔프로젝터에서 행 글자가 24px 이상 되게 행 높이 36 → 44px */
+.landing #board{--rh:44px;top:120px}
