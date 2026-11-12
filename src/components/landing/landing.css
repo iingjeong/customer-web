@@ -511,10 +511,12 @@ html.lenis,html.lenis body{height:auto}
 .landing #tzDev .tzd-pg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
 /* 웹 화면 안의 카드: 글자가 24px 이상 되게 확대(기본 16~17px 기준). 지도 칸은 없앤다. 카드 그림자는 짧고 옅게 */
 .landing #tzDev #card1{position:relative;filter:drop-shadow(0 2px 8px rgba(16,24,40,.10))}
-.landing #tzDev #card1 .tk,.landing #tzDev #card1 #seal{zoom:1.45}
+.landing #tzDev #card1 .tk{zoom:1.45}
 .landing #tzDev #card1 .tk{width:650px;--thh:0px}
 /* 개설 완료 도장(여권 도장): 확인서 오른쪽 위 모서리에 걸쳐 찍힌다(흰 바탕용 테두리) */
-.landing #tzDev #seal{right:-14px;top:-18px;background:var(--color-surface);box-shadow:inset 0 0 0 4px var(--color-surface),inset 0 0 0 5px var(--gold)}
+/* 개설 완료 도장: 원·글자가 모두 카드 위에 온전히(카드 오른쪽 위 안쪽, 흰 바탕으로 머리글 위에 찍힌다). 작은 글자는 카드의 17px 규칙보다 우선 */
+.landing #tzDev #card1 #seal{zoom:1.25;right:18px;top:26px;background:var(--color-surface);box-shadow:inset 0 0 0 4px var(--color-surface),inset 0 0 0 5px var(--gold)}
+.landing #tzDev #card1 #seal small{font-size:9px;letter-spacing:.16em;white-space:nowrap}
 .landing #tzDev #thumb{display:none}
 .landing #tzDev #card1 small{font-size:17px}
 .landing #tzDev #card2{width:600px;zoom:1.25;box-shadow:0 2px 8px rgba(16,24,40,.10)}
