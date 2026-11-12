@@ -76,10 +76,12 @@ toss.im 메인 페이지를 1920×1080(Chromium, ko-KR)에서 스크롤하며 `g
 | S1 | B + C | 기기 기울기(토스 matrix3d에서 이동값 뺀 각도), 사진 → `inset(180px 160px round 80px)` power3.out, 제목 64px/700 단어별 blur 16 → 0, 설명 회색 20% → 진하게 | 휴대폰 대신 가로 기기(확인서가 가로 카드라서), Z 회전은 반으로 줄임(5°) · 그림자는 토스가 그림이라 CSS 그림자 `0 60px 120px rgba(2,32,71,.16)`로 근사 · 설명 글자는 빔프로젝터 기준 24px |
 | S2 | B + C | 같은 기기 화면이 확인서 → 입고 카드로 넘어감(power3.out), 제목 단어별 blur | 카드 숫자·문구·'예시' 표시는 원래 그대로 |
 
-## 사진 출처
+## 사진·지도 출처
 
-| 파일 | 출처 | 라이선스 |
-|---|---|---|
-| `public/assets/photo-open.jpg` | Pexels 4461192 "Building Interior of an Airport Terminal" — https://www.pexels.com/photo/building-interior-of-an-airport-terminal-4461192/ (2560×1440으로 받음) | Pexels License(상업적 이용 무료, 출처 표기 의무 없음). 촬영자 이름은 자동으로 확인하지 못함 — 페이지에서 확인해 적을 것 |
+| 파일 | 쓰는 곳 | 출처 | 라이선스 |
+|---|---|---|---|
+| `public/assets/photo-open.jpg` | 오프닝(S0) | Pexels 20837364 "Birds Eye View of Seoul" (Elina Volkova) — https://www.pexels.com/photo/birds-eye-view-of-seoul-20837364/ (2560×1707) — 남산에서 본 맑은 낮의 서울 도심(종로·을지로 업무 지구). 여의도 낮 사진은 Pexels에서 찾지 못해 서울 도심 금융가로 대신함 | Pexels License(상업적 이용 무료, 출처 표기 의무 없음) |
+| `public/assets/photo-morning.jpg` | S5(아침 서울) | Pexels 31955766 "Scenic View of Seoul City Skyline under Clear Sky" (Theodore Nguyen) — https://www.pexels.com/photo/scenic-view-of-seoul-city-skyline-under-clear-sky-31955766/ (2560×1707) | Pexels License(상업적 이용 무료, 출처 표기 의무 없음) |
 
+이전 오프닝 사진(Pexels 4461192 공항 터미널)은 공항 사진이라 더 쓰지 않는다(같은 파일 이름에 새 사진을 덮어씀).
 Unsplash는 내려받기가 브라우저 확인(Anubis)으로 막혀 우회하지 않았다.

@@ -17,7 +17,7 @@ export function LandingHdr2({ loggedIn }: { loggedIn: boolean }) {
 export function LandingHdr({ loggedIn }: { loggedIn: boolean }) {
   return (
     <header id="hdr">
-      <img src="/assets/wordmark.png" alt="Returns." />
+      <img src="/assets/wordmark-white.png" alt="Returns." />
       <nav>
         <LandingNavLinks loggedIn={loggedIn} />
       </nav>

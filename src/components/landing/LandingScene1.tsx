@@ -17,9 +17,9 @@ export function LandingScene1({ t }: { t: LandingTexts }) {
     <div id="tz">
       <div id="tzHero">
         <div className="tzh-ph">
-          <img src="/assets/photo-open.jpg" alt="밝은 공항 터미널" />
+          <img src="/assets/photo-open.jpg" alt="맑은 낮의 서울 도심 금융가" />
         </div>
-        {/* 위쪽 아주 옅은 흰 그늘 — 사진 위에서도 머리글(로고·로그인·시작하기)이 또렷하게 */}
+        {/* 위쪽 아주 옅은 그늘 — 사진 위에 투명하게 겹친 머리글(흰 로고·로그인·시작하기)이 또렷하게 */}
         <i className="tzh-top" />
         <i className="tzh-sh" />
         <p className="tzh-w">
