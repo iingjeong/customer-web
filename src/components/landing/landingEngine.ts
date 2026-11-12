@@ -878,7 +878,7 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
   }
   const set = (v: boolean) => { if (v !== shown) { shown = v; bar.classList.toggle('on', v) } if (v) tone() }
   // 화면 맨 위(0~88px)에 깔린 장면으로 색 세트 결정 — S0~S9는 고정 타임라인 진행 위치로, 이후는 섹션 위치로
-  const DARK: Record<string, number> = { S6: 1 } // S0~S5는 밝은 장면
+  const DARK: Record<string, number> = { S11: 1 } // S0~S9는 밝은 장면, S11은 사진 위(흰 글자)
   const sceneNow = () => {
     if (st && tl && window.scrollY < st.end - 44) {
       const t = tl.time()
@@ -903,6 +903,8 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     last = y
     if (shown) tone()
     if (inS0()) { acc = 0; set(false); return }
+    // S11: 오프닝처럼 사진 위에 투명한 상단 바(흰 글자)를 계속 보여 준다
+    if (sceneNow() === 'S11') { set(true); return }
     if (!d) return
     if ((d > 0) !== (acc > 0)) acc = 0
     acc += d

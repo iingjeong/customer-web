@@ -419,14 +419,16 @@ html.lenis,html.lenis body{height:auto}
 .landing #s11{position:sticky;top:0;height:100vh;overflow:hidden;color:var(--ink)}
 .landing #ph11{position:absolute;inset:0;clip-path:inset(100% 0 0 0)}
 .landing #ph11 img{width:100%;height:100%;object-fit:cover;display:block}
-.landing #ph11 i{position:absolute;inset:0;background:rgba(255,255,255,.1)}
-.landing #w11{position:absolute;left:var(--pad);top:97px;display:flex;flex-direction:column;font:800 168px/.94 Pretendard;letter-spacing:-.04em;color:var(--navy)}
+/* S11: 오프닝과 같은 자연광 실사(서울 아침)를 화면 가득, 글자 뒤 아래쪽 그늘은 오프닝과 같은 값 */
+.landing #ph11 i{position:absolute;left:0;right:0;bottom:0;top:auto;height:calc(420px + var(--by,0px));background:linear-gradient(to top,rgba(0,0,0,1),rgba(0,0,0,0));opacity:.45}
+/* 마지막 문구: 오프닝 슬로건과 같은 흰 글자·자리(왼쪽 96px, 아래 112px, 88px/700) */
+.landing #w11{position:absolute;left:var(--pad);top:auto;bottom:112px;display:flex;flex-direction:column;font:700 88px/1.14 Pretendard;letter-spacing:-.025em;color:var(--color-on-navy)}
 .landing #sub11{position:absolute;left:var(--pad);font:600 24px/1.4 Pretendard;color:var(--ink);opacity:0}
 .landing #sum11{position:absolute;right:var(--pad);bottom:86px;width:380px;border-radius:4px;background:var(--color-surface);box-shadow:0 12px 32px rgba(16,24,40,.14);transform-origin:100% 100%;visibility:hidden;overflow:hidden}
-.landing #sum11bg{position:absolute;inset:0;background:var(--navy);z-index:1;pointer-events:none}
+.landing #sum11bg{position:absolute;inset:0;background:var(--color-surface);z-index:1;pointer-events:none}
 .landing #sum11c{position:relative;padding:24px;display:flex;flex-direction:column;gap:14px}
 .landing .s11h{display:flex;justify-content:space-between;align-items:center;font:700 20px Pretendard}
-/* 도장 줄은 남색 덮개(#sum11bg) 위에 둔다 — 카드가 커지기 전에 도장 5개가 먼저 보이게(엔진 render11) */
+/* 도장 줄은 흰 덮개(#sum11bg) 위에 둔다 — 카드가 커지기 전에 도장 5개가 먼저 보이게(엔진 render11) */
 .landing .s11st{display:flex;gap:8px;position:relative;z-index:2;transform-origin:0 0}
 .landing .s11st i{width:28px;height:28px;border-radius:50%;background:var(--gold);color:var(--navy);display:grid;place-items:center;font:700 13px Pretendard;font-style:normal}
 .landing .s11r{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:10px 0;border-top:1px solid var(--line);font-size:15px}
@@ -472,10 +474,11 @@ html.lenis,html.lenis body{height:auto}
 .landing #hdr2.lt .lo .wm-dk{opacity:0}
 .landing #hdr2 nav{display:flex;align-items:center;gap:24px;font-size:15px;font-weight:500}
 .landing #hdr2 nav a{transition:color .2s,border-color .2s,background-color .2s}
-.landing #hdr2 nav a.lg{color:rgba(255,255,255,.82)}
+.landing #hdr2 nav a.lg{color:var(--color-on-navy);font-weight:600}
 .landing #hdr2 nav a.lg:hover{color:var(--color-on-navy)}
-.landing #hdr2 nav a.cta{display:flex;align-items:center;gap:8px;border:1px solid var(--gold);color:var(--gold);padding:10px 16px;border-radius:4px}
-.landing #hdr2 nav a.cta:hover{background:rgba(216,169,78,.12)}
+/* 어두운(사진 위) 상단 바: 오프닝 머리글과 같은 흰 글자·흰 테두리 버튼 */
+.landing #hdr2 nav a.cta{display:flex;align-items:center;gap:8px;border:1px solid var(--color-on-navy);color:var(--color-on-navy);padding:10px 16px;border-radius:4px;font-weight:600}
+.landing #hdr2 nav a.cta:hover{background:rgba(255,255,255,.14)}
 .landing #hdr2 nav svg{width:16px;height:16px}
 .landing #hdr2.lt nav a.lg{color:var(--color-ink)}
 .landing #hdr2.lt nav a.lg:hover{color:var(--color-navy)}
