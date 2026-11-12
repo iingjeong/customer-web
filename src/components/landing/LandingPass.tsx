@@ -4,6 +4,15 @@ import type { LandingTexts } from './landingTexts'
 
 export function LandingPass({ t }: { t: LandingTexts }) {
   return (
+    <>
+    {/* 챕터 도장(장식): 단계가 끝날 때 화면 가운데 큰 도장이 찍히고 패스포트 탭으로 날아간다. 번호·단계 이름은 엔진이 채운다(STL) */}
+    <div id="stampFx" aria-hidden="true">
+      <i className="sfx-dim" />
+      <div className="sfx-st">
+        <b className="sfx-n" />
+        <span className="sfx-l" />
+      </div>
+    </div>
     <div id="passWrap">
       <div id="pnav">
         <div className="pni">
@@ -53,5 +62,6 @@ export function LandingPass({ t }: { t: LandingTexts }) {
         </div>
       </div>
     </div>
+    </>
   )
 }

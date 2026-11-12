@@ -388,7 +388,8 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
       L$.rf5.style.height = k * 100 + '%'
       setT(L$.cnt5, `보유 ${Math.round(365 * k)}일`); L$.cnt5.style.color = (r.y + dy) / vh > 0.5 ? 'var(--ink)' : 'var(--color-on-navy)'
       ticks5.forEach((tk, i) => tk.classList.toggle('on', k >= i / 12 - 0.001 && t >= 11.1))
-      const sk = seg(t, 12.0, 12.15); vis(L$.seal5, sk * (1 - out), `rotate(-12deg) scale(${2.2 - 1.2 * e3o(sk)})`)
+      const sk = RM ? seg(t, 12.0, 12.15) : 0; vis(L$.seal5, sk * (1 - out), // HOLD 도장은 큰 챕터 도장(04)과 같은 순간이라 움직임 줄이기에서만
+       `rotate(-12deg) scale(${2.2 - 1.2 * e3o(sk)})`)
     }
     /* S6 — scan beam over the security photo */
     const on6 = t >= 12.2 && t < 14.5; vis(L$.s6, on6 ? 1 : 0)
@@ -514,7 +515,7 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     if (stampN < 0) { setStamps(n); stampN = n; return }
     if (n !== stampN) {
       if (n === stampN + 1) stampFx(n)
-      else { if (passFx) passFx.kill(); gsap.set(pass, { width: 72, height: 88 }); gsap.set('.po', { autoAlpha: 0 }); gsap.set('.pt', { autoAlpha: 1 }); setStamps(n) }
+      else { if (passFx) passFx.kill(); endBig(); gsap.set(pass, { width: 72, height: 88 }); gsap.set('.po', { autoAlpha: 0 }); gsap.set('.pt', { autoAlpha: 1 }); setStamps(n) } // 뒤로 가거나 여러 단계를 한 번에 넘기면 효과 없이 맞춘다
       stampN = n
     }
   }
@@ -546,33 +547,47 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     st11.style.transform = RM || (sx === 1 && sy === 1) ? '' : `scale(${1 / sx},${1 / sy})`
   }
 
-  /* ===== passport tab ===== */
-  // 도장 4(확정)는 S5 장면 안 HOLD 도장(#seal5, 12.0~12.15)과 같이 찍히게 맞춘다(예전 11.8은 보유 일수를 세는 도중이었다).
-  // 패스포트는 펼쳐진 뒤 0.6초에 찍히므로 #seal5가 나타나기 시작하는 12.0 바로 뒤에서 시작한다(12.0 박자에 멈춰 있을 때는 아직 찍히지 않게 0.01 띄움)
-  const STAMPS = [R(5.3), R(6.6), R(8.45), 12.01, 13.75], STL = ['계좌 개설', '입고', '매도', '확정', '외부감시']
+  /* ===== passport tab + 챕터 도장 ===== */
+  // 도장 5개는 각 단계의 마지막 박자 바로 앞(-0.01)에서 찍힌다 — 발표 모드로 그 박자에 다 도착한 뒤. 박자: S1 4.25 · S2 6.2 · S3 8.15 · S5 12.17 · S6 14.05
+  const STAMPS = [4.24, 6.19, 8.14, 12.16, 14.04], STL = ['계좌 개설', '입고', '매도', '확정', '외부감시']
   const pass = byId('pass'), stI = $$('.st i'); let stampN = 0, passFx: gsap.core.Timeline | undefined
-  // 도장마다 정해 둔 기울기(도) — 손으로 찍은 것처럼 조금씩 다르게. 잉크 테두리는 도장 칸(.st)의 ::after(landing.css)
+  // 도장마다 정해 둔 기울기(도) — 손으로 찍은 것처럼 조금씩 다르게
   const TILT = [-7, 5, -4, 8, -6], stBox = stI.map((i) => i.parentElement as HTMLElement)
   function setStamps(n: number) { stI.forEach((st_, i) => gsap.set(st_, { opacity: i < n ? 1 : 0, scale: 1, rotation: TILT[i] })); gsap.set(stBox, { '--ink-o': 0, '--ink-s': 1 }); gsap.set(pass, { y: 0 }); byId('pCount').textContent = `${n}/5`; byId('stLab').textContent = n ? `${STL[n - 1]} 도장` : '' }
+  // 큰 도장(#stampFx): 화면이 남색으로 살짝 눌리고 → 가운데로 기울어진 채 내려찍힘(잉크 테두리 한 번, 무대 4px 눌림 한 번)
+  // → 곡선을 그리며 패스포트 탭으로 날아가 작아지고, 그때 탭의 n/5가 올라간다. 뒤 단계일수록 짧게(1.7초 → 1.2초)
+  const sfx = byId('stampFx'), sfxDim = $('#stampFx .sfx-dim'), sfxSt = $('#stampFx .sfx-st'), sfxN = $('#stampFx .sfx-n'), sfxL = $('#stampFx .sfx-l')
+  let bigFx: gsap.core.Timeline | undefined
+  // 찍히는 중인 큰 도장을 바로 끝낸다(탭은 지금까지 지나온 도장 수로)
+  function endBig() { if (bigFx) { const b = bigFx; bigFx = undefined; b.kill(); setStamps(Math.max(0, stampN)) } gsap.set(sfx, { autoAlpha: 0 }); gsap.set(sfxDim, { opacity: 0 }); gsap.set(stageBox, { y: 0 }) }
   function stampFx(n: number) {
     if (passFx) passFx.kill()
-    if (RM) { setStamps(n); return } // 움직임 줄이기: 펼침·찍힘 효과 없이 최종 상태만
-    setStamps(n - 1); byId('pCount').textContent = `${n}/5`; byId('stLab').textContent = `${STL[n - 1]} 도장`
+    // 움직임 줄이기, 앞 도장이 아직 찍히는 중, 또는 휠로 빠르게 지나가는 중이면(스크롤 속도) 효과 없이 탭에 바로 채운다
+    const busy = !!bigFx, fast = Math.abs((lenis as unknown as { velocity?: number }).velocity || 0) > 6
+    endBig()
+    if (RM || busy || fast) { setStamps(n); return }
+    setStamps(n - 1)
+    sfxN.textContent = String(n).padStart(2, '0'); sfxL.textContent = STL[n - 1]
+    const k = (1.7 - 0.125 * (n - 1)) / 1.7, tilt = TILT[n - 1]
+    const pr = passWrap.getBoundingClientRect(), tx = pr.left + pr.width / 2 - innerWidth / 2, ty = pr.top + pr.height / 2 - innerHeight / 2
     ctx.add(() => {
-      const HIT = 0.6 // 도장이 종이에 닿는 순간(0.38에 내려오기 시작 + 0.22)
-      passFx = gsap.timeline()
-        .to(pass, { width: 160, height: 212, duration: 0.35, ease: 'power3.out' })
-        .to('.pt', { autoAlpha: 0, duration: 0.12 }, 0).to('.po', { autoAlpha: 1, duration: 0.2 }, 0.12)
-        // 기울어진 채로 내려찍는다
-        .fromTo(stI[n - 1], { opacity: 0, scale: 2.4, rotation: TILT[n - 1] - 9 }, { opacity: 1, scale: 1, rotation: TILT[n - 1], duration: 0.22, ease: 'power3.in' }, 0.38)
-        // 닿는 순간: 잉크 테두리가 한 번 퍼졌다 사라지고, 패스포트가 2px 눌렸다 돌아온다(1회)
-        .fromTo(stBox[n - 1], { '--ink-o': 1, '--ink-s': 1 }, { '--ink-o': 0, '--ink-s': 1.6, duration: 0.5, ease: 'power2.out', immediateRender: false }, HIT)
-        .to(pass, { y: 2, duration: 0.05, ease: 'power2.out' }, HIT).to(pass, { y: 0, duration: 0.22, ease: 'power2.out' }, HIT + 0.05)
-        .to('.po', { autoAlpha: 0, duration: 0.15 }, 1.4).to('.pt', { autoAlpha: 1, duration: 0.15 }, 1.5)
-        .to(pass, { width: 72, height: 88, duration: 0.3, ease: 'power3.inOut' }, 1.4)
+      bigFx = gsap.timeline({ onComplete: () => { bigFx = undefined; gsap.set(sfx, { autoAlpha: 0 }) } })
+        .set(sfx, { autoAlpha: 1 }, 0)
+        .fromTo(sfxDim, { opacity: 0 }, { opacity: 1, duration: 0.15 * k }, 0)
+        .fromTo(sfxSt, { opacity: 0, scale: 2.5, rotation: tilt - 9, x: 0, y: 0, '--ink-o': 0, '--ink-s': 1 }, { opacity: 1, scale: 1, rotation: tilt, duration: 0.25 * k, ease: 'power3.in' }, 0.15 * k)
+        .fromTo(sfxSt, { '--ink-o': 1, '--ink-s': 1 }, { '--ink-o': 0, '--ink-s': 1.45, duration: 0.5 * k, ease: 'power2.out', immediateRender: false }, 0.4 * k)
+        .to(stageBox, { y: 4, duration: 0.05, ease: 'power2.out' }, 0.4 * k).to(stageBox, { y: 0, duration: 0.2, ease: 'power2.out' }, 0.4 * k + 0.05)
+        // 곡선: 가로는 점점 빠르게, 세로는 먼저 내려가며
+        .to(sfxSt, { x: tx, duration: 0.5 * k, ease: 'power1.in' }, 0.9 * k)
+        .to(sfxSt, { y: ty, duration: 0.5 * k, ease: 'power1.out' }, 0.9 * k)
+        .to(sfxSt, { scale: 0.06, rotation: tilt + 14, duration: 0.5 * k, ease: 'power2.out' }, 0.9 * k) // 날아가기 시작하자마자 작아진다 — 화면을 가리는 시간을 줄인다
+        .to(sfxSt, { opacity: 0, duration: 0.1 * k }, 1.3 * k)
+        .to(sfxDim, { opacity: 0, duration: 0.4 * k }, 0.9 * k)
+        .add(() => { setStamps(n); gsap.fromTo(pass, { y: 2 }, { y: 0, duration: 0.22, ease: 'power2.out' }) }, 1.4 * k)
+        .add(() => {}, 1.7 * k)
     })
   }
-  cleanups.push(() => passFx?.kill())
+  cleanups.push(() => { bigFx?.kill(); passFx?.kill() })
 
   /* ===== master timeline (one take) ===== */
   const stageEl = $('#stg')
@@ -673,13 +688,15 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     const glns = $$('.gln'), pulse = (g: HTMLElement, t: number, d: number) => { tl!.fromTo(g, { opacity: 0 }, { opacity: 1, duration: 0.04, immediateRender: false }, t); tl!.to(g, { opacity: 0, duration: 0.06 }, t + d) }
     $$('.kv b').forEach((b, i) => { const t = 3.2 + i * 0.25; tl!.fromTo(b, { autoAlpha: 0, x: -8 }, { autoAlpha: 1, x: 0, duration: 0.12, ease: 'power2.out' }, t); pulse(glns[i], t, 0.19) })
     tl.fromTo(K, { v: 0 }, { v: 1, duration: 0.45, ease: 'power2.out' }, 3.95); pulse(glns[3], 3.95, 0.39)
-    tl.fromTo('#seal', { autoAlpha: 0, scale: 2.2, rotate: -28 }, { autoAlpha: 1, scale: 1, rotate: -12, duration: 0.15, ease: 'power3.in' }, 4.4)
+    // 카드의 '개설 완료' 작은 도장은 같은 순간 큰 챕터 도장(01 계좌 개설)과 겹쳐서, 움직임 줄이기(큰 도장 없음)에서만 남긴다
+    if (RM) tl.fromTo('#seal', { autoAlpha: 0, scale: 2.2, rotate: -28 }, { autoAlpha: 1, scale: 1, rotate: -12, duration: 0.15, ease: 'power3.in' }, 4.4)
     OUT(4.83, ['#c1', '#c1p']) // 지도 썸네일이 사라지는 것(4.85~4.93)은 s01Frame
     const tdx = ((PS.x + PS.w / 2) - (CD.x + CD.w / 2)) / SK, tdy = ((PS.y + PS.h / 2) - (CD.y + CD.h / 2)) / SK
     tl.to('#card1', { scaleY: 0.5, duration: 0.12, ease: 'power2.in' }, 4.85)
     tl.to('#card1', { x: tdx, y: tdy, scaleX: 0.1, scaleY: 0.06, duration: 0.3, ease: 'power2.inOut' }, 4.97)
     tl.to('#card1', { autoAlpha: 0, duration: 0.08 }, 5.19)
-    tl.fromTo('#pass', { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.06 }, 5.21)
+    // 패스포트 탭은 S1 확인서가 펼쳐진 뒤부터 보인다(첫 챕터 도장이 날아 들어갈 곳)
+    tl.fromTo('#pass', { autoAlpha: 0 }, { autoAlpha: 1, duration: at(2.75, 2.85).d }, at(2.75, 2.85).p)
     FADE(4.85, '#bg2', 1)
     tl.set('#s1', { autoAlpha: 0 }, 5.28)
 
@@ -820,6 +837,7 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     e.preventDefault()
     const now = performance.now()
     if (now < beatBusyUntil) return // 이동 중(잠금 시간)에는 추가 입력 무시 — 연타로 건너뛰지 않게
+    if (bigFx) endBig() // 챕터 도장이 찍히는 중에 넘기면 바로 탭에 채우고 다음 박자로
     const y = scrollY, pts = beatYs()
     const tgt = nxt ? pts.find((p_) => p_ > y + 8) : [...pts].reverse().find((p_) => p_ < y - 8)
     if (tgt == null) return
@@ -1011,6 +1029,7 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
       get GEO() { return GEO },
       Mp, V, C, A, P, map, my, disp, K, LG,
       get passFx() { return passFx },
+      get bigFx() { return bigFx },
       get nudges() { return nudges },
       NODES, FLY,
       lenis, gsap, ScrollTrigger,
