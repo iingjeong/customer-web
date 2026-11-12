@@ -480,7 +480,7 @@ html.lenis,html.lenis body{height:auto}
 /* 16:9가 아닌 화면에서도 위아래·양옆 남는 칸까지 사진이 채운다(배경 레이어와 같은 방식) */
 .landing .stg #tzHero{inset:calc(var(--by,0px)*-1) calc(var(--bx,0px)*-1)}
 .landing #tzHero .tzh-ph{position:absolute;inset:0}
-.landing #tzHero .tzh-ph img{width:100%;height:100%;object-fit:cover;object-position:50% 78%;display:block;transform:scale(1.06);transform-origin:50% 50%}
+.landing #tzHero .tzh-ph img{width:100%;height:100%;object-fit:cover;object-position:50% 40%;display:block;transform:scale(1.06);transform-origin:50% 50%}
 .landing #tzHero .tzh-top{position:absolute;left:0;right:0;top:0;height:calc(200px + var(--by,0px));background:linear-gradient(to bottom,rgba(0,0,0,.32),rgba(0,0,0,0))}
 /* 글자 뒤 아래쪽 그늘(토스: 높이 324px, 불투명도 0.5 — 두 줄 슬로건이 밝은 사진 위에서 읽히게 420px·0.6) */
 .landing #tzHero .tzh-sh{position:absolute;left:0;right:0;bottom:0;height:420px;background:linear-gradient(to top,rgba(0,0,0,1),rgba(0,0,0,0));opacity:.45}

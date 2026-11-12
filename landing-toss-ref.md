@@ -80,9 +80,9 @@ toss.im 메인 페이지를 1920×1080(Chromium, ko-KR)에서 스크롤하며 `g
 
 | 파일 | 쓰는 곳 | 출처 | 라이선스 |
 |---|---|---|---|
-| `public/assets/photo-open.jpg` | 오프닝(S0) | Pexels 20837364 "Birds Eye View of Seoul" (Elina Volkova) — https://www.pexels.com/photo/birds-eye-view-of-seoul-20837364/ (2560×1707) — 남산에서 본 맑은 낮의 서울 도심(종로·을지로 업무 지구). 여의도 낮 사진은 Pexels에서 찾지 못해 서울 도심 금융가로 대신함 | Pexels License(상업적 이용 무료, 출처 표기 의무 없음) |
+| `public/assets/photo-open.jpg` | 오프닝(S0) | Pexels 37320179 "Modern Glass Skyscraper against Blue Sky" — https://www.pexels.com/photo/modern-glass-skyscraper-against-blue-sky-37320179/ (2560×1700) — 파란 하늘·흰 구름 아래 유리 외벽 고층 오피스 빌딩을 올려다본 사진. 화면에서는 object-position 50% 40%로 자름. 여의도·서울 고층 스카이라인은 조건(맑은 하늘, 크레인 없음, 유리 고층 빌딩이 주인공)을 통과한 Pexels 사진이 없어 이 사진으로 대신함 | Pexels License(상업적 이용 무료, 출처 표기 의무 없음) |
 | `public/assets/photo-morning.jpg` | S5(아침 서울) | Pexels 31955766 "Scenic View of Seoul City Skyline under Clear Sky" (Theodore Nguyen) — https://www.pexels.com/photo/scenic-view-of-seoul-city-skyline-under-clear-sky-31955766/ (2560×1707) | Pexels License(상업적 이용 무료, 출처 표기 의무 없음) |
 | `public/assets/world-map.svg` | S4 지도(대륙 면) | Natural Earth 1:110m land — https://www.naturalearthdata.com/ (레포에 이미 있던 `public/data/world-atlas.json`, world-atlas 형식)을 랜딩 지도와 같은 투영(Natural Earth I, 경도 150° 회전, 1600×820)으로 변환해 만든 SVG(경로 하나) | 퍼블릭 도메인(Natural Earth 이용 약관: 모든 용도 무료, 출처 표기 불필요) |
 
-이전 오프닝 사진(Pexels 4461192 공항 터미널)은 공항 사진이라 더 쓰지 않는다(같은 파일 이름에 새 사진을 덮어씀).
+이전 오프닝 사진(Pexels 4461192 공항 터미널, 이후 Pexels 20837364 서울 도심)은 더 쓰지 않는다(같은 파일 이름에 새 사진을 덮어씀).
 Unsplash는 내려받기가 브라우저 확인(Anubis)으로 막혀 우회하지 않았다.
