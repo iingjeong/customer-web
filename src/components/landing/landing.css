@@ -5,7 +5,7 @@
    - 글꼴 Pretendard는 원본처럼 정적판(landing 마운트 때 <link>로 추가). keyframes 이름에는 landing- 을 붙임. */
 .landing{
  /* 장면별 배경 (디자인 시스템 v2) */
- --bg-s0:var(--color-photo-base); --bg-s1:var(--landing-surface-soft); --bg-s2:var(--landing-bg-s2); --bg-s3:var(--landing-bg-s3); --bg-s4:var(--landing-bg-s4);
+ --bg-s0:var(--color-photo-base); --bg-s1:var(--landing-surface-soft); --bg-s2:var(--landing-bg-s2); --bg-s3:var(--landing-surface-soft); --bg-s4:var(--landing-surface-soft);
  --bg-s5:linear-gradient(180deg,var(--landing-dawn-top),var(--landing-dawn-bottom)); --bg-s6:var(--landing-bg-s6); --bg-s7:var(--landing-bg-s7); --bg-s8:var(--color-surface);
  --bg-s9:var(--landing-bg-s9); --bg-s10:var(--color-surface); --bg-s11:var(--color-surface);
  --navy:var(--color-navy); --gold:var(--color-gold); --ink:var(--color-ink); --sub:var(--color-sub); --line:var(--color-line);
@@ -36,16 +36,15 @@ html.lenis,html.lenis body{height:auto}
 .landing #bg0{background:var(--bg-s0)}
 .landing #bg1{background:var(--bg-s1)}
 .landing #bg2{background:var(--bg-s2)}
-.landing #bg2 img{left:0;width:125%;filter:grayscale(1) blur(4px);transform:scale(1.04)}
+.landing #bg2 img{left:0;width:100%;transform:scale(1.04)}
 /* 사진 전체를 덮던 흰 막(80%)은 없앴다 — 제목이 있는 왼쪽에만 옅은 그라데이션 */
 .landing #bg2 i{background:linear-gradient(90deg,rgba(255,255,255,.78) 0,rgba(255,255,255,.62) 24%,rgba(255,255,255,0) 48%)}
 .landing #bg3{background:var(--bg-s3)}
 .landing .ceil{position:absolute;left:0;right:0;top:0;height:12%;background:var(--landing-ceil);border-bottom:1px solid var(--landing-ceil-line)}
-.landing .ceil span{position:absolute;top:50%;width:72px;height:14px;margin:-7px 0 0 -36px;border-radius:50%;background:var(--color-surface);box-shadow:0 0 12px rgba(255,255,255,.95),inset 0 -2px 4px rgba(200,205,212,.6)}
-.landing .ceil span::after{content:'';position:absolute;left:-120px;right:-120px;top:10px;height:367px;background:radial-gradient(ellipse 50% 100% at 50% 0,rgba(255,255,255,.28),transparent 70%)}
+.landing .ceil span{position:absolute;top:50%;width:72px;height:10px;margin:-5px 0 0 -36px;border-radius:2px;background:var(--color-surface)}
 .landing #bg4{background:var(--bg-s4)}
-.landing #bg4 img{filter:blur(6px);transform:scale(1.04)}
-.landing #bg4 i{background:rgba(10,20,40,.7)}
+.landing #bg4 img{display:none} /* 기내 사진은 밤 사진이라 밝은 기내에 쓰지 않는다 — 밝은 바탕 + 밝은 좌석 등판 + 모니터로 */
+.landing #bg4 i{display:none}
 /* type */
 .landing .lab{font:600 12px/1 Pretendard;letter-spacing:.18em;text-transform:uppercase}
 .landing .h{font-weight:700;font-size:80px;line-height:1.1;letter-spacing:-.035em;word-break:keep-all;max-width:16em}
@@ -67,7 +66,7 @@ html.lenis,html.lenis body{height:auto}
 .landing #hdr nav{display:flex;align-items:center;gap:24px;font-size:15px;font-weight:500}
 .landing #hdr nav a.lg{color:rgba(255,255,255,.82)}
 .landing #hdr nav a.lg:hover{color:var(--color-on-navy)}
-.landing #hdr nav a.cta{display:flex;align-items:center;gap:8px;border:1px solid var(--gold);color:var(--gold);padding:10px 16px;border-radius:8px}
+.landing #hdr nav a.cta{display:flex;align-items:center;gap:8px;border:1px solid var(--gold);color:var(--gold);padding:10px 16px;border-radius:4px}
 .landing #hdr nav a.cta:hover{background:rgba(216,169,78,.12)}
 .landing #hdr nav svg{width:16px;height:16px}
 /* map canvas + S0 */
@@ -77,11 +76,16 @@ html.lenis,html.lenis body{height:auto}
 /* 오프닝 슬로건: 화면 폭의 약 78%(둘째 줄 기준) 크기로 가운데 높이에 왼쪽 정렬 */
 .landing #c0{left:var(--pad);top:322px;bottom:auto;color:var(--color-on-navy);transform-origin:0 50%}
 .landing #c0 .h{font-size:190px;line-height:1.04;letter-spacing:-.045em;max-width:none}
-/* S0→S1 빛: 서울 점 크기(14px = 200px × 0.07)에서 화면을 거의 채울 때까지 커진다(transform만). 확인서(#s1, z4)·지도(#map, z5)보다 아래 — 금빛 위로 확인서가 펼쳐진다 */
-.landing #flare{position:absolute;left:50%;top:50%;width:200px;height:200px;margin:-100px 0 0 -100px;border-radius:50%;background:var(--gold);z-index:3;visibility:hidden;pointer-events:none}
+/* S0→S1 조준선: 서울 위치에 가는 금색 원+십자, 바깥에 동심원 눈금 3개(엔진이 돌진 배율에 맞춰 키운다). 선만 쓰고 채우지 않는다 */
+.landing #aim{position:absolute;left:0;top:0;width:0;height:0;z-index:7;pointer-events:none;visibility:hidden}
+.landing #aim i{position:absolute;display:block}
+.landing #aim .aim-c{left:-36px;top:-36px;width:72px;height:72px;border:2px solid var(--gold);border-radius:50%}
+.landing #aim .aim-h{left:-64px;top:-1px;width:128px;height:2px;background:var(--gold)}
+.landing #aim .aim-v{left:-1px;top:-64px;width:2px;height:128px;background:var(--gold)}
+.landing #aim .aim-r{left:-100px;top:-100px;width:200px;height:200px;border:1.5px solid var(--gold);border-radius:50%;opacity:0}
 .landing #c0 .lab{color:var(--gold)}
 /* app cards */
-.landing .app{background:var(--color-surface);border-radius:16px;box-shadow:0 24px 64px rgba(0,0,0,.35);padding:32px;color:var(--ink)}
+.landing .app{background:var(--color-surface);border-radius:4px;box-shadow:0 12px 32px rgba(16,24,40,.14);padding:32px;color:var(--ink)}
 .landing .app small{display:block;font:500 13px/1.3 Pretendard;color:var(--sub)}
 /* S1 */
 .landing #s1{position:absolute;inset:0;z-index:4;display:flex;align-items:center;justify-content:center;pointer-events:none}
@@ -91,11 +95,11 @@ html.lenis,html.lenis body{height:auto}
 .landing #c1 .ml>span{white-space:normal;word-break:keep-all}
 .landing #s1w .tt{flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:28px}
 .landing #c1p{font-size:26px;line-height:1.55;opacity:.8;max-width:none}
-.landing #card1{flex:none;filter:drop-shadow(0 24px 60px rgba(15,30,60,.16));pointer-events:auto}
+.landing #card1{flex:none;filter:drop-shadow(0 12px 32px rgba(16,24,40,.14));pointer-events:auto}
 .landing #card1 .tk,.landing #card1 #seal{zoom:1.55}
 .landing #card1 .tk{width:720px}
 .landing #card1 small{font-size:16px}
-.landing .tk{--thh:176px;--py:calc(32px + 20px + 16px + var(--thh) + 20px);position:relative;background:var(--color-surface);border-radius:16px;padding:32px;
+.landing .tk{--thh:176px;--py:calc(32px + 20px + 16px + var(--thh) + 20px);position:relative;background:var(--color-surface);border-radius:2.6px;padding:32px;
  -webkit-mask:radial-gradient(circle 12px at 0 var(--py),rgba(0,0,0,0) 97%,rgb(0,0,0)) left/51% 100% no-repeat,radial-gradient(circle 12px at 100% var(--py),rgba(0,0,0,0) 97%,rgb(0,0,0)) right/51% 100% no-repeat;
  mask:radial-gradient(circle 12px at 0 var(--py),rgba(0,0,0,0) 97%,rgb(0,0,0)) left/51% 100% no-repeat,radial-gradient(circle 12px at 100% var(--py),rgba(0,0,0,0) 97%,rgb(0,0,0)) right/51% 100% no-repeat}
 .landing #card1{position:relative}
@@ -104,7 +108,7 @@ html.lenis,html.lenis body{height:auto}
 .landing .tk-h{height:20px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
 .landing .tk-h img{height:18px;display:block}
 .landing .tk-h span{font:500 14px var(--mono);letter-spacing:.12em;color:var(--sub)}
-.landing #thumb{height:var(--thh);border-radius:10px;background:var(--color-photo-base)}
+.landing #thumb{height:var(--thh);border-radius:2.6px;background:var(--color-photo-base)}
 .landing .perf{height:40px;display:flex;align-items:center}
 .landing .perf::before{content:'';flex:1;border-top:1.5px dashed var(--landing-perf)}
 .landing .tk-b{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:40px}
@@ -119,41 +123,41 @@ html.lenis,html.lenis body{height:auto}
 .landing input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:24px;background:transparent;cursor:pointer}
 .landing input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:linear-gradient(90deg,var(--navy) var(--p),var(--line) var(--p))}
 .landing input[type=range]::-moz-range-track{height:4px;border-radius:2px;background:linear-gradient(90deg,var(--navy) var(--p),var(--line) var(--p))}
-.landing input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--gold);border:3px solid var(--color-surface);box-shadow:0 1px 4px rgba(0,0,0,.25);margin-top:-8px}
+.landing input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--gold);border:3px solid var(--color-surface);margin-top:-8px}
 .landing input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--gold);border:3px solid var(--color-surface)}
 .landing .msg{font-size:12px;color:var(--sub);margin-bottom:16px}
 .landing .msg.warn{color:var(--ink);font-weight:600}
 .landing .rates{display:flex;gap:8px;align-items:center}
 .landing .rates small{margin-right:4px}
-.landing .rates button{flex:1;min-width:0;height:40px;padding:0 4px;border-radius:8px;border:1px solid var(--line);font:600 16px Pretendard;color:var(--ink);background:var(--color-surface);font-variant-numeric:tabular-nums}
+.landing .rates button{flex:1;min-width:0;height:40px;padding:0 4px;border-radius:2.6px;border:1px solid var(--line);font:600 16px Pretendard;color:var(--ink);background:var(--color-surface);font-variant-numeric:tabular-nums}
 .landing .rates button:hover{border-color:var(--navy)}
 .landing .rates button.on{background:var(--navy);border-color:var(--navy);color:var(--color-on-navy)}
 .landing .rem{margin-top:16px;padding-top:12px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:baseline}
 .landing .rem b{font-size:18px}
 /* S2 */
-.landing #c2{left:var(--pad);top:50%;transform:translateY(-50%);color:var(--ink)}
-.landing #c2 .h{font-size:64px}
+.landing #c2{left:var(--pad);top:50%;transform:translateY(-50%);color:var(--ink);max-width:700px}
+.landing #c2 .h{font-size:96px;line-height:1.08;letter-spacing:-.04em}
+.landing #c2 .ml>span{white-space:normal;word-break:keep-all}
 .landing #c2 .lab{color:var(--navy)}
 .landing #c2 .p{max-width:24em}
 .landing #s2c{position:absolute;inset:0;z-index:4;display:flex;align-items:center;justify-content:flex-end;padding:0 var(--pad);pointer-events:none}
-.landing #card2{width:600px}
+.landing #card2{width:600px;flex:none;zoom:1.65;border-radius:2.4px}
+.landing #card2 small,.landing #card2 .ex{font-size:15px}
 .landing .c2h{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px}
 .landing .c2h h3{font:700 22px/1.3 Pretendard;letter-spacing:-.02em;margin-top:4px}
 .landing .c2r{display:flex;justify-content:space-between;align-items:baseline;padding:16px 0;border-top:1px solid var(--line)}
 .landing .c2r span{font-size:16px;color:var(--ink)}
 .landing .c2r b{font-size:40px;line-height:1}
 .landing .c2r b em,.landing .c2res b em{font-style:normal;font-size:.5em;font-weight:600;margin-left:4px}
-.landing .c2res{margin-top:16px;border-radius:10px;background:var(--navy);color:var(--color-on-navy);padding:20px 24px;display:flex;justify-content:space-between;align-items:baseline}
+.landing .c2res{margin-top:16px;border-radius:2.4px;background:var(--navy);color:var(--color-on-navy);padding:20px 24px;display:flex;justify-content:space-between;align-items:baseline}
 .landing .c2res span{font-size:16px;font-weight:600}
-.landing .c2res b{font-size:44px;line-height:1;color:var(--gold)}
+.landing .c2res b{font-size:97px;line-height:1;letter-spacing:-.04em;color:var(--gold)}
 .landing .c2n{margin-top:12px;font-size:14px;color:var(--sub)}
 /* S3 departure board */
 .landing #board{position:absolute;z-index:3;left:77px;width:1920px;top:152px;--rh:36px;--cn:'Roboto Condensed',Pretendard,sans-serif;color:var(--color-on-navy)}
 .landing .rod{position:absolute;top:-22px;width:6px;height:22px;background:linear-gradient(90deg,var(--landing-rod-light),var(--landing-rod-highlight) 50%,var(--landing-rod-light))}
-.landing .frm{display:grid;grid-template-columns:72% 26%;gap:6px;padding:10px;border-radius:4px;background:linear-gradient(180deg,var(--landing-rod-mid),var(--landing-rod-dark))}
-.landing .pnl{position:relative;overflow:hidden;background:linear-gradient(180deg,var(--landing-pnl-top),var(--landing-pnl-bottom));font:500 calc(var(--rh)*.56)/1 var(--cn);text-shadow:0 0 2px rgba(255,255,255,.25)}
-.landing .pnl::before{content:'';position:absolute;inset:0;z-index:2;pointer-events:none;background:repeating-linear-gradient(180deg,rgba(255,255,255,.03) 0 1px,transparent 1px 2px)}
-.landing .pnl::after{content:'';position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(118deg,rgba(255,255,255,.07),rgba(255,255,255,0) 38%)}
+.landing .frm{display:grid;grid-template-columns:72% 26%;gap:6px;padding:10px;border-radius:4px;box-shadow:0 12px 32px rgba(16,24,40,.14);background:linear-gradient(180deg,var(--landing-rod-mid),var(--landing-rod-dark))}
+.landing .pnl{position:relative;overflow:hidden;background:linear-gradient(180deg,var(--landing-pnl-top),var(--landing-pnl-bottom));font:500 calc(var(--rh)*.56)/1 var(--cn)}
 .landing .ph{position:relative;height:calc(var(--rh)*1.1);display:flex;align-items:center;justify-content:center;padding:0 14px}
 .landing .pic{position:absolute;left:14px;width:calc(var(--rh)*.8);height:calc(var(--rh)*.8);border-radius:3px;background:var(--color-surface);color:var(--landing-pic);display:grid;place-items:center}
 .landing .pic svg{width:70%;height:70%}
@@ -165,60 +169,59 @@ html.lenis,html.lenis body{height:auto}
 .landing .psm{--cols:.8fr 1.6fr;font-size:calc(var(--rh)*.46)}
 .landing .br.th{height:calc(var(--rh)*1.1);font:700 calc(var(--rh)*.36)/1.15 Pretendard;border-bottom:1px solid rgba(255,255,255,.18)}
 .landing .br.th small{display:block;font:500 calc(var(--rh)*.3)/1.1 var(--cn);opacity:.8}
-.landing .rows>.br:nth-child(odd){background:rgba(42,58,166,.55)}
-.landing .rows>.br:nth-child(even){background:rgba(30,43,140,.55)}
+.landing .rows>.br{border-bottom:1px solid rgba(255,255,255,.08)}
 .landing .ko{font-family:Pretendard;font-weight:700}
 .landing .nm{font-size:calc(var(--rh)*.58)}
 .landing .fl{color:var(--landing-amber)}
-.landing .kw{color:var(--landing-orange)}
+.landing .kw{color:var(--landing-amber)}
 .landing .br .r{text-align:right}
-.landing .mk{display:inline-flex;align-items:center;justify-content:center;min-width:72%;padding:0 6px;height:calc(var(--rh)*.62);border-radius:2px;font:700 calc(var(--rh)*.32)/1 var(--cn);letter-spacing:.06em;color:var(--color-on-navy);text-shadow:none}
+.landing .mk{display:inline-flex;align-items:center;justify-content:center;min-width:72%;padding:0 6px;height:calc(var(--rh)*.62);border-radius:2px;font:700 calc(var(--rh)*.32)/1 var(--cn);letter-spacing:.06em;color:var(--color-on-navy);text-shadow:none;background:none!important;box-shadow:inset 0 0 0 1px rgba(255,255,255,.55)}
 .landing .sx{display:inline-flex;align-items:center;gap:6px;height:calc(var(--rh)*.72);padding:0 8px;margin-left:-8px;font:700 calc(var(--rh)*.46)/1 Pretendard;color:var(--color-on-navy)}
 .landing .sx.s1{color:var(--landing-amber)}
-.landing .sx.s2{background:var(--landing-orange-deep);text-shadow:none}
-.landing .sx.s3::after{content:'';width:7px;height:7px;border-radius:50%;background:var(--landing-green);box-shadow:0 0 4px rgba(60,203,127,.8)}
+.landing .sx.s2{color:var(--landing-amber);box-shadow:inset 0 0 0 1px var(--landing-amber);text-shadow:none}
+.landing .sx.s3::after{content:'';width:7px;height:7px;border-radius:50%;background:var(--landing-amber)}
 .landing .pf{position:relative;height:calc(var(--rh)*.9);display:flex;align-items:center;justify-content:center;font-size:calc(var(--rh)*.45)}
 .landing .pf b{position:absolute;right:14px;color:var(--landing-amber);font-weight:500}
 .landing .pf b i{font-style:normal;animation:landing-blink 1s steps(1) infinite}
 .landing .bstrip{grid-column:1;position:relative;display:flex;align-items:center;gap:20px;height:var(--rh);padding:0 14px;background:var(--landing-pnl-strip);font:700 calc(var(--rh)*.4)/1 Pretendard;white-space:nowrap}
-.landing .bstrip b{font:500 calc(var(--rh)*.52)/1 var(--cn);color:var(--landing-orange)}
+.landing .bstrip b{font:500 calc(var(--rh)*.52)/1 var(--cn);color:var(--landing-amber)}
 .landing .bstrip .ex{margin-left:auto;color:var(--color-on-navy)}
-.landing .bsh{position:absolute;left:6%;right:20%;bottom:-48px;height:48px;background:radial-gradient(ellipse 50% 60% at 50% 0,rgba(26,34,51,.3),transparent 75%);filter:blur(10px);pointer-events:none}
+.landing .bsh{display:none}
 .landing #c3{left:var(--pad);right:calc(var(--pad) + 72px);bottom:76px;color:var(--ink)}
-.landing #c3 .h{font-size:46px;max-width:none}
+.landing #c3 .h{font-size:56px;max-width:none}
 .landing #c3 .row{display:flex;justify-content:space-between;align-items:flex-end;gap:32px}
 .landing #c3 .lab{color:var(--navy)}
 /* S4 seat-back monitor */
 .landing #mon,.landing #monUI{position:absolute;left:0;top:0;pointer-events:none}
 .landing #mon{z-index:4}
 .landing #monUI{z-index:7;padding:14px}
-.landing #seat{position:absolute;left:-9%;right:-9%;top:-56px;height:2160px;border-radius:120px 120px 0 0;background:var(--landing-seat);box-shadow:0 -10px 50px rgba(0,0,0,.35)}
-.landing #bez{position:absolute;inset:0;border-radius:18px;background:var(--landing-seat-bezel);padding:14px;box-shadow:0 0 0 1px var(--landing-seat-bezel-edge)}
-.landing #bez i{display:block;width:100%;height:100%;border-radius:6px;background:var(--color-photo-base)}
-.landing .mscr{position:relative;width:100%;height:100%;border-radius:6px;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between}
-.landing .mscr .gl{position:absolute;inset:0 0 50% 0;background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,0))}
-.landing .mt{position:relative;display:flex;align-items:center;gap:16px;padding:10px 16px;background:rgba(4,9,20,.72);border-bottom:1px solid rgba(255,255,255,.08);font:500 12px var(--mono);letter-spacing:.08em;color:rgba(255,255,255,.62);white-space:nowrap}
+.landing #seat{position:absolute;left:-9%;right:-9%;top:-56px;height:2160px;border-radius:4px;background:var(--landing-seat);box-shadow:0 12px 32px rgba(16,24,40,.14)}
+.landing #bez{position:absolute;inset:0;border-radius:4px;background:var(--landing-seat-bezel);padding:14px;box-shadow:0 0 0 1px var(--landing-seat-bezel-edge)}
+.landing #bez i{display:block;width:100%;height:100%;border-radius:2px;background:var(--color-photo-base)}
+.landing .mscr{position:relative;width:100%;height:100%;border-radius:2px;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between}
+.landing .mscr .gl{display:none}
+.landing .mt{position:relative;display:flex;align-items:center;gap:16px;padding:10px 16px;background:rgba(4,9,20,.72);border-bottom:1px solid rgba(255,255,255,.08);font:500 20px var(--mono);padding:14px 22px;letter-spacing:.08em;color:rgba(255,255,255,.62);white-space:nowrap}
 .landing .mt b{font-weight:600;color:var(--color-on-navy);margin-left:6px}
 .landing .mt .pr{margin-left:auto;color:var(--color-on-navy)}
 .landing .mb{position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));background:rgba(4,9,20,.78);border-top:1px solid rgba(255,255,255,.08)}
-.landing .mb>div{padding:10px 16px;display:flex;flex-direction:column;gap:4px;border-left:1px solid rgba(255,255,255,.08);min-width:0}
+.landing .mb>div{padding:16px 22px;display:flex;flex-direction:column;gap:4px;border-left:1px solid rgba(255,255,255,.08);min-width:0}
 .landing .mb>div:first-child{border-left:0}
-.landing .mb small{font:500 11px Pretendard;color:rgba(255,255,255,.62);white-space:nowrap}
-.landing .mb b{font:500 20px/1.1 var(--mono);color:var(--color-on-navy);font-variant-numeric:tabular-nums;white-space:nowrap}
+.landing .mb small{font:500 20px Pretendard;color:rgba(255,255,255,.62);white-space:nowrap}
+.landing .mb b{font:600 40px/1.1 var(--mono);color:var(--color-on-navy);font-variant-numeric:tabular-nums;white-space:nowrap}
 .landing .mb b.g{color:var(--gold)}
-.landing #c4{color:var(--color-on-navy)}
+.landing #c4{color:var(--ink)}
 .landing #c4 .lab{color:var(--gold)}
-.landing #c4 .h{font-size:42px;max-width:none}
+.landing #c4 .h{font-size:96px;line-height:1.08;letter-spacing:-.04em;max-width:none}
 .landing .stack{display:grid}
 .landing .stack>*{grid-area:1/1}
 .landing #hero{position:absolute;inset:0;z-index:8;pointer-events:none;overflow:hidden}
 .landing #hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform-origin:50% 50%}
 .landing #slogan{left:var(--pad);bottom:var(--pad);color:var(--color-on-navy)}
 .landing #slogan .lab{color:var(--gold)}
-.landing #slogan .h{text-shadow:0 2px 30px rgba(0,0,0,.35)}
+.landing #slogan .h{}
 /* passport tab */
-.landing #pass{position:absolute;right:0;bottom:0;width:72px;height:88px;z-index:20;border-radius:8px;background:var(--navy);box-shadow:0 10px 28px rgba(3,10,22,.35);visibility:hidden;cursor:default}
-.landing #pass::before{content:'';position:absolute;inset:4px;border:1px solid rgba(216,169,78,.5);border-radius:5px;pointer-events:none}
+.landing #pass{position:absolute;right:0;bottom:0;width:72px;height:88px;z-index:20;border-radius:4px;background:var(--navy);box-shadow:0 12px 32px rgba(16,24,40,.14);visibility:hidden;cursor:default}
+.landing #pass::before{content:'';position:absolute;inset:4px;border:1px solid rgba(216,169,78,.5);border-radius:4px;pointer-events:none}
 .landing .pt{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
 .landing .pt img{width:48px;display:block}
 .landing .pt b{font:700 14px/1 Pretendard;color:var(--gold);font-variant-numeric:tabular-nums}
@@ -258,15 +261,14 @@ html.lenis,html.lenis body{height:auto}
 .landing .tk5.dk span{color:rgba(26,34,51,.62)}
 .landing .tk5.on span{font-weight:700;color:var(--color-on-navy)}
 .landing .tk5.dk.on span{color:var(--ink)}
-.landing #dot5{position:absolute;left:-7px;top:0;width:16px;height:16px;margin-top:-8px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 6px rgba(216,169,78,.25)}
+.landing #dot5{position:absolute;left:-7px;top:0;width:16px;height:16px;margin-top:-8px;border-radius:50%;background:var(--gold);box-shadow:none}
 .landing #cnt5{position:absolute;left:28px;top:-5px;font:700 20px/26px Pretendard;white-space:nowrap;font-variant-numeric:tabular-nums}
 .landing #warn5{position:absolute;left:var(--pad);right:var(--pad);bottom:54px;border-top:1px solid rgba(26,34,51,.35);padding-top:14px;font:500 17px/1.5 Pretendard;color:var(--ink);word-break:keep-all}
 .landing .ph6{position:absolute;inset:0;overflow:hidden}
 .landing .ph6 img{position:absolute;left:-8px;top:-8px;width:calc(100% + 16px);height:calc(100% + 16px);object-fit:cover}
 /* 사진 전체를 덮던 청록 막(70%·55%)은 없앴다 — 글자가 있는 왼쪽 위(제목)와 오른쪽(목록·비율)에만 옅은 그라데이션 */
-.landing .ph6 i{position:absolute;inset:0;background:linear-gradient(270deg,rgba(15,35,38,.78) 0,rgba(15,35,38,.68) 36%,rgba(15,35,38,0) 56%),linear-gradient(180deg,rgba(15,35,38,.8) 0,rgba(15,35,38,.72) 26%,rgba(15,35,38,0) 40%)}
-.landing .beam{position:absolute;top:0;bottom:0;left:0;width:3px;margin-left:-3px;background:var(--landing-teal);box-shadow:0 0 14px rgba(95,211,198,.85);visibility:hidden}
-.landing .beam::before{content:'';position:absolute;right:3px;top:0;bottom:0;width:40px;background:linear-gradient(270deg,rgba(95,211,198,.32),rgba(95,211,198,0))}
+.landing .ph6 i{position:absolute;inset:0;background:linear-gradient(270deg,rgba(11,27,51,.78) 0,rgba(11,27,51,.68) 36%,rgba(11,27,51,0) 56%),linear-gradient(180deg,rgba(11,27,51,.8) 0,rgba(11,27,51,.72) 26%,rgba(11,27,51,0) 40%)}
+.landing .beam{position:absolute;top:0;bottom:0;left:0;width:2px;margin-left:-2px;background:var(--gold);visibility:hidden}
 .landing #beam6b{z-index:5}
 .landing #tt6{color:var(--color-on-navy)}
 .landing #tt6 .p2{color:rgba(255,255,255,.86)}
@@ -274,7 +276,7 @@ html.lenis,html.lenis body{height:auto}
 .landing .r6{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px 0;border-top:1px solid rgba(255,255,255,.24);font:600 18px/1.3 Pretendard;color:var(--color-on-navy);white-space:nowrap;visibility:hidden}
 .landing .r6:last-child{border-bottom:1px solid rgba(255,255,255,.24)}
 .landing .r6 em{font-style:normal;font-weight:500;display:flex;align-items:center;gap:8px;opacity:0}
-.landing .r6 em.ok{color:var(--landing-teal-light)}
+.landing .r6 em.ok{color:var(--color-on-navy)}
 .landing .r6 em.wr{color:var(--landing-orange-soft)}
 .landing .r6 em.wr i{width:8px;height:8px;border-radius:50%;background:var(--landing-orange-soft)}
 .landing .r6 .ex{color:var(--landing-orange-soft)}
@@ -341,11 +343,11 @@ html.lenis,html.lenis body{height:auto}
 .landing .l9.on{color:var(--ink)}
 .landing .l9.on::before{opacity:1}
 /* S9 노트북(브라우저 창) 화면 — 16:10, 848×530(무대 기준), 오른쪽 열에 붙임. 화면 안 글자는 발표용으로 16px 이상 */
-.landing #app9{position:absolute;width:848px;height:530px;left:calc(1920px - var(--pad) - 848px);top:200px;background:var(--color-surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 18px 50px rgba(26,34,51,.12);overflow:hidden;display:flex;flex-direction:column;visibility:hidden}
+.landing #app9{position:absolute;width:848px;height:530px;left:calc(1920px - var(--pad) - 848px);top:200px;background:var(--color-surface);border:1px solid var(--line);border-radius:4px;box-shadow:0 12px 32px rgba(16,24,40,.14);overflow:hidden;display:flex;flex-direction:column;visibility:hidden}
 .landing .a9bar{flex:none;height:42px;display:flex;align-items:center;gap:16px;padding:0 16px;background:var(--landing-surface-soft);border-bottom:1px solid var(--line)}
 .landing .a9dots{display:flex;gap:7px}
 .landing .a9dots i{width:10px;height:10px;border-radius:50%;background:var(--line)}
-.landing .a9addr{flex:1;max-width:440px;margin:0 auto;height:28px;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:6px;background:var(--color-surface);font:500 16px/1 Pretendard;color:var(--sub);white-space:nowrap}
+.landing .a9addr{flex:1;max-width:440px;margin:0 auto;height:28px;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:4px;background:var(--color-surface);font:500 16px/1 Pretendard;color:var(--sub);white-space:nowrap}
 .landing .a9addr span{color:var(--ink)}
 .landing .a9scr{position:relative;flex:1;overflow:hidden}
 .landing .a9web{position:absolute;left:0;right:0;top:0;height:60px;z-index:2;display:flex;align-items:center;gap:32px;padding:0 24px;background:var(--color-surface);border-bottom:1px solid var(--line)}
@@ -362,30 +364,30 @@ html.lenis,html.lenis body{height:auto}
 .landing .a9p.shot img{width:100%;height:100%;object-fit:cover;object-position:top left;display:block}
 .landing .a9p h4{font:700 22px/1.3 Pretendard;letter-spacing:-.02em}
 .landing .a9hd{display:flex;align-items:center;gap:14px}
-.landing .a9chip{font:600 16px/1 Pretendard;color:var(--navy);padding:6px 10px;border:1px solid var(--line);border-radius:6px}
+.landing .a9chip{font:600 16px/1 Pretendard;color:var(--navy);padding:6px 10px;border:1px solid var(--line);border-radius:4px}
 .landing .a9g{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:start}
 .landing .a9g3{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
 .landing .a9col{display:flex;flex-direction:column;gap:12px;min-width:0}
-.landing .a9c{border:1px solid var(--line);border-radius:10px;padding:18px;display:flex;flex-direction:column;gap:6px}
+.landing .a9c{border:1px solid var(--line);border-radius:4px;padding:18px;display:flex;flex-direction:column;gap:6px}
 .landing .a9c small,.landing .a9kv span,.landing .a9r span{font-size:16px;color:var(--sub)}
 .landing .a9c b{font:800 30px/1.25 Pretendard}
 .landing .a9c p{font-size:16px;color:var(--landing-text-sub)}
 .landing .a9kv{display:flex;justify-content:space-between;align-items:baseline;padding:6px 0;border-bottom:1px solid var(--line)}
 .landing .a9kv b,.landing .a9r b{font:700 18px Pretendard;font-variant-numeric:tabular-nums}
 .landing .a9s{font-size:16px;color:var(--landing-text-sub)}
-.landing .a9r{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:12px 14px;border-radius:8px;background:var(--landing-surface-soft)}
+.landing .a9r{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:12px 14px;border-radius:4px;background:var(--landing-surface-soft)}
 .landing .a9ok span,.landing .a9ok b{color:var(--navy);font-weight:600}
-.landing .a9e{border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:4px}
+.landing .a9e{border:1px solid var(--line);border-radius:4px;padding:16px;display:flex;flex-direction:column;gap:4px}
 .landing .a9e b{font:700 18px Pretendard;margin-bottom:2px}
 .landing .a9e small{font-size:16px;color:var(--sub)}
-.landing .a9btn{align-self:flex-start;padding:12px 18px;border-radius:8px;background:var(--navy);color:var(--color-on-navy);font:600 17px Pretendard}
-.landing .a9big{display:flex;flex-direction:column;gap:4px;padding:18px;border-radius:10px;background:var(--landing-surface-soft)}
+.landing .a9btn{align-self:flex-start;padding:12px 18px;border-radius:4px;background:var(--navy);color:var(--color-on-navy);font:600 17px Pretendard}
+.landing .a9big{display:flex;flex-direction:column;gap:4px;padding:18px;border-radius:4px;background:var(--landing-surface-soft)}
 .landing .a9big small{font-size:16px;color:var(--sub)}
 .landing .a9big b{font:800 40px/1.1 Pretendard;color:var(--landing-gold-text);font-variant-numeric:tabular-nums}
-.landing .bq{align-self:flex-end;max-width:90%;padding:12px 16px;border-radius:14px 14px 4px 14px;background:var(--navy);color:var(--color-on-navy);font-size:17px}
-.landing .ba{max-width:100%;padding:14px 16px;border-radius:14px 14px 14px 4px;background:var(--landing-gold-pale);font-size:17px;line-height:1.5}
+.landing .bq{align-self:flex-end;max-width:90%;padding:12px 16px;border-radius:4px;background:var(--navy);color:var(--color-on-navy);font-size:17px}
+.landing .ba{max-width:100%;padding:14px 16px;border-radius:4px;background:var(--landing-gold-pale);font-size:17px;line-height:1.5}
 .landing .ba small{display:block;margin-top:8px;font-size:16px;color:var(--landing-gold-dark)}
-.landing .nt{display:flex;gap:12px;align-items:flex-start;padding:16px;border-radius:10px;background:var(--navy);color:var(--color-on-navy)}
+.landing .nt{display:flex;gap:12px;align-items:flex-start;padding:16px;border-radius:4px;background:var(--navy);color:var(--color-on-navy)}
 .landing .nt svg{flex:none;width:22px;height:22px;margin-top:2px}
 .landing .nt b{display:block;font-size:17px}
 .landing .nt p{font-size:16px;opacity:.85;margin-top:2px}
@@ -401,7 +403,7 @@ html.lenis,html.lenis body{height:auto}
 .landing .cmr .cm img{width:28px;height:28px}
 .landing #kiroo{position:absolute;height:88px;width:auto;visibility:hidden;z-index:2}
 /* 끼루 말풍선: 끼루가 노트북 오른쪽 아래 모서리에 있어 꼬리를 오른쪽 아래로 */
-.landing #bub9{position:absolute;padding:10px 14px;border-radius:14px 14px 4px 14px;background:var(--ink);color:var(--color-on-navy);font:600 17px Pretendard;white-space:nowrap;visibility:hidden;z-index:2}
+.landing #bub9{position:absolute;padding:10px 14px;border-radius:4px;background:var(--ink);color:var(--color-on-navy);font:600 17px Pretendard;white-space:nowrap;visibility:hidden;z-index:2}
 .landing #disc9{position:absolute;left:var(--pad);bottom:32px;font-size:12px;color:var(--color-sub)}
 .landing #faq,.landing #ftr{zoom:var(--fw,1);--pad:96px}
 .landing #faq{position:relative;background:var(--color-surface);color:var(--ink);padding:140px var(--pad) 160px}
@@ -426,7 +428,7 @@ html.lenis,html.lenis body{height:auto}
 .landing #ph11 i{position:absolute;inset:0;background:rgba(255,255,255,.1)}
 .landing #w11{position:absolute;left:var(--pad);top:97px;display:flex;flex-direction:column;font:800 168px/.94 Pretendard;letter-spacing:-.04em;color:var(--navy)}
 .landing #sub11{position:absolute;left:var(--pad);font:600 24px/1.4 Pretendard;color:var(--ink);opacity:0}
-.landing #sum11{position:absolute;right:var(--pad);bottom:86px;width:380px;border-radius:16px;background:var(--color-surface);box-shadow:0 18px 50px rgba(15,30,60,.18);transform-origin:100% 100%;visibility:hidden;overflow:hidden}
+.landing #sum11{position:absolute;right:var(--pad);bottom:86px;width:380px;border-radius:4px;background:var(--color-surface);box-shadow:0 12px 32px rgba(16,24,40,.14);transform-origin:100% 100%;visibility:hidden;overflow:hidden}
 .landing #sum11bg{position:absolute;inset:0;background:var(--navy);z-index:1;pointer-events:none}
 .landing #sum11c{position:relative;padding:24px;display:flex;flex-direction:column;gap:14px}
 .landing .s11h{display:flex;justify-content:space-between;align-items:center;font:700 20px Pretendard}
@@ -437,7 +439,7 @@ html.lenis,html.lenis body{height:auto}
 .landing .s11r span{color:var(--sub)}
 .landing .s11r b{font:700 18px Pretendard;font-variant-numeric:tabular-nums}
 .landing .s11a{font-size:12px;line-height:1.5;color:var(--sub);word-break:keep-all}
-.landing #cta11{display:flex;align-items:center;justify-content:space-between;height:56px;padding:0 20px;border-radius:10px;background:var(--navy);color:var(--color-on-navy);font:600 17px Pretendard}
+.landing #cta11{display:flex;align-items:center;justify-content:space-between;height:56px;padding:0 20px;border-radius:4px;background:var(--navy);color:var(--color-on-navy);font:600 17px Pretendard}
 .landing #cta11:hover{background:var(--landing-navy-deep);color:var(--color-on-navy)}
 .landing #cta11 svg{width:20px;height:20px}
 .landing #ftr{background:var(--navy);color:rgba(255,255,255,.82);padding:28px var(--pad);display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;font-size:14px}
@@ -445,33 +447,33 @@ html.lenis,html.lenis body{height:auto}
 .landing #ftr a:hover{color:var(--gold)}
 .landing #ftr span:last-child{margin-left:auto}
 .landing #passWrap{position:fixed;right:24px;bottom:24px;width:72px;height:88px;z-index:40;transition:opacity .25s;zoom:var(--ui,1)}
-/* 챕터 도장 — 화면 전체를 남색으로 살짝 누르고(38%), 가운데에 지름 360px(무대 기준) 도장. 패스포트 탭(z40) 바로 아래 층이라 날아가 탭 속으로 들어간다.
-   남색 바탕에 골드 이중 테두리·골드 글자(명암비 5.2). 찍히는 순간 퍼지는 잉크 테두리는 ::after(엔진이 --ink-o·--ink-s를 움직임) */
+/* 체결 알림 — 앱 상단 바 알림 패널과 같은 흰 바탕·1px 회색 테두리, 왼쪽 3px 금색 세로선, 모서리 4px, 그림자 한 종류(--shadow-chat).
+   크기는 무대(1920×1080) 기준: 가로 640px 이상, 번호 30px, 본문 32px. 화면을 어둡게 덮지 않는다. 위치·움직임은 엔진(stampFx) */
 .landing #stampFx{position:fixed;inset:0;z-index:39;pointer-events:none;visibility:hidden}
-.landing #stampFx .sfx-dim{position:absolute;inset:0;background:rgba(11,27,51,.38);opacity:0}
-.landing #stampFx .sfx-st{--u:calc(var(--ss,1)*1px);position:absolute;left:50%;top:50%;width:calc(360*var(--u));height:calc(360*var(--u));margin:calc(-180*var(--u)) 0 0 calc(-180*var(--u));border-radius:50%;background:var(--navy);border:calc(12*var(--u)) double var(--gold);box-shadow:0 calc(20*var(--u)) calc(60*var(--u)) rgba(3,10,22,.35);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(10*var(--u));color:var(--gold);opacity:0}
-.landing #stampFx .sfx-st::after{content:'';position:absolute;inset:calc(-16*var(--u));border-radius:50%;border:calc(4*var(--u)) solid var(--gold);opacity:var(--ink-o,0);transform:scale(var(--ink-s,1))}
-.landing #stampFx .sfx-n{font:800 calc(150*var(--u))/.9 Pretendard;letter-spacing:-.04em;font-variant-numeric:tabular-nums}
-.landing #stampFx .sfx-l{font:700 calc(40*var(--u))/1.2 Pretendard;letter-spacing:-.02em;white-space:nowrap}
+.landing #stampFx .nf{--u:calc(var(--ss,1)*1px);position:absolute;left:0;top:0;min-width:calc(640*var(--u));display:flex;align-items:baseline;gap:calc(20*var(--u));padding:calc(24*var(--u)) calc(36*var(--u)) calc(24*var(--u)) calc(33*var(--u));background:var(--color-surface);border:1px solid var(--color-line);border-left:3px solid var(--gold);border-radius:4px;box-shadow:var(--shadow-chat);color:var(--ink);white-space:nowrap;transform-origin:50% 50%;opacity:0}
+.landing #stampFx .nf-n{font:700 calc(30*var(--u))/1.2 Pretendard;color:var(--navy);font-variant-numeric:tabular-nums}
+.landing #stampFx .nf-t{font:700 calc(32*var(--u))/1.2 Pretendard;letter-spacing:-.02em}
+.landing #stampFx .nf-v{font:800 calc(32*var(--u))/1.2 Pretendard;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.landing #stampFx .nf-t::before,.landing #stampFx .nf-v::before{content:'·';margin-right:calc(20*var(--u));color:var(--sub);font-weight:500}
 .landing #passWrap.gone{opacity:0;pointer-events:none}
 /* 발표자용 현재 장면 번호: 왼쪽 아래 구석에 작게(어두운·밝은 장면 모두에서 읽히게 반투명 바탕) */
 .landing #sceneNo{position:fixed;left:16px;bottom:12px;z-index:41;zoom:var(--ui,1);padding:5px 8px;border-radius:4px;background:rgba(11,27,51,.45);color:rgba(255,255,255,.9);font:600 12px/1 var(--mono);letter-spacing:.08em;font-variant-numeric:tabular-nums;pointer-events:none}
 .landing #pnav{position:absolute;right:0;bottom:100%;padding-bottom:10px;opacity:0;visibility:hidden;transition:opacity .2s,visibility .2s}
 .landing #passWrap:hover #pnav,.landing #passWrap:focus-within #pnav{opacity:1;visibility:visible}
 .landing #passWrap:hover #passD,.landing #passWrap:focus-within #passD{visibility:hidden!important}
-.landing .pni{width:236px;background:var(--color-surface);border-radius:14px;box-shadow:0 16px 44px rgba(15,30,60,.22);padding:12px;color:var(--ink)}
-.landing #pnAmt{width:100%;display:flex;align-items:center;gap:6px;padding:10px;border-radius:10px;background:var(--landing-surface-soft);font:500 14px Pretendard;color:var(--ink)}
+.landing .pni{width:236px;background:var(--color-surface);border-radius:4px;box-shadow:0 12px 32px rgba(16,24,40,.14);padding:12px;color:var(--ink)}
+.landing #pnAmt{width:100%;display:flex;align-items:center;gap:6px;padding:10px;border-radius:4px;background:var(--landing-surface-soft);font:500 14px Pretendard;color:var(--ink)}
 .landing #pnAmt b{font-weight:700}
 .landing #pnAmt svg{width:15px;height:15px;margin-left:auto;color:var(--navy)}
 .landing #pnAmt:hover{background:var(--landing-surface-hover)}
 .landing #pnList{list-style:none;margin:8px 0 0;padding:0}
-.landing #pnList button{width:100%;display:flex;align-items:center;gap:10px;padding:7px 8px;border-radius:8px;font:500 14px Pretendard;color:var(--landing-text-sub);text-align:left}
+.landing #pnList button{width:100%;display:flex;align-items:center;gap:10px;padding:7px 8px;border-radius:4px;font:500 14px Pretendard;color:var(--landing-text-sub);text-align:left}
 .landing #pnList button:hover{background:var(--landing-surface-soft);color:var(--ink)}
 .landing #pnList i{width:14px;height:14px;border-radius:50%;border:1px dashed var(--landing-dot);flex:none}
 .landing #pnList li.past i{border:0;background:rgba(216,169,78,.55)}
 .landing #pnList li.cur button{color:var(--ink);font-weight:700}
-.landing #pnList li.cur i{border:0;background:var(--gold);box-shadow:0 0 0 3px rgba(216,169,78,.25)}
-.landing #passD{position:absolute;right:0;bottom:calc(100% + 8px);font:600 14px Pretendard;color:var(--color-on-navy);background:var(--navy);padding:6px 10px;border-radius:8px;visibility:hidden;white-space:nowrap}
+.landing #pnList li.cur i{border:0;background:var(--gold);box-shadow:none}
+.landing #passD{position:absolute;right:0;bottom:calc(100% + 8px);font:600 14px Pretendard;color:var(--color-on-navy);background:var(--navy);padding:6px 10px;border-radius:4px;visibility:hidden;white-space:nowrap}
 /* fixed header after S0 — 첫 화면 #hdr와 같은 모양, 투명 */
 .landing #hdr2{zoom:var(--ui,1);position:fixed;top:0;left:0;right:0;height:88px;padding:0 var(--pad);display:flex;align-items:center;justify-content:space-between;z-index:35;background:none;pointer-events:none;transform:translateY(-100%);visibility:hidden;transition:transform .2s ease-out,visibility 0s linear .2s}
 .landing #hdr2.on{transform:translateY(0);visibility:visible;transition:transform .2s ease-out,visibility 0s}
@@ -486,7 +488,7 @@ html.lenis,html.lenis body{height:auto}
 .landing #hdr2 nav a{transition:color .2s,border-color .2s,background-color .2s}
 .landing #hdr2 nav a.lg{color:rgba(255,255,255,.82)}
 .landing #hdr2 nav a.lg:hover{color:var(--color-on-navy)}
-.landing #hdr2 nav a.cta{display:flex;align-items:center;gap:8px;border:1px solid var(--gold);color:var(--gold);padding:10px 16px;border-radius:8px}
+.landing #hdr2 nav a.cta{display:flex;align-items:center;gap:8px;border:1px solid var(--gold);color:var(--gold);padding:10px 16px;border-radius:4px}
 .landing #hdr2 nav a.cta:hover{background:rgba(216,169,78,.12)}
 .landing #hdr2 nav svg{width:16px;height:16px}
 .landing #hdr2.lt nav a.lg{color:var(--color-ink)}

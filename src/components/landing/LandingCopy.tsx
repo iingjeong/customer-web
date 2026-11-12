@@ -47,8 +47,15 @@ export function LandingCopy() {
         </div>
       </div>
       <i id="slogan" hidden />
-      {/* S0→S1: 서울 금색 점이 화면을 채울 만큼 커졌다가 걷히며 확인서가 되는 빛(장식). 크기·보이기는 엔진 타임라인 */}
-      <i id="flare" aria-hidden="true" />
+      {/* S0→S1: 서울 위치의 금색 조준선(원+십자)과 동심원 눈금 3개(장식). 위치·크기·보이기는 엔진(s01Frame) */}
+      <div id="aim" aria-hidden="true">
+        <i className="aim-r" />
+        <i className="aim-r" />
+        <i className="aim-r" />
+        <i className="aim-c" />
+        <i className="aim-h" />
+        <i className="aim-v" />
+      </div>
     </>
   )
 }
