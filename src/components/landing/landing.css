@@ -266,8 +266,8 @@ html.lenis,html.lenis body{height:auto}
 /* 결과 칸: 위에 얇은 구분선, '공제 인정 비율' 라벨, 진한 큰 숫자 + 작은 '%'(S2 입고 수량 100주와 같은 방식) */
 .landing #big6{position:absolute;left:730px;width:1032px;top:566px;padding-top:16px;border-top:1px solid var(--ink);display:flex;flex-direction:column-reverse;align-items:flex-start;gap:4px;color:var(--ink);visibility:hidden}
 .landing #big6 .n6{display:flex;align-items:baseline;gap:4px}
-.landing #big6 b{font:800 104px/1 Pretendard;color:var(--ink);letter-spacing:-.04em;font-variant-numeric:tabular-nums}
-.landing #big6 .n6 em{font:700 40px/1 Pretendard;font-style:normal}
+.landing #big6 b{font:800 150px/1 Pretendard;color:var(--ink);letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+.landing #big6 .n6 em{font:700 56px/1 Pretendard;font-style:normal}
 .landing #big6 .ln{font:700 24px/1.4 Pretendard;color:var(--sub);display:flex;gap:8px;align-items:center}
 .landing #s7{color:var(--ink)}
 .landing #col7{position:absolute;left:var(--pad);top:108px;display:flex;flex-direction:column;gap:18px}
@@ -316,7 +316,7 @@ html.lenis,html.lenis body{height:auto}
 .landing .nlab{position:absolute;display:flex;flex-direction:column;gap:2px;white-space:nowrap;visibility:hidden;color:var(--ink)}
 .landing .nlab.end{align-items:flex-end;text-align:right}
 .landing .nlab b{font:800 28px/1.15 Pretendard;color:var(--ink);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
-.landing .nlab small{font:500 20px/1.4 Pretendard;color:var(--sub);display:flex;gap:6px;align-items:center}
+.landing .nlab small{font:500 24px/1.35 Pretendard;color:var(--sub);display:flex;gap:6px;align-items:center}
 .landing #fly8{display:inline-block;color:var(--ink);transform-origin:0 0}
 .landing #big8{position:absolute;right:var(--pad);bottom:65px;display:flex;flex-direction:column;align-items:flex-end;text-align:right;color:var(--ink);visibility:hidden}
 .landing #big8 b{font:800 96px/1 Pretendard;letter-spacing:-.035em;font-variant-numeric:tabular-nums}
@@ -377,7 +377,7 @@ html.lenis,html.lenis body{height:auto}
 .landing .a9btn{align-self:flex-start;padding:12px 18px;border-radius:4px;background:var(--navy);color:var(--color-on-navy);font:600 17px Pretendard}
 .landing .a9big{display:flex;flex-direction:column;gap:4px;padding:18px;border-radius:4px;background:var(--landing-surface-soft)}
 .landing .a9big small{font-size:16px;color:var(--sub)}
-.landing .a9big b{font:800 40px/1.1 Pretendard;color:var(--landing-gold-text);font-variant-numeric:tabular-nums}
+.landing .a9big b{font:800 40px/1.1 Pretendard;color:var(--ink);font-variant-numeric:tabular-nums}
 .landing .bq{align-self:flex-end;max-width:90%;padding:12px 16px;border-radius:4px;background:var(--navy);color:var(--color-on-navy);font-size:17px}
 .landing .ba{max-width:100%;padding:14px 16px;border-radius:4px;background:var(--landing-gold-pale);font-size:17px;line-height:1.5}
 .landing .ba small{display:block;margin-top:8px;font-size:16px;color:var(--landing-gold-dark)}
@@ -419,8 +419,8 @@ html.lenis,html.lenis body{height:auto}
 .landing #s11{position:sticky;top:0;height:100vh;overflow:hidden;color:var(--ink)}
 .landing #ph11{position:absolute;inset:0;clip-path:inset(100% 0 0 0)}
 .landing #ph11 img{width:100%;height:100%;object-fit:cover;display:block}
-/* S11: 오프닝과 같은 자연광 실사(서울 아침)를 화면 가득, 글자 뒤 아래쪽 그늘은 오프닝과 같은 값 */
-.landing #ph11 i{position:absolute;left:0;right:0;bottom:0;top:auto;height:calc(420px + var(--by,0px));background:linear-gradient(to top,rgba(0,0,0,1),rgba(0,0,0,0));opacity:.45}
+/* S11: 오프닝과 같은 자연광 실사(서울 아침)를 화면 가득. 글자 뒤 아래쪽 그늘은 오프닝과 같은 방식 — 도시 사진이 오프닝보다 복잡해서 글자 높이까지 조금 더 진하게 */
+.landing #ph11 i{position:absolute;left:0;right:0;bottom:0;top:auto;height:calc(560px + var(--by,0px));background:linear-gradient(to top,rgba(0,0,0,1) 0,rgba(0,0,0,.85) 50%,rgba(0,0,0,0) 100%);opacity:.6}
 /* 마지막 문구: 오프닝 슬로건과 같은 흰 글자·자리(왼쪽 96px, 아래 112px, 88px/700) */
 .landing #w11{position:absolute;left:var(--pad);top:auto;bottom:112px;display:flex;flex-direction:column;font:700 88px/1.14 Pretendard;letter-spacing:-.025em;color:var(--color-on-navy)}
 .landing #sub11{position:absolute;left:var(--pad);font:600 24px/1.4 Pretendard;color:var(--ink);opacity:0}

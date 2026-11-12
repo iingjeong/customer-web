@@ -384,7 +384,8 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
       // 계좌 목록은 사진이 걷히면서 웹 화면에 나타나고, 확인 표시가 한 행씩 차분하게 바뀐다(빔 없음)
       const li = RM ? 1 : seg(t, 12.52, 12.62)
       rows6.forEach((row, i) => { row.style.visibility = li > 0 ? 'visible' : 'hidden'; row.style.opacity = String(li); ems6[i].style.opacity = String(RM ? 1 : seg(t, 12.85 + i * 0.22, 12.97 + i * 0.22)) })
-      const gk = seg(t, 13.7, 14.0); vis(L$.big6, gk > 0 ? 1 : 0, `translateY(${(1 - e3o(gk)) * 16}px)`)
+      const gk = seg(t, 13.66, 13.92); vis(L$.big6, // 박자(14.05)에는 82%가 다 나타나 진한 색으로 머문다
+        gk > 0 ? 1 : 0, `translateY(${(1 - e3o(gk)) * 16}px)`)
       setT(L$.pct6, String(Math.round(100 - 18 * e3o(gk))))
     }
     /* S7 — big deduction rate, ruler, printed receipt */
@@ -469,7 +470,9 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     const ho = back ? 1 - (RM ? (t >= 12.5 ? 1 : 0) : seg(t, 12.5, 12.57)) : RM ? (t >= 10.3 ? 1 : 0) : seg(t, 10.12, 10.24)
     sv(heroEl, hv ? ho : 0)
     if (hv) {
-      heroEl.style.clipPath = `inset(${Math.max(0, y0 + BY).toFixed(1)}px ${Math.max(0, g.vw + BX - x0 - w).toFixed(1)}px ${Math.max(0, g.vh + BY - y0 - h).toFixed(1)}px ${Math.max(0, x0 + BX).toFixed(1)}px round ${(2 * (1 - zk)).toFixed(1)}px)`
+      // S4 → S5: 다가가기 후반에는 사진 윗변이 노트북 화면 칸보다 먼저 무대 위끝까지 올라간다(화면 위 웹 머리글이 얇은 흰 띠로 한두 프레임 보이지 않게)
+      const ef = back ? 1 : 1 - e2io(seg(zk, 0.35, 0.75))
+      heroEl.style.clipPath = `inset(${(Math.max(0, y0 + BY) * ef).toFixed(1)}px ${Math.max(0, g.vw + BX - x0 - w).toFixed(1)}px ${Math.max(0, g.vh + BY - y0 - h).toFixed(1)}px ${Math.max(0, x0 + BX).toFixed(1)}px round ${(2 * (1 - zk)).toFixed(1)}px)`
     }
     if (t < g.T1x) return                       // S0–S1: map viewport is tween-driven
     if (t < 8.55) { V.o = 0; return }
