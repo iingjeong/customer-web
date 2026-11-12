@@ -416,7 +416,8 @@ html.lenis,html.lenis body{height:auto}
 .landing #sum11bg{position:absolute;inset:0;background:var(--navy);z-index:1;pointer-events:none}
 .landing #sum11c{position:relative;padding:24px;display:flex;flex-direction:column;gap:14px}
 .landing .s11h{display:flex;justify-content:space-between;align-items:center;font:700 20px Pretendard}
-.landing .s11st{display:flex;gap:8px}
+/* 도장 줄은 남색 덮개(#sum11bg) 위에 둔다 — 카드가 커지기 전에 도장 5개가 먼저 보이게(엔진 render11) */
+.landing .s11st{display:flex;gap:8px;position:relative;z-index:2;transform-origin:0 0}
 .landing .s11st i{width:28px;height:28px;border-radius:50%;background:var(--gold);color:var(--navy);display:grid;place-items:center;font:700 13px Pretendard;font-style:normal}
 .landing .s11r{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:10px 0;border-top:1px solid var(--line);font-size:15px}
 .landing .s11r span{color:var(--sub)}

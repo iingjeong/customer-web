@@ -514,14 +514,28 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
   const words11 = $$('#w11 .ml>span')
   // S11 요약 카드가 줄어 들어갈 패스포트 탭 위치(무대 좌표) — build11()에서 계산
   const P11 = { dx: 72, dy: 62, w: 72, h: 88 }
+  // S11 사진, 요약 카드 안의 도장 줄(.s11st)과 그 밖의 내용
+  const ph11img = $('#ph11 img'), st11 = $('.s11st'), rest11 = ([...L$.sum11c.children] as HTMLElement[]).filter((e) => e !== st11)
+  const MID11 = 0.58 // 도장이 먼저 보이는 중간 크기(카드의 0.58배 — 제 크기의 도장 5개가 한 줄에 들어가는 폭)
   function render11(p: number) {
     paintLate()
     L$.ph11.style.clipPath = `inset(${(1 - e3o(seg(p, 0, 0.3))) * 100}% 0 0 0)`
+    // 사진이 아주 천천히 다가온다(1.06 → 1) — 움직임 줄이기면 확대 없음
+    const z = RM ? 1 : 1.06 - 0.06 * e2o(seg(p, 0, 2))
+    ph11img.style.transform = z === 1 ? '' : `scale(${z})`
     words11.forEach((s_, i) => { const k = e3o(seg(p, 0.3 + i * 0.3, 0.3 + i * 0.3 + 0.22)); s_.style.transform = `translateY(${(1 - k) * 112}%)` })
-    const k = e3o(seg(p, 1.2, 1.5)), c = L$.sum11, w = c.offsetWidth || 380, h = c.offsetHeight || 360
+    // 요약 카드: 패스포트 탭 자리에서 중간 크기로 커지며 도장 5개가 먼저 보이고(kA), 잠깐 멈췄다가 카드로 커진다(kB).
+    // 움직임 줄이기면 도장 단계 없이 예전처럼 한 번에(kA = kB)
+    const kB = e3o(seg(p, RM ? 1.2 : 1.3, 1.5)), kA = RM ? kB : e3o(seg(p, 1.14, 1.26)), k = RM ? kB : 0.4 * kA + 0.6 * kB
+    const c = L$.sum11, w = c.offsetWidth || 380, h = c.offsetHeight || 360
     const g = P11, tw = g.w / w, th = g.h / h
-    vis(c, p >= 1.2 ? 1 : 0, `translate(${g.dx * (1 - k)}px,${g.dy * (1 - k)}px) scale(${tw + (1 - tw) * k},${th + (1 - th) * k})`)
-    L$.sum11bg.style.opacity = String(1 - k); L$.sum11c.style.opacity = String(seg(k, 0.6, 1))
+    const sx = tw + (MID11 - tw) * kA + (1 - MID11) * kB, sy = th + (MID11 - th) * kA + (1 - MID11) * kB
+    vis(c, p >= (RM ? 1.2 : 1.14) ? 1 : 0, `translate(${g.dx * (1 - k)}px,${g.dy * (1 - k)}px) scale(${sx},${sy})`)
+    const co = String(seg(kB, 0.6, 1))
+    L$.sum11bg.style.opacity = String(1 - kB); rest11.forEach((e) => { e.style.opacity = co })
+    // 도장 줄은 카드가 줄어 있는 동안에도 제 크기로 보이게 카드 배율을 되돌린다(카드가 다 커지면 그대로 제자리). 줄이 다 들어갈 만큼 커진 뒤에 나타난다
+    st11.style.opacity = RM ? co : String(seg(p, 1.19, 1.26))
+    st11.style.transform = RM || (sx === 1 && sy === 1) ? '' : `scale(${1 / sx},${1 / sy})`
   }
 
   /* ===== passport tab ===== */
