@@ -473,18 +473,20 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     const g = GEO; if (!g) return
     A.sil = t < g.T4 ? 1 : 0
     const on = t >= g.T4 && t < g.TX, rise = e2o(clamp((t - g.T4) / g.dR))
-    gsap.set(['#mon', '#monUI'], { autoAlpha: on ? rise : 0, y: 0 })
+    gsap.set('#mon', { autoAlpha: on ? rise : 0, y: 0 })
+    gsap.set('#monUI', { autoAlpha: on ? e2o(clamp((t - R(8.98)) / (R(9.12) - R(8.98)))) : 0, y: 0 })
     if (t < g.T1x) return                       // S0–S1: map viewport is tween-driven
     if (t < g.T4) { V.o = 0; return }
     const S = g.SCR
-    if (t < g.TX) { Object.assign(V, { x: S.x, y: S.y, w: S.w, h: S.h, r: 2, bg: 1, o: rise }); return }
+    // 지도는 안내판이 모니터 화면 속으로 다 줄어든 뒤 나타난다(줄어드는 안내판 위로 비치지 않게)
+    if (t < g.TX) { Object.assign(V, { x: S.x, y: S.y, w: S.w, h: S.h, r: 2, bg: 1, o: e2o(clamp((t - R(8.92)) / (R(9.04) - R(8.92)))) }); return }
     const k = e2io(clamp((t - g.TX) / g.dX))
     Object.assign(V, { x: S.x * (1 - k), y: S.y * (1 - k), w: S.w + (g.vw - S.w) * k, h: S.h + (g.vh - S.h) * k, r: 2 * (1 - k), bg: 1, o: 1 - clamp((t - g.TX - g.dX * 0.33) / (g.dX * 0.67)) })
   }
   // 레터박스(16:9가 아닐 때 무대 밖에 남는 칸) 색: 지금 보이는 장면 배경. [시작 시간, 위쪽 색, 아래쪽 색]
   const BARS: Array<[number, string, string]> = [
     [0, '--bg-s0', '--bg-s0'], [R(2.7), '--bg-s1', '--bg-s1'], [R(5.15), '--bg-s2', '--bg-s2'], [7.35, '--bg-s3', '--bg-s3'],
-    [R(8.85), '--bg-s4', '--bg-s4'], [10.7, '--landing-dawn-top', '--landing-dawn-bottom'], [12.35, '--bg-s6', '--bg-s6'],
+    [R(8.6), '--bg-s4', '--bg-s4'], [10.7, '--landing-dawn-top', '--landing-dawn-bottom'], [12.35, '--bg-s6', '--bg-s6'],
     [14.35, '--bg-s7', '--bg-s7'], [16.35, '--bg-s8', '--bg-s8'], [18.35, '--bg-s9', '--bg-s9'],
   ]
   const stageBox = byId('stage')
@@ -699,7 +701,6 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
 
     tl = gsap.timeline({ paused: true, defaults: { ease: 'none' }, onUpdate: onTL })
     wrapTL(tl)
-    const FADE = (t: number, sel: string, to: number, d = 0.6) => tl!.fromTo(sel, { autoAlpha: to ? 0 : 1 }, { autoAlpha: to, duration: d }, t)
     const q = (sel: string | string[]) => $$(String(sel))
     const REV = (t: number, sel: string) => { tl!.set(sel, { autoAlpha: 1 }, t); tl!.fromTo($$(sel + ' .ml>span'), { yPercent: 28, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.2, stagger: 0.06, ease: 'power3.out' }, t) }
     const IN = (t: number, sel: string | string[], d = 0.18, y = 14) => tl!.fromTo(q(sel), { autoAlpha: 0, y }, { autoAlpha: 1, y: 0, duration: d, ease: 'power2.out' }, t)
@@ -729,17 +730,19 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     tl.fromTo('#c3', { autoAlpha: 0, filter: 'blur(10px)' }, { autoAlpha: 1, filter: 'blur(0px)', duration: n3(7.36) - n3(7.2), ease: 'power2.out', immediateRender: false }, n3(7.2))
     OUT(8.47, '#c3', 0.12, 16)
     /* → board lifts away, seat-back monitor rises from below (monitor + map viewport: monitorFrame) */
-    tl.to(q('#board .pnl > *, #board .bstrip > *'), { opacity: 0.3, duration: 0.1, ease: 'power3.out' }, 8.5) // 불이 흐려진다(검은 바탕이라 다 끄면 빈 화면)
     // 보드 기준점은 왼쪽 가운데(0% 50%): 그 기준으로 모니터 화면(SCR) 자리·크기에 맞춘다
-    { const sy = SCR.h / BD.h
-      tl.to('#board', { x: SCR.x - BD.x, y: SCR.y - BD.y - BD.h / 2 + BD.h * sy / 2, scaleX: SCR.w / BD.w, scaleY: sy, duration: 0.4, ease: 'power3.inOut' }, 8.6) }
-    tl.set('#board', { autoAlpha: 0 }, 9.02)
-    FADE(8.62, '#bg4', 1, 0.36)
+    // S3 → S4: 다 '원화 확정'된 안내판이 같은 비율로 줄어들며 좌석 모니터 화면(SCR) 한가운데로 들어간다(S3에서 노트북 화면이 안내판이 된 것의 반대).
+    // 화면 속에 들어간 뒤 지도(모니터 화면)로 겹쳐 바뀐다. 바탕은 S3와 같은 밤 팔레트라 밝기·색이 튀지 않는다
+    { const s = Math.min(SCR.w / BD.w, SCR.h / BD.h)
+      tl.to('#board', { x: SCR.x - BD.x + (SCR.w - BD.w * s) / 2, y: SCR.y + SCR.h / 2 - (BD.y + BD.h / 2), scale: s, duration: 0.4, ease: 'power3.inOut' }, 8.6)
+      tl.to('#board', { opacity: 0, duration: 0.1 }, 8.98) }
+    tl.set('#board', { autoAlpha: 0 }, 9.1)
+    tl.set('#bg4', { autoAlpha: 1 }, 8.6)
     tl.set(C, { cx: MW / 2, cy: MH * 0.47, z: 1 }, 8.7)
     tl.set(A, { krDot: 0, sw: 2, ro: 1, dimOn: 1 }, 8.7)
 
     /* S4 — inflight map: NY & Tokyo → Seoul */
-    tl.set('#c4', { autoAlpha: 1 }, 9.15); IN(9.15, '#c4lab'); REV(9.2, '#c4a')
+    tl.set('#c4', { autoAlpha: 1 }, 8.82); IN(8.82, '#c4lab'); REV(8.84, '#c4a') // 안내판이 제목 아래로 줄어든 뒤(S4 시작 직후)
     tl.fromTo(P, { v: 0 }, { v: 1, duration: 1.15, ease: 'power1.inOut', immediateRender: false }, 9.2)
     tl.fromTo(A, { krLit: 0 }, { krLit: 1.15, duration: 0.4, immediateRender: false }, 10.0)
 
