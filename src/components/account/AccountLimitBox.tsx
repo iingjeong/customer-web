@@ -1,6 +1,5 @@
 import '../../styles/tokens.css'
 import { Box } from '../common/Box'
-import { F } from '../../lib/calc'
 import { limitValues } from './accountTaxData'
 import type { SellLimitState } from './useSellLimit'
 import styles from './AccountLimitBox.module.css'
@@ -12,7 +11,12 @@ interface AccountLimitBoxProps {
   onRetryLimit: () => void
 }
 
-// 매도 한도 박스(data-box="limit") — 사용 한도·한도(서버 값)·지금 공제율 구간·구간 마감
+// 한도 금액 표기: 만원 단위로 자른다(내림). 반올림하면 한도 5천만 원에서 1,000원만 남아도 사용 한도가 "5,000만"으로 보인다(예: 49,999,000 → 4,999만, 1,000 → 0만)
+const floorMan = (n: number): string => Math.floor(n / 1e4).toLocaleString('ko-KR') + '만'
+// 남은 한도: 1만 원 미만은 원 단위 그대로(1,000), 1만 원 이상은 만원 단위로 자른다
+const remainText = (n: number): string => (n < 1e4 ? Math.round(n).toLocaleString('ko-KR') : floorMan(n))
+
+// 매도 한도 박스(data-box="limit") — 사용 한도·한도(서버 값)·남은 한도·지금 공제율 구간·구간 마감
 export function AccountLimitBox({ className, onApply, limit, onRetryLimit }: AccountLimitBoxProps) {
   const v = limitValues()
 
@@ -32,11 +36,15 @@ export function AccountLimitBox({ className, onApply, limit, onRetryLimit }: Acc
           <>
             <div className={styles.remainRow}>
               <span className={styles.remainLabel}>사용 한도</span>
-              <b className={styles.remain}>{F.man(limit.data.usedAmount)} 원</b>
-              <span className={styles.of}>/ {F.man(limit.data.limitAmount)}</span>
+              <b className={styles.remain}>{floorMan(limit.data.usedAmount)} 원</b>
+              <span className={styles.of}>/ {floorMan(limit.data.limitAmount)}</span>
             </div>
             <div className={styles.track}>
               <div className={styles.fill} style={{ width: (limit.data.limitAmount > 0 ? (limit.data.usedAmount / limit.data.limitAmount) * 100 : 0) + '%' }} />
+            </div>
+            <div className={styles.row}>
+              <span className={styles.key}>남은 한도</span>
+              <span className={styles.val}>{remainText(Math.max(0, limit.data.remainingLimit))} 원</span>
             </div>
           </>
         )}
@@ -57,11 +65,6 @@ export function AccountLimitBox({ className, onApply, limit, onRetryLimit }: Acc
           <span className={styles.val}>
             {v.bandEnd} (<span className={styles.dday}>D-{v.bandD}</span>)
           </span>
-        </div>
-        <div className={styles.guide}>
-          <button type="button" className={styles.guideLink} onClick={onApply}>
-            매도 신청에서 보기 ›
-          </button>
         </div>
       </div>
     </Box>
