@@ -176,7 +176,8 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
   const K = { v: 1, last: -1 }   // S1 limit count-up
   const limBig = byId('limBig'), amt = byId('amt') as HTMLInputElement, amtMsg = byId('amtMsg')
   const setP = () => amt.style.setProperty('--p', (+amt.value / +amt.max * 100) + '%')
-  function paintBig() { const v = disp.A * K.v; limBig.textContent = won(v); amt.value = String(v); setP() }
+  // 한도 숫자는 '₩0'부터 세지 않는다 — 세기 전(K=0)에는 보이지 않고, 금액의 절반에서 나타나며 최종 금액까지 올라간다(최종 표시는 그대로 disp.A)
+  function paintBig() { const kk = K.v >= 1 ? 1 : 0.5 + 0.5 * K.v, v = disp.A * kk; limBig.textContent = won(v); limBig.style.opacity = K.v >= 1 ? '' : String(clamp(K.v / 0.15)); amt.value = String(v); setP() }
   function paintNums() {
     $$('[data-n=A]').forEach((e) => { e.textContent = won(disp.A) })
     $$('[data-n=Aman]').forEach((e) => { e.textContent = man(disp.A) })
@@ -495,6 +496,7 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     if (!tl) return
     const t = tl.time()
     paintBars(t)
+    if (GEO && t < GEO.T1x) s01Frame(t)
     monitorFrame(t); map.drawMap()
     renderLate(t)
     updBoard(t, boardLive())
@@ -577,7 +579,34 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
   // 화면에서 잰 위치를 무대(1920×1080) 좌표로 — 무대가 scale(SS)로 그려지므로 배율로 나눈다
   const rel = (el: Element) => { const s = stageEl.getBoundingClientRect(), r = el.getBoundingClientRect(); return { x: (r.left - s.left) / SS, y: (r.top - s.top) / SS, w: r.width / SS, h: r.height / SS } }
   const r$ = (s: string) => rel($(s))
-  const ANIM = '#hdr,#c0,#scrim,#bg1,#bg2,#bg2 img,#bg3,#bg4,#s1,#c1,#c1p,#card1,#seal,.kv b,.gln,#c2,#c2p,#card2,.c2r,.c2res,.c2n,#board,#c3,#mon,#monUI,#c4,#c4a,#c4lab,#hero,#hero img,#slogan,#pass,.ml>span'
+  const ANIM = '#hdr,#c0,#scrim,#flare,#bg1,#bg2,#bg2 img,#bg3,#bg4,#s1,#c1,#c1p,#card1,#seal,.kv b,.gln,#c2,#c2p,#card2,.c2r,.c2res,.c2n,#board,#c3,#mon,#monUI,#c4,#c4a,#c4lab,#hero,#hero img,#slogan,#pass,.ml>span'
+
+  /** 새 시간(장면표 단위, S0 0~2.5·S1 2.5~4.5) → 타임라인에 넣는 옛 시간(R()의 역함수, S1까지만) */
+  const nt = (t: number) => (t <= 2.5 ? t * 2.95 / 2.5 : 2.95 + (t - 2.5) * 1.9 / 2)
+
+  /* ===== 오프닝(자동 재생, 한 번) — 빛이 지나가며 지도가 켜지고 서울 점이 금색으로, 슬로건이 한 줄씩. 값은 IN에 두고 s01Frame이 지도에 옮긴다 ===== */
+  const IN = { sw: 1.2, rv: 2, kr: 1 } // 끝난 상태(오프닝을 건너뛰거나 움직임 줄이기면 이대로)
+  let intro: gsap.core.Timeline | undefined
+  const sloganLines = $$('#c0 .ml>span')
+
+  /* ===== S0~S1 지도 카메라(스크롤 위치에서 바로 계산) =====
+     S0: 오프닝이 끝난 전체 지도 → 서울로 돌진(C.z 1 → 9, 지수적으로 빨라짐), 지도는 금색 빛 뒤로 사라진다.
+     S1: 확인서 썸네일 칸(#thumb)에 서울을 가운데 둔 지도(카드가 다 펼쳐진 뒤 나타나고, 카드가 패스포트로 갈 때 사라진다) */
+  let TBr = { x: 0, y: 0, w: 0, h: 0 }
+  function s01Frame(t: number) {
+    const sx = Mp.ready ? Mp.seoul[0] : MW / 2, sy = Mp.ready ? Mp.seoul[1] : MH / 2
+    Object.assign(A, { sw: IN.sw, rv: IN.rv, krDot: IN.kr, ro: 0, krLit: 0, lit: 0, dimOn: 0 })
+    if (t < 2.5) {
+      const c = e2io(seg(t, 0.1, 1.3)), z = seg(t, 0.1, 2.3)
+      Object.assign(C, { cx: MW / 2 + (sx - MW / 2) * c, cy: MH / 2 + (sy - MH / 2) * c, z: Math.pow(9, z * z) })
+      Object.assign(V, { x: 0, y: 0, w: SW, h: SH, r: 0, bg: 0, o: 1 - seg(t, 1.7, 2.25) })
+      A.krR = 7 + 5 * seg(t, 0.4, 1.1)
+    } else {
+      Object.assign(C, { cx: sx, cy: sy, z: 1.25 })
+      Object.assign(V, { x: TBr.x, y: TBr.y, w: TBr.w, h: TBr.h, r: 10, bg: 1, o: seg(t, 2.6, 2.85) * (1 - seg(t, R(4.85), R(4.93))) })
+      A.krDot = 1; A.krR = 4
+    }
+  }
 
   function build() {
     const prog = st ? st.progress : 0
@@ -595,6 +624,7 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     const sw = $('#s1w'); sw.style.transform = ''
     const SK = Math.min(1, (vh - 56) / sw.offsetHeight); sw.style.transform = SK < 1 ? `scale(${SK})` : ''
     const TB = r$('#thumb'), CD = r$('#card1'), PS = r$('#pass'), BD = r$('#board')
+    TBr = TB
 
     /* seat-back monitor geometry */
     const mw = Math.min(1040, vw * 0.78, ((vh * 0.66) - 28) * 16 / 9 + 28), mh = (mw - 28) * 9 / 16 + 28
@@ -610,8 +640,9 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     Object.assign(C, { cx: MW / 2, cy: MH / 2, z: 1 })
     Object.assign(A, { sw: -0.2, krDot: 0, ro: 0, krLit: 0, lit: 0, dimOn: 0 }); P.v = 0; K.v = 0; K.last = -1
 
-    gsap.set(['#bg1', '#bg2', '#bg3', '#bg4', '#s1', '#c1', '#c1p', '#card1', '#seal', '.kv b', '#c2', '#c2p', '#card2', '.c2res', '.c2n', '#board', '#c3', '#mon', '#monUI', '#c4', '#c4a', '#c4lab', '#hero', '#slogan', '#pass'], { autoAlpha: 0 })
-    gsap.set('#stg .ml>span', { yPercent: 0, opacity: 1 })
+    gsap.set(['#bg1', '#bg2', '#bg3', '#bg4', '#s1', '#c1', '#c1p', '#card1', '#seal', '.kv b', '#c2', '#c2p', '#card2', '.c2res', '.c2n', '#board', '#c3', '#mon', '#monUI', '#c4', '#c4a', '#c4lab', '#hero', '#slogan', '#pass', '#flare'], { autoAlpha: 0 })
+    // 슬로건 줄(#c0)은 오프닝이 다루므로 건드리지 않는다(다시 빌드돼도 오프닝 도중 상태 유지)
+    gsap.set($$('#stg .ml>span').filter((e) => !e.closest('#c0')), { yPercent: 0, opacity: 1 })
 
     tl = gsap.timeline({ paused: true, defaults: { ease: 'none' }, onUpdate: onTL })
     wrapTL(tl)
@@ -621,19 +652,21 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     const IN = (t: number, sel: string | string[], d = 0.18, y = 14) => tl!.fromTo(q(sel), { autoAlpha: 0, y }, { autoAlpha: 1, y: 0, duration: d, ease: 'power2.out' }, t)
     const OUT = (t: number, sel: string | string[], d = 0.16, y = -10) => tl!.to(q(sel), { autoAlpha: 0, y, duration: d, ease: 'power1.in' }, t)
 
-    /* S0 — whole world in currency symbols, slow approach ×1.35, one light sweep */
-    tl.to('#hdr', { autoAlpha: 0, y: -8, duration: 0.22 }, 0.05)
-    tl.to(C, { z: 1.35, cy: MH * 0.46, duration: 2.0, ease: 'power1.inOut' }, 0.1)
-    tl.fromTo(A, { sw: -0.2 }, { sw: 1.2, duration: 1.1, ease: 'power1.inOut', immediateRender: false }, 0.6)
-    // 슬로건은 S1 카드가 뜬 뒤(2.45)까지 남긴다 — 예전 1.95에는 어두운 지도만 남는 구간이 있었다
-    tl.to(['#c0', '#scrim'], { autoAlpha: 0, duration: 0.18 }, 2.45)
-    /* → map shrinks into the card thumbnail while night turns to ivory */
-    FADE(2.4, '#bg1', 1)
-    tl.set('#s1', { autoAlpha: 1 }, 2.3) // 카드(2.32)보다 먼저 켠다
-    tl.fromTo('#card1', { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.3 }, 2.32) // 예전 2.5 — 배경이 바뀌는 동안 카드가 없어 빈 화면이 생겼다
-    tl.to(V, { x: TB.x, y: TB.y, w: TB.w, h: TB.h, r: 10, bg: 1, duration: 0.7, ease: 'power2.inOut' }, 2.3)
-    tl.to(C, { cx: MW * 0.5, cy: (Mp.seoul[1] || MH * 0.4), z: 1.25, duration: 0.7, ease: 'power2.inOut' }, 2.3)
-    tl.to(A, { krDot: 1, duration: 0.25 }, 2.75)
+    /* S0 — 오프닝이 끝난 화면(지도 + 큰 슬로건)에서 시작. 첫 스크롤: 슬로건이 물러나고 카메라가 서울 금색 점으로 돌진(지도 줌은 s01Frame),
+       금색 점이 화면을 거의 채울 만큼 커졌다가 걷히며 S1 확인서가 펼쳐진다. 시간은 새 단위(장면표)로 쓰고 nt()로 옛 단위로 바꿔 넣는다 */
+    const at = (a: number, b: number) => ({ p: nt(a), d: nt(b) - nt(a) })
+    tl.to('#hdr', { autoAlpha: 0, y: -8, duration: at(0.02, 0.2).d }, at(0.02, 0.2).p)
+    tl.to('#c0', { autoAlpha: 0, scale: 0.7, y: -70, duration: at(0, 1.05).d, ease: 'power1.in' }, at(0, 1.05).p) // 금빛이 나타날 때까지 물러나며 남는다
+    tl.to('#scrim', { autoAlpha: 0, duration: at(0.4, 1.05).d }, at(0.4, 1.05).p)
+    tl.fromTo('#flare', { autoAlpha: 0, scale: 0.07 }, { autoAlpha: 1, duration: at(1.0, 1.1).d }, at(1.0, 1.1).p)
+    tl.to('#flare', { scale: 10, duration: at(1.1, 2.35).d, ease: 'power3.in' }, at(1.1, 2.35).p)
+    tl.to('#flare', { autoAlpha: 0, duration: at(2.26, 2.62).d, ease: 'power1.out' }, at(2.26, 2.62).p) // 화면을 다 덮기 전에 걷히기 시작 — 그 아래로 확인서가 비친다
+    /* → 빛 아래로 밝은 바탕이 깔리고, 확인서가 가는 빛줄기에서 위아래로 펼쳐진다 */
+    tl.fromTo('#bg1', { autoAlpha: 0 }, { autoAlpha: 1, duration: at(2.15, 2.4).d }, at(2.15, 2.4).p)
+    tl.set('#s1', { autoAlpha: 1 }, nt(2.18))
+    // 카드는 바로 불투명해지고(금빛이 비쳐 탁해 보이지 않게) 크기만 가는 빛줄기에서 위아래로 펼쳐진다
+    tl.fromTo('#card1', { autoAlpha: 0 }, { autoAlpha: 1, duration: at(2.2, 2.3).d }, at(2.2, 2.3).p)
+    tl.fromTo('#card1', { scaleX: 0.72, scaleY: 0.03 }, { scaleX: 1, scaleY: 1, duration: at(2.2, 2.75).d, ease: 'power3.out' }, at(2.2, 2.75).p)
 
     /* S1 — account card fills in slowly (≈2 screens) */
     REV(3.0, '#c1'); IN(3.08, '#c1p')
@@ -641,8 +674,7 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     $$('.kv b').forEach((b, i) => { const t = 3.2 + i * 0.25; tl!.fromTo(b, { autoAlpha: 0, x: -8 }, { autoAlpha: 1, x: 0, duration: 0.12, ease: 'power2.out' }, t); pulse(glns[i], t, 0.19) })
     tl.fromTo(K, { v: 0 }, { v: 1, duration: 0.45, ease: 'power2.out' }, 3.95); pulse(glns[3], 3.95, 0.39)
     tl.fromTo('#seal', { autoAlpha: 0, scale: 2.2, rotate: -28 }, { autoAlpha: 1, scale: 1, rotate: -12, duration: 0.15, ease: 'power3.in' }, 4.4)
-    OUT(4.83, ['#c1', '#c1p'])
-    tl.to(V, { o: 0, duration: 0.08 }, 4.85)
+    OUT(4.83, ['#c1', '#c1p']) // 지도 썸네일이 사라지는 것(4.85~4.93)은 s01Frame
     const tdx = ((PS.x + PS.w / 2) - (CD.x + CD.w / 2)) / SK, tdy = ((PS.y + PS.h / 2) - (CD.y + CD.h / 2)) / SK
     tl.to('#card1', { scaleY: 0.5, duration: 0.12, ease: 'power2.in' }, 4.85)
     tl.to('#card1', { x: tdx, y: tdy, scaleX: 0.1, scaleY: 0.06, duration: 0.3, ease: 'power2.inOut' }, 4.97)
@@ -768,7 +800,8 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
   listen('scroll', updNav, { passive: true })
   /* ===== 발표 모드: 키 한 번에 다음·이전 박자 지점으로(landingScenes의 BEATS) ===== */
   const beatYs = () => {
-    const ys = SCN.flatMap((sc) => (BEATS[sc.k] || []).map((t) => yOfT(t)))
+    // 움직임 줄이기: 장면 완성 화면(done)에만 멈춘다(그 사이 박자는 다시 완성 화면으로 붙어 키가 헛돌았다)
+    const ys = RM ? SCN.map((sc) => yOfT(sc.done)) : SCN.flatMap((sc) => (BEATS[sc.k] || []).map((t) => yOfT(t)))
     ys.push(faqY())
     if (st2) { ys.push(st2.start); S11_BEATS.forEach((p) => ys.push(st2!.start + p / 2 * (st2!.end - st2!.start))) }
     return ys.map(Math.round).sort((x, y) => x - y)
@@ -888,6 +921,26 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
   } else {
     window.scrollTo(0, 0)
   }
+  /* ===== 오프닝(약 2.6초, 한 번) — 맨 위에서 새로 열었을 때만. 위치 복원·#faq 진입·움직임 줄이기면 끝난 상태로 바로 =====
+     0~0.4초 어두운 화면(상단 로고·버튼만) → 0.4~1.6초 빛이 왼쪽→오른쪽으로 지나가며 지도 기호가 켜지고 서울 점이 금색으로
+     → 1.2~2.6초 슬로건 두 줄이 차례로. 지도·글꼴이 늦어도 슬로건은 제때 나온다(지도는 준비되는 대로 같은 상태로 그려짐) */
+  const introDraw = () => { if (tl && GEO && tl.time() < GEO.T1x) { s01Frame(tl.time()); map.drawMap() } }
+  if (!RM && !(savedY != null && savedY > 0) && opts.hash !== '#faq' && window.scrollY < 2) {
+    Object.assign(IN, { sw: -0.2, rv: -0.1, kr: 0 })
+    gsap.set(sloganLines, { opacity: 0, yPercent: 30 })
+    intro = gsap.timeline({ onUpdate: introDraw, onComplete: () => { intro = undefined } })
+      .to(IN, { sw: 1.2, rv: 1.2, duration: 1.2, ease: 'power1.inOut' }, 0.4)
+      .to(IN, { kr: 1, duration: 0.3, ease: 'power2.out' }, 1.45)
+      .to(sloganLines[0], { opacity: 1, yPercent: 0, duration: 0.8, ease: 'power3.out' }, 1.2)
+      .to(sloganLines[1], { opacity: 1, yPercent: 0, duration: 0.8, ease: 'power3.out' }, 1.8)
+    introDraw()
+    // 발표자가 기다리지 않게: 키·휠·터치·스크롤이 들어오면 오프닝을 끝난 상태로 넘기고, 그 입력은 그대로 이어서 처리된다
+    const skip = () => { if (intro) { const it = intro; intro = undefined; it.progress(1); it.kill(); introDraw() } }
+    listen('keydown', skip); listen('wheel', skip, { passive: true }); listen('touchstart', skip, { passive: true })
+    listen('scroll', () => { if (window.scrollY > 2) skip() }, { passive: true })
+    cleanups.push(() => { intro?.kill(); intro = undefined })
+  } else gsap.set(sloganLines, { opacity: 1, yPercent: 0 })
+
   // 언마운트 시점에는 새 페이지로 DOM이 바뀌며 scrollY가 줄어들 수 있어, 스크롤할 때마다 마지막 위치를 따로 기억한다
   let lastY = window.scrollY, lastKey = opts.historyKey
   // 랜딩 안에서 #faq 링크 등으로 history 항목이 바뀌면(React Router가 history.state.key를 새로 만듦) 그 항목의 키로 저장한다

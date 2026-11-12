@@ -5,7 +5,7 @@
    - 글꼴 Pretendard는 원본처럼 정적판(landing 마운트 때 <link>로 추가). keyframes 이름에는 landing- 을 붙임. */
 .landing{
  /* 장면별 배경 (디자인 시스템 v2) */
- --bg-s0:var(--color-photo-base); --bg-s1:var(--landing-bg-s1); --bg-s2:var(--landing-bg-s2); --bg-s3:var(--landing-bg-s3); --bg-s4:var(--landing-bg-s4);
+ --bg-s0:var(--color-photo-base); --bg-s1:var(--landing-surface-soft); --bg-s2:var(--landing-bg-s2); --bg-s3:var(--landing-bg-s3); --bg-s4:var(--landing-bg-s4);
  --bg-s5:linear-gradient(180deg,var(--landing-dawn-top),var(--landing-dawn-bottom)); --bg-s6:var(--landing-bg-s6); --bg-s7:var(--landing-bg-s7); --bg-s8:var(--color-surface);
  --bg-s9:var(--landing-bg-s9); --bg-s10:var(--color-surface); --bg-s11:var(--color-surface);
  --navy:var(--color-navy); --gold:var(--color-gold); --ink:var(--color-ink); --sub:var(--color-sub); --line:var(--color-line);
@@ -60,8 +60,7 @@ html.lenis,html.lenis body{height:auto}
    조금 올라오며 서서히 나타나게 바꿨으므로 줄 자르기를 끈다. S11(#stg11)의 영문 큰 글자는 예전 방식 그대로 */
 .landing #stg .ml{overflow:visible}
 @keyframes landing-blink{50%{opacity:0}}
-.landing #c0 .ml>span{animation:landing-rise 1s cubic-bezier(.2,.7,.2,1) both}
-.landing #c0 .ml:nth-child(2)>span{animation-delay:.12s}
+/* S0 슬로건 두 줄의 등장은 엔진의 오프닝(자동 재생)이 맡는다 */
 /* header */
 .landing #hdr{position:absolute;top:0;left:0;right:0;height:88px;padding:0 var(--pad);display:flex;align-items:center;justify-content:space-between;z-index:30}
 .landing #hdr img{height:26px;display:block}
@@ -73,18 +72,29 @@ html.lenis,html.lenis body{height:auto}
 .landing #hdr nav svg{width:16px;height:16px}
 /* map canvas + S0 */
 .landing #map{position:absolute;left:0;top:0;z-index:5;pointer-events:none}
-.landing #scrim{position:absolute;inset:0;z-index:6;pointer-events:none;background:radial-gradient(ellipse 70% 60% at 0% 100%,rgba(11,27,51,.92),rgba(11,27,51,.55) 45%,transparent 75%)}
-.landing #c0{left:var(--pad);bottom:var(--pad);color:var(--color-on-navy)}
+/* 슬로건(가운데 높이, 왼쪽 정렬) 뒤만 지도를 눌러 글자가 또렷하게 — 오른쪽(아메리카·서울 쪽)은 그대로 */
+.landing #scrim{position:absolute;inset:0;z-index:6;pointer-events:none;background:linear-gradient(90deg,rgba(11,27,51,.72) 0,rgba(11,27,51,.5) 45%,rgba(11,27,51,0) 82%)}
+/* 오프닝 슬로건: 화면 폭의 약 78%(둘째 줄 기준) 크기로 가운데 높이에 왼쪽 정렬 */
+.landing #c0{left:var(--pad);top:322px;bottom:auto;color:var(--color-on-navy);transform-origin:0 50%}
+.landing #c0 .h{font-size:190px;line-height:1.04;letter-spacing:-.045em;max-width:none}
+/* S0→S1 빛: 서울 점 크기(14px = 200px × 0.07)에서 화면을 거의 채울 때까지 커진다(transform만). 확인서(#s1, z4)·지도(#map, z5)보다 아래 — 금빛 위로 확인서가 펼쳐진다 */
+.landing #flare{position:absolute;left:50%;top:50%;width:200px;height:200px;margin:-100px 0 0 -100px;border-radius:50%;background:var(--gold);z-index:3;visibility:hidden;pointer-events:none}
 .landing #c0 .lab{color:var(--gold)}
 /* app cards */
 .landing .app{background:var(--color-surface);border-radius:16px;box-shadow:0 24px 64px rgba(0,0,0,.35);padding:32px;color:var(--ink)}
 .landing .app small{display:block;font:500 13px/1.3 Pretendard;color:var(--sub)}
 /* S1 */
 .landing #s1{position:absolute;inset:0;z-index:4;display:flex;align-items:center;justify-content:center;pointer-events:none}
-.landing #s1w{width:720px;transform-origin:50% 50%;display:flex;flex-direction:column;gap:32px;color:var(--ink)}
-.landing #s1w .h{font-size:40px;max-width:none}
-.landing #s1w .tt{display:flex;flex-direction:column;gap:12px}
-.landing #card1{filter:drop-shadow(0 16px 48px rgba(26,34,51,.12));pointer-events:auto}
+/* S1: 왼쪽 큰 제목, 오른쪽 1.5배 확인서(화면의 주인공) — 밝은 바탕. 카드 안 글자는 1.5배가 돼도 24px 이상이 되게 16px 기준 */
+.landing #s1w{width:1728px;transform-origin:50% 50%;display:flex;flex-direction:row;align-items:center;gap:56px;color:var(--ink)}
+.landing #s1w .h{font-size:96px;line-height:1.08;letter-spacing:-.04em;max-width:none}
+.landing #c1 .ml>span{white-space:normal;word-break:keep-all}
+.landing #s1w .tt{flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:28px}
+.landing #c1p{font-size:26px;line-height:1.55;opacity:.8;max-width:none}
+.landing #card1{flex:none;filter:drop-shadow(0 24px 60px rgba(15,30,60,.16));pointer-events:auto}
+.landing #card1 .tk,.landing #card1 #seal{zoom:1.55}
+.landing #card1 .tk{width:720px}
+.landing #card1 small{font-size:16px}
 .landing .tk{--thh:176px;--py:calc(32px + 20px + 16px + var(--thh) + 20px);position:relative;background:var(--color-surface);border-radius:16px;padding:32px;
  -webkit-mask:radial-gradient(circle 12px at 0 var(--py),rgba(0,0,0,0) 97%,rgb(0,0,0)) left/51% 100% no-repeat,radial-gradient(circle 12px at 100% var(--py),rgba(0,0,0,0) 97%,rgb(0,0,0)) right/51% 100% no-repeat;
  mask:radial-gradient(circle 12px at 0 var(--py),rgba(0,0,0,0) 97%,rgb(0,0,0)) left/51% 100% no-repeat,radial-gradient(circle 12px at 100% var(--py),rgba(0,0,0,0) 97%,rgb(0,0,0)) right/51% 100% no-repeat}
@@ -93,7 +103,7 @@ html.lenis,html.lenis body{height:auto}
 .landing #seal small{font:600 8px var(--mono);letter-spacing:.2em;color:var(--gold);margin-top:6px}
 .landing .tk-h{height:20px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
 .landing .tk-h img{height:18px;display:block}
-.landing .tk-h span{font:500 11px var(--mono);letter-spacing:.18em;color:var(--sub)}
+.landing .tk-h span{font:500 14px var(--mono);letter-spacing:.12em;color:var(--sub)}
 .landing #thumb{height:var(--thh);border-radius:10px;background:var(--color-photo-base)}
 .landing .perf{height:40px;display:flex;align-items:center}
 .landing .perf::before{content:'';flex:1;border-top:1.5px dashed var(--landing-perf)}
@@ -104,7 +114,7 @@ html.lenis,html.lenis body{height:auto}
 .landing .gln{position:absolute;left:-14px;top:8px;bottom:8px;width:2px;border-radius:1px;background:var(--gold);opacity:0}
 .landing .kv small{display:inline;white-space:nowrap}
 .landing .rates small,.landing .rem small{white-space:nowrap}
-.landing .kv b{font:600 15px var(--mono)}
+.landing .kv b{font:600 16px var(--mono)}
 .landing .lim .big{font-size:40px;line-height:1.15;margin:4px 0 4px}
 .landing input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:24px;background:transparent;cursor:pointer}
 .landing input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:linear-gradient(90deg,var(--navy) var(--p),var(--line) var(--p))}
@@ -115,11 +125,11 @@ html.lenis,html.lenis body{height:auto}
 .landing .msg.warn{color:var(--ink);font-weight:600}
 .landing .rates{display:flex;gap:8px;align-items:center}
 .landing .rates small{margin-right:4px}
-.landing .rates button{flex:1;min-width:0;height:36px;padding:0 4px;border-radius:8px;border:1px solid var(--line);font:600 13px Pretendard;color:var(--ink);background:var(--color-surface);font-variant-numeric:tabular-nums}
+.landing .rates button{flex:1;min-width:0;height:40px;padding:0 4px;border-radius:8px;border:1px solid var(--line);font:600 16px Pretendard;color:var(--ink);background:var(--color-surface);font-variant-numeric:tabular-nums}
 .landing .rates button:hover{border-color:var(--navy)}
 .landing .rates button.on{background:var(--navy);border-color:var(--navy);color:var(--color-on-navy)}
 .landing .rem{margin-top:16px;padding-top:12px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:baseline}
-.landing .rem b{font-size:16px}
+.landing .rem b{font-size:18px}
 /* S2 */
 .landing #c2{left:var(--pad);top:50%;transform:translateY(-50%);color:var(--ink)}
 .landing #c2 .h{font-size:64px}

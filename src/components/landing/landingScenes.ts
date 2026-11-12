@@ -19,7 +19,7 @@ export interface Scene {
 }
 
 export const SCN: Scene[] = [
-  { k: 'S0', n: '해외 자산', a: 0, b: 2.5, done: 2.0 },
+  { k: 'S0', n: '해외 자산', a: 0, b: 2.5, done: 0 }, // 움직임 줄이기 맞춤 위치: 오프닝이 끝난 화면(지도 + 슬로건)
   { k: 'S1', n: '계좌 개설', a: 2.5, b: 4.5, done: 4.25 },
   { k: 'S2', n: '입고', a: 4.5, b: 6.5, done: 6.1 },
   { k: 'S3', n: '매도', a: 6.5, b: 8.5, done: 8.1 },
@@ -53,7 +53,7 @@ export const FOLLOW_SEC = 0.6
 export const BEAT_SEC = 1.1
 /** 발표 모드: 키를 누른 뒤 다음 입력을 무시하는 시간(초). 연타로 건너뛰지 않게 이동 시간보다 조금 길게 */
 export const BEAT_LOCK_SEC = 1.3
-const SCREENS: Record<string, number> = { S0: 2.0, S1: 3.0, S2: 3.0, S3: 2.0, S4: 2.5, S5: 2.0, S6: 2.0, S7: 2.0, S8: 2.0, S9: 3.4 }
+const SCREENS: Record<string, number> = { S0: 1.6, S1: 3.0, S2: 3.0, S3: 2.0, S4: 2.5, S5: 2.0, S6: 2.0, S7: 2.0, S8: 2.0, S9: 3.4 }
 const U0: number[] = [] // 각 장면이 시작하는 스크롤 위치(화면 수)
 const LEN: number[] = SCN.map((sc) => SCREENS[sc.k] * PACE)
 LEN.reduce((u, l) => { U0.push(u); return u + l }, 0)
@@ -76,8 +76,8 @@ export function uOfT(t: number): number {
 /* ===== 발표 모드 박자 지점(타임라인 시간) =====
    ↓ → Space PageDown = 다음 지점, ↑ ← PageUp = 이전 지점. 각 지점은 연출이 끝나 화면이 멈춰 있는 순간(엔진의 타임라인·renderLate 구간에서 뽑음) */
 export const BEATS: Record<string, number[]> = {
-  S0: [0, 0.8, 1.5, 1.9], //                      시작 · 확대 중 · 빛이 지나감 · 문구 사라짐
-  S1: [2.6, 2.9, 3.45, 4.05, 4.25], //            티켓 카드 · 제목·설명 · 항목 채움 · 한도 숫자 · 도장
+  S0: [0, 1.2], //                              오프닝 끝 화면 · 서울로 돌진 중(슬로건 물러남)
+  S1: [2.85, 3.45, 4.05, 4.25], //                확인서 펼쳐짐(제목·설명) · 항목 채움 · 한도 숫자 · 도장
   S2: [4.95, 5.5, 5.95, 6.2], //                  카드가 패스포트로 · 입고 카드 · 수량 비교 · 결과·안내
   S3: [7.2, 7.4, 7.75, 8.15], //                  안내판 내려옴 · 제목 · 상태 넘어가는 중 · 전부 출발
   S4: [8.9, 9.1, 9.4, 9.7, 10.1, 10.45], //       모니터 · 제목 · 비행 중 · 도착 · ₩ 켜짐 · 서울 야경

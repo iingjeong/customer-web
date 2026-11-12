@@ -47,6 +47,8 @@ export function LandingCopy() {
         </div>
       </div>
       <i id="slogan" hidden />
+      {/* S0→S1: 서울 금색 점이 화면을 채울 만큼 커졌다가 걷히며 확인서가 되는 빛(장식). 크기·보이기는 엔진 타임라인 */}
+      <i id="flare" aria-hidden="true" />
     </>
   )
 }

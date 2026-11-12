@@ -76,7 +76,8 @@ export function createLandingMap(cv: HTMLCanvasElement) {
   const Mp: MapState = { ready: false, cls: null, land: null, fi: [], g: { X: [], Y: [], S: [], AL: [], T: [], D: [], KO: [], n: 0 }, dense: [], routes: {}, seoul: [0, 0], krB: null, KD: 1 }
   const V = { x: 0, y: 0, w: 0, h: 0, r: 0, bg: 0, o: 1 }      // map viewport on screen
   const C = { cx: MW / 2, cy: MH / 2, z: 1 }                   // camera (z=1 → world at 90% of viewport width)
-  const A = { sw: -0.2, krDot: 0, ro: 0, krLit: 0, lit: 0, dimOn: 0, sil: 1 }
+  // rv: 오프닝에서 빛이 지나간 곳(지도 가로 위치 < rv)만 기호가 켜진다(1.2 이상이면 전부 켜짐). krR: 서울 금색 점 반지름(px)
+  const A = { sw: -0.2, krDot: 0, ro: 0, krLit: 0, lit: 0, dimOn: 0, sil: 1, rv: 2, krR: 4 }
   const P = { v: 0 }                                           // flight progress
   const PLANE = new Path2D('M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z')
 
@@ -206,6 +207,7 @@ export function createLandingMap(cv: HTMLCanvasElement) {
       } else if (A.dimOn) {
         const k = clamp((P.v - G.D[i]) / 0.04); a = a + (0.12 - a) * k
       }
+      if (A.rv < 1.2) { a *= clamp((A.rv - G.X[i] / MW) / 0.06); if (a < 0.01) continue }
       if (A.sw > -0.15 && A.sw < 1.15) { const dx = (G.X[i] / MW - A.sw) / 0.05; a += 0.5 * Math.exp(-dx * dx) }
       if (a < 0.01) continue
       ctx.globalAlpha = V.o * Math.min(1, a)
@@ -230,7 +232,7 @@ export function createLandingMap(cv: HTMLCanvasElement) {
       }
     }
     // thumbnail: Korea as one gold dot
-    if (A.krDot > 0) { ctx.globalAlpha = V.o * A.krDot; ctx.fillStyle = col.gold; ctx.beginPath(); ctx.arc(ox + Mp.seoul[0] * s, oy + Mp.seoul[1] * s, 4, 0, 6.2832); ctx.fill() }
+    if (A.krDot > 0) { ctx.globalAlpha = V.o * A.krDot; ctx.fillStyle = col.gold; ctx.beginPath(); ctx.arc(ox + Mp.seoul[0] * s, oy + Mp.seoul[1] * s, A.krR, 0, 6.2832); ctx.fill() }
     // flight routes + planes
     if (A.ro > 0) {
       ctx.strokeStyle = col.gold; ctx.lineCap = 'round'
