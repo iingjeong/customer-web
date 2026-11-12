@@ -354,7 +354,7 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     L$.lb6.style.opacity = '0' // S6는 흰 바탕 위 노트북 웹 화면(바탕 레이어 없음)
     // 배경 레이어는 레터박스까지 늘어나 있으므로(BX·BY) 쓸어 가는 선도 화면 왼쪽 끝(-BX)에서 오른쪽 끝(vw+BX)까지 간다
     const x2 = seg(t, 14.2, 14.5) * (vw + 2 * BX) - BX
-    L$.lb7.style.clipPath = `inset(0 ${vw + BX - x2}px 0 0)`
+    L$.lb7.style.visibility = t >= 14.45 ? 'visible' : 'hidden' // S7 흰 바탕: 웹 화면이 무대를 다 채운 뒤 그대로 이어받는다(쓸어 가는 선 없음)
     L$.lb8.style.opacity = String(seg(t, 16.2, 16.5))
     L$.lb9.style.opacity = String(seg(t, 18.2, 18.5))
     vis(L$.beam6b, x2 > -BX && x2 < vw + BX ? 1 : 0, `translateX(${x2}px)`)
@@ -378,7 +378,7 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     /* S6 — scan beam over the security photo */
     const on6 = t >= 12.2 && t < 14.5; vis(L$.s6, on6 ? 1 : 0)
     if (on6) {
-      L$.s6.style.clipPath = x2 > -BX ? `inset(${-BY}px ${-BX}px ${-BY}px ${x2}px)` : ''
+      L$.s6.style.clipPath = ''; L$.s6.style.opacity = String(1 - (RM ? (t >= 14.2 ? 1 : 0) : seg(t, 14.12, 14.22))) // 노트북 화면으로 다가가기 전에 물러난다
       // 제목은 노트북이 돌아오는 동안(12.4) 왼쪽 열에 — S1·S2와 같은 흐림이 걷히는 방식
       revL(L$.tt6, 12.4, t); vis(L$.tt6, t >= 12.4 ? 1 : 0); L$.p6.style.opacity = String(seg(t, 12.5, 12.7))
       // 계좌 목록은 사진이 걷히면서 웹 화면에 나타나고, 확인 표시가 한 행씩 차분하게 바뀐다(빔 없음)
@@ -390,10 +390,10 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     /* S7 — big deduction rate, ruler, printed receipt */
     const on7 = t >= 14.2 && t < 16.55; vis(L$.s7, on7 ? 1 : 0)
     if (on7) {
-      L$.s7.style.clipPath = x2 < vw + BX ? `inset(${-BY}px ${vw - x2}px ${-BY}px ${-BX}px)` : ''
+      L$.s7.style.clipPath = ''
       const out = seg(t, 16.2, 16.35)
-      revL(L$.tt7, 14.4, t); vis(L$.tt7, t >= 14.4 ? 1 : 0) // 쓸어 가는 선(14.2~14.5)이 끝나기 전에 제목이 먼저 — 빈 화면 방지
-      const bi = e3o(seg(t, 14.45, 14.7)); vis(L$.big7, bi, `translateY(${(1 - bi) * 20}px)`)
+      revL(L$.tt7, 14.36, t); vis(L$.tt7, t >= 14.36 ? 1 : 0) // 흰 페이지가 화면을 채울 때 제목·100%가 바로 — 빈 화면 방지
+      const bi = e3o(seg(t, 14.38, 14.58)); vis(L$.big7, bi, `translateY(${(1 - bi) * 20}px)`)
       L$.col7.style.opacity = String(1 - out)
       vis(L$.rul7, (t >= 14.8 ? 1 : 0) * (1 - out)); L$.rul7in.style.clipPath = `inset(-40px ${(1 - e2io(seg(t, 14.8, 15.1))) * 100}% -10px 0)`
       const td = seg(t, 15.0, 15.15); L$.today7.style.transform = `scaleY(${td})`; L$.today7.style.opacity = String(td)
@@ -593,6 +593,7 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     const s5 = Math.max((1920 + 2 * BX) / CT.w, (1080 + 2 * BY) / CT.h), cy5 = CT.y + CT.h / 2 - 870 / 2
     const f5: Pose = { tx: 960 - ox, ty: 540 - oy - cy5 * s5, s: s5, rx: 0, rz: 0 }
     const st = (a: number) => (RM ? (t >= a ? 1 : 0) : 0)
+    if (t >= 14.2) return lerpP(flat, f5, RM ? st(14.3) : e2io(seg(t, 14.2, 14.45))) // S6 → S7: 웹 화면(흰 페이지)으로 다가가 무대를 채운다
     if (t >= 12.2) return lerpP(f5, flat, RM ? st(12.3) : e2io(seg(t, 12.22, 12.5))) // S5 → S6: 사진이 다시 웹 화면 칸 속으로(S4 → S5의 반대)
     if (t >= 10.24) return lerpP(flat, f5, RM ? st(10.3) : e2io(seg(t, 10.24, 10.42)))
     if (t >= 8.4) return lerpP(f3, flat, RM ? st(8.5) : e2io(seg(t, 8.4, 8.75)))
@@ -611,7 +612,7 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     e.style.opacity = String(k); e.style.filter = k >= 1 ? '' : `blur(${(16 * (1 - k)).toFixed(2)}px)`
   })
   function tzFrame(t: number) {
-    const on = t < 10.7 || (t >= 12.2 && t < 14.5), tzBox = tzHero.parentElement!
+    const on = t < 10.7 || (t >= 12.2 && t < 14.47), tzBox = tzHero.parentElement!
     tzBox.style.visibility = on ? 'visible' : 'hidden'
     tzBox.style.opacity = on ? '1' : '0' // 자식이 visibility를 따로 켜 두므로 불투명도로도 확실히 숨긴다
     zk = RM ? (t >= 6.8 ? 1 : 0) : e2io(seg(t, 6.8, 7.35))
