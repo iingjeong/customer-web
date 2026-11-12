@@ -5,7 +5,7 @@
    - 글꼴 Pretendard는 원본처럼 정적판(landing 마운트 때 <link>로 추가). keyframes 이름에는 landing- 을 붙임. */
 .landing{
  /* 장면별 배경 (디자인 시스템 v2) */
- --bg-s0:var(--color-surface); --bg-s1:var(--color-surface); --bg-s2:var(--color-surface); --bg-s3:var(--landing-pnl-bottom); --bg-s4:var(--landing-surface-soft);
+ --bg-s0:var(--color-surface); --bg-s1:var(--color-surface); --bg-s2:var(--color-surface); --bg-s3:var(--landing-night-bg); --bg-s4:var(--landing-surface-soft);
  --bg-s5:linear-gradient(180deg,var(--landing-dawn-top),var(--landing-dawn-bottom)); --bg-s6:var(--landing-bg-s6); --bg-s7:var(--landing-bg-s7); --bg-s8:var(--color-surface);
  --bg-s9:var(--landing-bg-s9); --bg-s10:var(--color-surface); --bg-s11:var(--color-surface);
  --navy:var(--color-navy); --gold:var(--color-gold); --ink:var(--color-ink); --sub:var(--color-sub); --line:var(--color-line);
@@ -529,11 +529,45 @@ html.lenis,html.lenis body{height:auto}
 .landing #tzDev .lt-th small{display:block;font:500 16px/1.1 var(--mono)}
 .landing #tzDev .lt-n{font-variant-numeric:tabular-nums}
 .landing #tzDev .lt-mk{font:700 18px var(--mono);letter-spacing:.04em;padding:4px 8px;border:1px solid var(--landing-line-strong);border-radius:2px}
-.landing #tzDev .lt-dark{position:absolute;inset:0;z-index:5;background:var(--landing-pnl-bottom);opacity:0;pointer-events:none}
+.landing #tzDev .lt-dark{position:absolute;inset:0;z-index:5;background:var(--landing-night-bg);opacity:0;pointer-events:none}
 /* 보드는 커지는 노트북 화면 위에 그 화면 모양대로 잘려 나타난다(노트북 #tz보다 위 층) */
 .landing #board{z-index:5}
-/* 검은 화면 위 보드: 천장·걸이·금속 테두리 없이 화면에 바로 뜬 전광판 */
-.landing #bg3 .ceil,.landing #board .rod{display:none}
-.landing #board .frm{background:var(--landing-pnl-bottom);box-shadow:none}
-/* 빔프로젝터에서 행 글자가 24px 이상 되게 행 높이 36 → 44px */
-.landing #board{--rh:44px;top:120px}
+/* ===== S3 공항 출발 안내판(밤 팔레트) — 평평한 단색 면과 얇은 선만. 그라데이션·빛 번짐·유리 효과·깜빡임 없음 =====
+   무대 여백(96px) 안에 한 장으로: 왼쪽 큰 표 + 오른쪽 보조 열(M~T)이 같은 행 높이·구분선을 쓴다 */
+.landing #bg3 .ceil,.landing #board .rod,.landing #board .bsh{display:none}
+.landing #board{left:96px;width:1728px;top:92px;--rh:46px;--cn:'Roboto Condensed',Pretendard,sans-serif;color:var(--color-on-navy)}
+.landing #board .frm{grid-template-columns:minmax(0,1fr) 420px;gap:0;padding:0;border:1px solid var(--landing-night-line);border-radius:4px;box-shadow:none;background:var(--landing-night-surface);overflow:hidden}
+.landing #board .pnl{background:var(--landing-night-surface);font:500 24px/1 var(--cn);font-variant-numeric:tabular-nums}
+.landing #board .psm{border-left:1px solid var(--landing-night-line);font-size:24px}
+/* 머리줄 띠: 공항 '출발 Departures' 자리 — 안내판 면보다 한 단계 밝은 네이비 단색 */
+.landing #board .ph{height:76px;justify-content:flex-start;gap:18px;padding:0 24px;background:var(--landing-night-line)}
+.landing #board .pic{position:static;width:44px;height:44px;border-radius:3px;background:var(--color-surface);color:var(--landing-night-bg)}
+.landing #board .ptl{font:800 40px/1 Pretendard;letter-spacing:-.01em}
+.landing #board .ptl em{font:600 34px/1 var(--cn);margin-left:14px;opacity:1;color:var(--landing-night-sub)}
+/* 열 머리글: 한글 위·영어 아래 두 줄, 위쪽 맞춤 */
+.landing #board .br{column-gap:20px;padding:0 24px}
+.landing #board .pbig{--cols:.75fr .75fr 1.5fr 1.05fr .6fr 1.35fr 1.3fr}
+.landing #board .psm{--cols:.8fr 1.5fr}
+.landing #board .br.th{height:68px;align-items:center;font:700 20px/1.2 Pretendard;color:var(--color-on-navy);border-bottom:1px solid var(--landing-night-line)}
+.landing #board .br.th small{display:block;margin-top:3px;font:500 16px/1.1 var(--cn);letter-spacing:.04em;opacity:1;color:var(--landing-night-sub)}
+/* 행: 넉넉한 높이, 아주 옅은 줄무늬(면 색을 번갈아), 얇은 구분선 */
+.landing #board .rows>.br{height:var(--rh);border-bottom:1px solid var(--landing-night-line)}
+.landing #board .rows>.br:nth-child(even){background:var(--landing-night-bg)}
+.landing #board .nm{font-size:24px}
+.landing #board .br .r{text-align:right}
+/* 시장 표시: 공항 항공사 코드·게이트 칸처럼 작은 사각 칸 */
+.landing #board .mk{min-width:108px;height:32px;padding:0 10px;border-radius:2px;font:700 16px/1 var(--cn);letter-spacing:.08em;color:var(--color-on-navy);box-shadow:inset 0 0 0 1px var(--landing-night-sub)}
+/* 상태: 원화 환전 중 = '탑승 중'처럼 앰버 테두리, 원화 확정 = '출발함'처럼 흰 글자 + 작은 점 */
+.landing #board .sx{height:34px;font:700 22px/1 Pretendard}
+.landing #board .sx.s3{color:var(--color-on-navy)}
+/* 칸 넘김(엔진): 값이 바뀌는 칸만 위아래로 한 번 넘어간다 */
+.landing #board .rows>.br>span{backface-visibility:hidden}
+/* 페이지 번호·시계: 안내판 정보 표시처럼 고정폭 숫자, 깜빡임 없음 */
+.landing #board .pf{height:44px;font:600 18px/1 var(--cn);color:var(--landing-night-sub);font-variant-numeric:tabular-nums;border-top:1px solid var(--landing-night-line)}
+.landing #board .pf b{right:24px;font:600 20px/1 var(--cn);letter-spacing:.06em}
+.landing #board .pf b i{animation:none}
+/* 아래 띠: 남은 매도 한도 + '예시' */
+.landing #board .bstrip{height:52px;padding:0 24px;background:var(--landing-night-bg);border-top:1px solid var(--landing-night-line);font:700 20px/1 Pretendard}
+.landing #board .bstrip b{font:600 24px/1 var(--cn);font-variant-numeric:tabular-nums}
+.landing #board .bstrip .ex{font:700 18px/1 Pretendard;padding:6px 10px;border:1px solid var(--color-on-navy);border-radius:3px;color:var(--color-on-navy)}
+.landing #board .pbig .br>span[data-c="q"],.landing #board .pbig .rows>.br>span:nth-child(5){text-align:right;padding-right:24px}

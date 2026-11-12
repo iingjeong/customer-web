@@ -154,7 +154,8 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
       const el = stEls[i]; el.textContent = STATES[n]; el.className = 'sx s' + n
       flEls[i].textContent = n >= 1 ? r.f : ''
       krwEls[i].textContent = n >= 1 ? won(disp.A * r.share) : '-'
-      if (anim && changed) ctx.add(() => { gsap.fromTo([el, krwEls[i]], { rotationX: -88, transformPerspective: 320, transformOrigin: '50% 0%' }, { rotationX: 0, duration: 0.3, ease: 'power3.out', overwrite: true }) })
+      // 칸 넘김: 값이 바뀐 칸(상태·체결 시각·금액)만 공항 안내판처럼 위아래로 한 번 넘어간다. 움직임 줄이기면 넘김 없이 바로
+      if (anim && changed && !RM) ctx.add(() => { gsap.fromTo([el.parentElement!, flEls[i], krwEls[i]], { rotationX: -88, transformPerspective: 320, transformOrigin: '50% 0%' }, { rotationX: 0, duration: 0.3, ease: 'power3.out', overwrite: true }) })
     })
   }
   const boardLive = () => !!tl && tl.time() > R(7.25) && tl.time() < R(8.65)
@@ -630,8 +631,8 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     tzC2.style.opacity = String(o2); tzC2.style.visibility = (t >= 4.6 || (RM && t >= 4.5)) && o2 > 0 ? 'visible' : 'hidden'
     blurIn(bw2, 4.65, t, 0.04)
     // S3 문장(한 문장): 6.38부터 단어마다 선명해지고, 카메라가 화면으로 다가갈 때 왼쪽으로 물러난다
-    const o3 = 1 - (RM ? 0 : seg(t, 6.95, 7.2))
-    tzC3.style.visibility = t >= 6.36 && o3 > 0 ? 'visible' : 'hidden'; tzC3.style.opacity = String(o3)
+    const o3 = 1 - (RM ? 0 : seg(t, 6.78, 6.92)) // 커지는 화면이 문장에 닿기 전에 먼저 사라진다(잘린 글자가 보이지 않게)
+    tzC3.style.visibility = t >= 6.36 && o3 > 0 ? 'visible' : 'hidden'; tzC3.style.opacity = String(o3); tzC3.style.filter = o3 < 1 ? `blur(${(8 * (1 - o3)).toFixed(2)}px)` : ''
     tzC3.style.transform = `translateY(-50%) translateX(${(-240 * zk).toFixed(1)}px)`
     blurIn(bw3, 6.38, t, 0.03, 0.18)
     // 기기 화면: 확인서가 위로 빠지고 입고 카드가 아래에서
