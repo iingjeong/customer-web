@@ -596,14 +596,15 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     zk = RM ? (t >= 6.8 ? 1 : 0) : e2io(seg(t, 6.8, 7.35)) // 노트북이 꺼진 뒤에도 s3Frame이 쓰므로 먼저 계산
     if (!on) return
     // A: 사진 카드 → 화면 가득
-    const a = RM ? (t >= 2.34 ? 1 : 0) : e3o(seg(t, 0, 2.34))
+    const a = RM ? (t >= 2.34 ? 1 : 0) : e2o(seg(t, 0, 2.34)) // 사진이 아주 천천히 다가온다(1.06 → 1)
     // B: 다시 둥근 카드로(3.0~3.45), 위로 빠짐(3.5~4.2)
     const b = RM ? (t >= 3.0 ? 1 : 0) : e3o(seg(t, 3.0, 3.45)), up = RM ? (t >= 3.5 ? 1 : 0) : e3o(seg(t, 3.5, 4.2))
-    const top = b > 0 ? 180 * b : 88 * (1 - a), side = b > 0 ? 160 * b : 16 * (1 - a), bot = b > 0 ? 180 * b : 24 * (1 - a), rad = 24 * (b > 0 ? b : 1 - a) // 모서리는 토스(40·80)보다 작게 24
+    // 처음부터 화면 가득(여백·모서리 0). S1에서 노트북이 올라올 때만 둥근 카드(inset 180·160, 모서리 24)로 줄어든다. 사진은 레터박스까지 늘어나 있으므로 그만큼 더 안쪽으로
+    const top = 180 * b + BY * b, side = 160 * b + BX * b, bot = top, rad = 24 * b
     tzHero.style.clipPath = `inset(${top.toFixed(1)}px ${side.toFixed(1)}px ${bot.toFixed(1)}px ${side.toFixed(1)}px round ${rad.toFixed(1)}px)`
-    tzHero.style.transform = up > 0 ? `translateY(${(-1080 * up).toFixed(1)}px)` : ''
+    tzHero.style.transform = up > 0 ? `translateY(${(-(1080 + 2 * BY) * up).toFixed(1)}px)` : ''
     tzHero.style.visibility = up >= 1 ? 'hidden' : 'visible'
-    tzImg.style.transform = `scale(${(1.2 - 0.2 * a).toFixed(4)})`
+    tzImg.style.transform = `scale(${(1.06 - 0.06 * a).toFixed(4)})`
     const wo = RM ? (t < 2.5 ? 1 : 0) : 1 - seg(t, 2.45, 2.75)
     tzW.style.opacity = String(wo)
     // 기기: 아래에서 올라온다(2.5~3.0)

@@ -19,6 +19,8 @@ export function LandingScene1({ t }: { t: LandingTexts }) {
         <div className="tzh-ph">
           <img src="/assets/photo-open.jpg" alt="밝은 공항 터미널" />
         </div>
+        {/* 위쪽 아주 옅은 흰 그늘 — 사진 위에서도 머리글(로고·로그인·시작하기)이 또렷하게 */}
+        <i className="tzh-top" />
         <i className="tzh-sh" />
         <p className="tzh-w">
           <span>국내로 잇는 투자,</span>
