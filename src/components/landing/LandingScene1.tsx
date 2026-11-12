@@ -140,6 +140,8 @@ export function LandingScene1({ t }: { t: LandingTexts }) {
           </div>
           {/* S4 비행 화면 — 지도(캔버스)와 위·아래 정보 띠(#monUI)가 이 자리에 맞춰 그려진다 */}
           <div className="tzd-pg" id="tzP4" />
+          {/* S6 연결 계좌 점검 페이지 — 계좌 목록·결과 칸(#list6·#big6)이 이 자리에 맞춰 그려진다 */}
+          <div className="tzd-pg" id="tzP5" />
         </div>
           </div>
         </div>

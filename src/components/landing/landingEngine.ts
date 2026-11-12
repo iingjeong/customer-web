@@ -280,23 +280,6 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
   }
 
 
-  /* S6 duotone baked once into images (no live filters while scrolling) */
-  const bakeSrc = new Image()
-  bakeSrc.onload = () => {
-    if (dead) return
-    const w = Math.min(1600, bakeSrc.naturalWidth), hh = Math.round(w * bakeSrc.naturalHeight / bakeSrc.naturalWidth), c = document.createElement('canvas'); c.width = w; c.height = hh
-    const x = c.getContext('2d')!; x.filter = 'grayscale(1) blur(2px)'; x.drawImage(bakeSrc, 0, 0, w, hh); x.filter = 'none'
-    const base = x.getImageData(0, 0, w, hh), lo = [11, 27, 51], hi = [214, 222, 234] // 보안 검색대 사진 이중톤(남색 → 밝은 회청색) 변환 값(이미지 처리용 숫자) — 청록 쓰지 않음
-    const make = (inv: boolean) => {
-      const d = new ImageData(new Uint8ClampedArray(base.data), w, hh), p = d.data
-      for (let i = 0; i < p.length; i += 4) { let g = p[i] / 255; if (inv) g = 1 - g; p[i] = lo[0] + (hi[0] - lo[0]) * g; p[i + 1] = lo[1] + (hi[1] - lo[1]) * g; p[i + 2] = lo[2] + (hi[2] - lo[2]) * g }
-      x.putImageData(d, 0, 0); return c.toDataURL('image/jpeg', 0.86)
-    }
-    // 스캔 전(#ph6a)은 원래 색 사진 그대로 둔다(청록 이중톤으로 덮지 않음). 스캔 빔이 지나간 쪽(#ph6b)만 반전 이중톤 — 검색대 화면 효과
-    $<HTMLImageElement>('#ph6b img').src = make(true)
-  }
-  bakeSrc.src = import.meta.env.BASE_URL + 'assets/photo-security.jpg'
-  cleanups.push(() => { bakeSrc.onload = null; bakeSrc.removeAttribute('src') })
 
   function buildLate(vw: number, vh: number) {
     const pad = parseFloat(getComputedStyle(stageEl).getPropertyValue('--pad')) || 96 // 무대(.stg) 안 --pad는 96px 고정
@@ -366,9 +349,9 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     const c = paintLate(), vw = LG.vw, vh = LG.vh
     /* backgrounds: dawn rises from below → teal → sky (swept left→right) → white → ivory */
     // S4→S5: 아침 사진이 무대를 다 채운 뒤(10.42) S5 바탕(같은 사진)이 그대로 이어받는다
-    const m = t >= 10.42 ? 100 : 0
+    const m = t >= 10.42 && t < 12.2 ? 100 : 0 // S5 → S6: 같은 사진(#hero)이 이어받아 노트북 화면 속으로 줄어든다
     L$.lb5.style.webkitMaskImage = L$.lb5.style.maskImage = `linear-gradient(to top,rgb(0,0,0) ${m}%,transparent ${m}%)`
-    L$.lb6.style.opacity = String(seg(t, 12.2, 12.5))
+    L$.lb6.style.opacity = '0' // S6는 흰 바탕 위 노트북 웹 화면(바탕 레이어 없음)
     // 배경 레이어는 레터박스까지 늘어나 있으므로(BX·BY) 쓸어 가는 선도 화면 왼쪽 끝(-BX)에서 오른쪽 끝(vw+BX)까지 간다
     const x2 = seg(t, 14.2, 14.5) * (vw + 2 * BX) - BX
     L$.lb7.style.clipPath = `inset(0 ${vw + BX - x2}px 0 0)`
@@ -396,16 +379,13 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     const on6 = t >= 12.2 && t < 14.5; vis(L$.s6, on6 ? 1 : 0)
     if (on6) {
       L$.s6.style.clipPath = x2 > -BX ? `inset(${-BY}px ${-BX}px ${-BY}px ${x2}px)` : ''
-      const pi = seg(t, 12.2, 12.5); L$.ph6a.style.opacity = String(pi)
-      // 제목은 S5가 다 빠지기 전(12.38)에 올라오기 시작한다 — 장면 사이에 빈 화면이 생기지 않게
-      revL(L$.tt6, 12.38, t); vis(L$.tt6, t >= 12.38 ? 1 : 0); L$.p6.style.opacity = String(seg(t, 12.5, 12.7))
-      const bx = seg(t, 12.8, 13.7) * (vw + 2 * BX) - BX
-      vis(L$.beam6, bx > -BX && bx < vw + BX ? 1 : 0, `translateX(${bx}px)`)
-      L$.ph6b.style.clipPath = `inset(0 ${vw + BX - bx}px 0 0)`; L$.ph6b.style.opacity = String(pi)
-      const l = LG.l6!
-      rows6.forEach((row, i) => { row.style.visibility = bx >= l.x ? 'visible' : 'hidden'; ems6[i].style.opacity = String(clamp((bx - (l.x + (i + 1) / 5 * l.w)) / 40)) })
+      // 제목은 노트북이 돌아오는 동안(12.4) 왼쪽 열에 — S1·S2와 같은 흐림이 걷히는 방식
+      revL(L$.tt6, 12.4, t); vis(L$.tt6, t >= 12.4 ? 1 : 0); L$.p6.style.opacity = String(seg(t, 12.5, 12.7))
+      // 계좌 목록은 사진이 걷히면서 웹 화면에 나타나고, 확인 표시가 한 행씩 차분하게 바뀐다(빔 없음)
+      const li = RM ? 1 : seg(t, 12.52, 12.62)
+      rows6.forEach((row, i) => { row.style.visibility = li > 0 ? 'visible' : 'hidden'; row.style.opacity = String(li); ems6[i].style.opacity = String(RM ? 1 : seg(t, 12.85 + i * 0.22, 12.97 + i * 0.22)) })
       const gk = seg(t, 13.7, 14.0); vis(L$.big6, gk > 0 ? 1 : 0, `translateY(${(1 - e3o(gk)) * 16}px)`)
-      setT(L$.pct6, Math.round(100 - 18 * e3o(gk)) + '%')
+      setT(L$.pct6, String(Math.round(100 - 18 * e3o(gk))))
     }
     /* S7 — big deduction rate, ruler, printed receipt */
     const on7 = t >= 14.2 && t < 16.55; vis(L$.s7, on7 ? 1 : 0)
@@ -484,11 +464,12 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     // 정보 띠는 노트북이 곧은 자세로 돌아와 비행 화면이 들어온 뒤(8.78~8.9) 나타나고, 카메라가 다가가기 전에 사라진다
     sv(monUiEl, t >= 8.7 && t < 10.44 ? seg(t, 8.78, 8.9) * (1 - seg(t, 10.18, 10.26)) : 0, tf)
     // 서울 야경: 모니터 화면 모양대로 잘려 보이다가 화면과 함께 커진다. 하늘이 다 덮이면(10.7) S5 바탕이 이어받는다
-    const hv = t >= 10.1 && t < 10.7
-    const ho = RM ? (t >= 10.3 ? 1 : 0) : seg(t, 10.12, 10.24)
+    const back = t >= 12.2 // S5 → S6: 화면 가득한 사진이 다시 칸 속으로 줄어든 뒤 걷힌다
+    const hv = (t >= 10.1 && t < 10.7) || (back && t < 12.58)
+    const ho = back ? 1 - (RM ? (t >= 12.5 ? 1 : 0) : seg(t, 12.5, 12.57)) : RM ? (t >= 10.3 ? 1 : 0) : seg(t, 10.12, 10.24)
     sv(heroEl, hv ? ho : 0)
     if (hv) {
-      heroEl.style.clipPath = zk >= 1 ? '' : `inset(${Math.max(0, y0 + BY).toFixed(1)}px ${Math.max(0, g.vw + BX - x0 - w).toFixed(1)}px ${Math.max(0, g.vh + BY - y0 - h).toFixed(1)}px ${Math.max(0, x0 + BX).toFixed(1)}px round ${(2 * (1 - zk)).toFixed(1)}px)`
+      heroEl.style.clipPath = `inset(${Math.max(0, y0 + BY).toFixed(1)}px ${Math.max(0, g.vw + BX - x0 - w).toFixed(1)}px ${Math.max(0, g.vh + BY - y0 - h).toFixed(1)}px ${Math.max(0, x0 + BX).toFixed(1)}px round ${(2 * (1 - zk)).toFixed(1)}px)`
     }
     if (t < g.T1x) return                       // S0–S1: map viewport is tween-driven
     if (t < 8.55) { V.o = 0; return }
@@ -591,7 +572,7 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
      움직임 줄이기: 각 장면의 끝난 상태(완성 화면)만 */
   function s01Frame() { Object.assign(V, { o: 0 }) } // 지도는 S4 기내 모니터부터
   const tzHero = byId('tzHero'), tzImg = $('#tzHero .tzh-ph img'), tzW = $('#tzHero .tzh-w'), tzDev = byId('tzDev')
-  const tzP1 = byId('tzP1'), tzP2 = byId('tzP2'), tzP3 = byId('tzP3'), tzP4 = byId('tzP4'), tzC3 = byId('c3t'), tzC1 = byId('c1'), tzC2 = byId('c2'), tzC1p = byId('c1p'), tzS1 = byId('s1')
+  const tzP1 = byId('tzP1'), tzP2 = byId('tzP2'), tzP3 = byId('tzP3'), tzP4 = byId('tzP4'), tzP5 = byId('tzP5'), tzC3 = byId('c3t'), tzC1 = byId('c1'), tzC2 = byId('c2'), tzC1p = byId('c1p'), tzS1 = byId('s1')
   const bw1 = $$('#c1 .bw'), bw2 = $$('#c2 .bw'), bw3 = $$('#c3t .bw')
   // 노트북 기울기: 토스 휴대폰 각도(측정한 matrix3d ≈ Z 10°, X 21°)에서 가져와 가로 노트북에 맞게 줄였다
   const TILT3 = 'perspective(2400px) rotateX(18deg) rotateZ(-5deg)'
@@ -612,6 +593,7 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     const s5 = Math.max((1920 + 2 * BX) / CT.w, (1080 + 2 * BY) / CT.h), cy5 = CT.y + CT.h / 2 - 870 / 2
     const f5: Pose = { tx: 960 - ox, ty: 540 - oy - cy5 * s5, s: s5, rx: 0, rz: 0 }
     const st = (a: number) => (RM ? (t >= a ? 1 : 0) : 0)
+    if (t >= 12.2) return lerpP(f5, flat, RM ? st(12.3) : e2io(seg(t, 12.22, 12.5))) // S5 → S6: 사진이 다시 웹 화면 칸 속으로(S4 → S5의 반대)
     if (t >= 10.24) return lerpP(flat, f5, RM ? st(10.3) : e2io(seg(t, 10.24, 10.42)))
     if (t >= 8.4) return lerpP(f3, flat, RM ? st(8.5) : e2io(seg(t, 8.4, 8.75)))
     if (t >= 6.8) return lerpP(rest, f3, zk)
@@ -629,7 +611,7 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     e.style.opacity = String(k); e.style.filter = k >= 1 ? '' : `blur(${(16 * (1 - k)).toFixed(2)}px)`
   })
   function tzFrame(t: number) {
-    const on = t < 10.7, tzBox = tzHero.parentElement!
+    const on = t < 10.7 || (t >= 12.2 && t < 14.5), tzBox = tzHero.parentElement!
     tzBox.style.visibility = on ? 'visible' : 'hidden'
     tzBox.style.opacity = on ? '1' : '0' // 자식이 visibility를 따로 켜 두므로 불투명도로도 확실히 숨긴다
     zk = RM ? (t >= 6.8 ? 1 : 0) : e2io(seg(t, 6.8, 7.35))
@@ -679,7 +661,9 @@ export function mountLanding(root: HTMLElement, opts: LandingMountOptions): () =
     // S3 → S4: 노트북이 물러나는 동안 매도 화면이 위로 빠지고 비행 화면이 아래에서(8.5~8.72)
     const sw4 = RM ? (t >= 8.5 ? 1 : 0) : e3o(seg(t, 8.5, 8.72))
     tzP3.style.transform = `translateY(${(100 * (1 - sw3) - 100 * sw4).toFixed(2)}%)`; tzP3.style.visibility = sw3 > 0 && sw4 < 1 ? 'visible' : 'hidden'
-    tzP4.style.transform = `translateY(${(100 * (1 - sw4)).toFixed(2)}%)`; tzP4.style.visibility = sw4 > 0 ? 'visible' : 'hidden'
+    tzP4.style.transform = `translateY(${(100 * (1 - sw4)).toFixed(2)}%)`; tzP4.style.visibility = sw4 > 0 && t < 12.2 ? 'visible' : 'hidden'
+    // S6: 사진이 칸 속으로 들어오는 동안 웹 화면은 연결 계좌 점검 페이지(사진이 덮고 있다가 걷힌다)
+    tzP5.style.visibility = t >= 12.2 ? 'visible' : 'hidden'
   }
 
   function build() {
