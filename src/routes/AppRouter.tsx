@@ -41,7 +41,7 @@ function RequireAuth({ children }: { children: ReactNode }) {
 
 export function AppRouter() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <Routes>
         <Route element={<BareLayout />}>
           <Route path="/" element={page(<LandingPage />, blank('var(--color-photo-base)'))} />
