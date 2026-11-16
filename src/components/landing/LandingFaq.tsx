@@ -1,17 +1,26 @@
-import { LandingFaqItems } from './LandingLists'
+import type { Reg } from './landingRefs'
 
-export function LandingFaq() {
+// 자주 묻는 질문 8칸 — 원본 #faq (펼치기 없이 질문·답을 함께 보여 줌)
+const FAQ: Array<[string, string]> = [
+  ['어떤 해외주식이 대상인가요?', '2025.12.23 기준 보유분이에요. 이후 새로 산 주식은 입고할 수 없어요.'],
+  ['매도 한도는 얼마인가요?', '전 증권사를 합쳐 5,000만 원, 증권사별 1개 계좌예요.'],
+  ['원금은 언제 인출할 수 있나요?', '원화 환전 확정일부터 1년이 지나면 인출할 수 있어요.'],
+  ['다른 계좌에서 해외주식을 사도 되나요?', '2026년 1~12월 RIA 외 계좌의 순매수는 금액에 비례해 공제가 줄어요.'],
+  ['증빙서류는 언제 받을 수 있나요?', '2027년부터 받을 수 있어요.'],
+  ['언제까지 가입할 수 있나요?', '2026년 12월 31일까지예요.'],
+  ['투자성향 진단은 왜 하나요?', '금융소비자보호법의 적합성 원칙에 따라 진행해요.'],
+  ['위험등급은 어떻게 정하나요?', '금융투자협회 가이드라인의 VaR 방식을 참고해 과거 3년 시세로 정해요.'],
+]
+
+export function LandingFaq({ reg }: { reg: Reg }) {
   return (
-    <section id="faq" data-screen-label="S10 FAQ">
-      <div className="fq">
-        <div className="fqL">
-          <h2>자주 묻는 질문</h2>
-          <a href="#faq">더 궁금한 건 끼루 AI 챗봇에게 물어보세요 →</a>
+    <div id="faq" ref={reg('faq')}>
+      {FAQ.map(([q, a]) => (
+        <div key={q}>
+          <b>{q}</b>
+          <p>{a}</p>
         </div>
-        <div className="fqR" id="fqR">
-          <LandingFaqItems />
-        </div>
-      </div>
-    </section>
+      ))}
+    </div>
   )
 }

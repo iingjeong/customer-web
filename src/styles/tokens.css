@@ -239,4 +239,35 @@
   --landing-mk-tse: #c4302b; /* 전광판 시장 TSE */
   --landing-mk-lse: #5e626b; /* 전광판 시장 LSE */
   --landing-mk-hkex: #dd7a1f; /* 전광판 시장 HKEX */
+
+  /* --- 새 랜딩(원본 _design/returns-landing) — 원본 값 그대로. 위쪽 옛 랜딩 변수는 src/components/landing-legacy 보관용 --- */
+  --landing-v2-ink: #0f1e3d; /* 글자·남색(원본 --ink·--navy) */
+  --landing-v2-sub: #5d6678; /* 보조 글자(원본 --sub) */
+  --landing-v2-mute: #9aa1ae; /* 흐린 글자(원본 --mute) */
+  --landing-v2-line: #e6e7ea; /* 선(원본 --line) */
+  --landing-v2-gold: #b8935a; /* 금색(원본 --gold) */
+  --landing-v2-gold-light: #d9bc8c; /* 밝은 금색·항로 선(원본 --goldl) */
+  --landing-v2-paper: #f6f5f2; /* 종이색(원본 --paper) */
+  --landing-v2-white: #ffffff; /* 흰색 */
+  --landing-v2-navy-hover: #1a2e57; /* 계좌 개설 버튼 hover */
+  --landing-v2-night-1: #162b52; /* 밤 배경 그라데이션 가운데 아래 */
+  --landing-v2-night-2: #0c1a36; /* 밤 배경 그라데이션 중간 */
+  --landing-v2-night-3: #08122a; /* 밤 배경 그라데이션 바깥 */
+  --landing-v2-lid: #0a0a0c; /* 노트북 화면 테두리 */
+  --landing-v2-lid-edge: #2a2b2f; /* 노트북 화면 테두리 가장자리 */
+  --landing-v2-camera: #1f2633; /* 노트북 카메라 점 */
+  --landing-v2-base-1: #eceef1; /* 노트북 받침 그라데이션 위 */
+  --landing-v2-base-2: #cdd1d7; /* 노트북 받침 그라데이션 중간 */
+  --landing-v2-base-3: #a2a7af; /* 노트북 받침 그라데이션 아래 */
+  --landing-v2-notch-1: #a3a8b0; /* 노트북 받침 홈 위 */
+  --landing-v2-notch-2: #c6cad0; /* 노트북 받침 홈 아래 */
+  --landing-v2-ui-line: #edeff2; /* 노트북 웹 화면 구분선 */
+  --landing-v2-ui-tab: #8a919c; /* 노트북 웹 화면 탭·작은 글자 */
+  --landing-v2-ui-faint: #9aa1ac; /* 노트북 웹 화면 경로·라벨 */
+  --landing-v2-ui-label: #5b6472; /* 노트북 웹 화면 금액 라벨 */
+  --landing-v2-ui-step: #b4bac3; /* 노트북 웹 화면 진행 단계(꺼짐) */
+  --landing-v2-ui-track: #ecedf0; /* 노트북 웹 화면 한도 막대 바탕 */
+  --landing-v2-ui-bar: #c9cdd6; /* 입고 수량 막대·1년 눈금 */
+  --landing-v2-list-off: #b6bbc4; /* 서비스 목록(꺼진 줄) */
+  --landing-v2-cut: #a0a7b2; /* 세액이 잘린 뒤 작아진 금액 글자 */
 }
