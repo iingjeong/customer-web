@@ -53,7 +53,7 @@ function ArticleConversation({ customerId, article, summaries }: { customerId: n
       </div>)}
       {conversation.pendingQuestion && <div className={styles.turn}>
         <div className={styles.meRow}><span className={styles.me}>{conversation.pendingText}</span></div>
-        <p className={styles.waiting} role="status">끼루가 기사에서 답을 찾고 있어요…</p>
+        <p className={styles.waiting} role="status">끼루가 질문의 답을 찾는 중...</p>
       </div>}
       {conversation.error && <div role="alert">{conversation.error}<button type="button" onClick={conversation.retry}>기사 다시 불러오기</button></div>}
     </div>

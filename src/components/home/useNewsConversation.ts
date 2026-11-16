@@ -50,7 +50,11 @@ export function useNewsConversation(customerId: number, article: Article | null,
       { role: 'assistant' as const, content: t.answer.explanation },
     ]).slice(-6)
     try {
-      const answer = await newsApi.question(article, question, history, ticket.signal)
+      // 시연 연출: 답이 빨리 와도 "찾는 중" 화면을 최소 3초 보여 준다(답이 3초보다 늦으면 더 기다리지 않는다)
+      const [answer] = await Promise.all([
+        newsApi.question(article, question, history, ticket.signal),
+        new Promise(resolve => setTimeout(resolve, 3000)),
+      ])
       if (ticket.current() && answer.articleId === article.id && answer.articleVersion === article.version) {
         setTurns(previous => [...previous.slice(-2), { question, answer }])
       }
