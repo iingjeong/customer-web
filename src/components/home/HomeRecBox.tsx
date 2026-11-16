@@ -271,7 +271,7 @@ export function HomeRecBox({ className, onOpenFullAsk, onAskDeposit }: HomeRecBo
                   <img className={styles.face} src={assetUrl('assets/kkiru-ai-face.png')} alt="끼루" />
                   <div className={styles.bubble}>
                     {m.ai && <span className={styles.aiTag}>AI</span>}
-                    {m.wait ? '답을 찾고 있어요…' : m.text}
+                    {m.wait ? '끼루가 답을 찾는 중...' : m.text}
                     {m.pkg && opened && (
                       <div className={styles.bubbleBtn}>
                         <button type="button" className={styles.bubbleAdd} onClick={() => addPkg(m.pkg as string)}>
