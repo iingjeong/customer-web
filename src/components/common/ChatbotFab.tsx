@@ -8,7 +8,8 @@ import styles from './ChatbotFab.module.css'
 
 /** 끼루 말풍선 본문 + 링크 목록 */
 function KkBody({ text, src }: { text: string; src?: string }) {
-  const { body, links } = parseKkText(text)
+  // 답이 아직 안 왔을 때(빈 말풍선) 대기 문구를 보여 준다
+  const { body, links } = parseKkText(text || '끼루가 답을 찾는 중...')
   return (
     <div className={styles.kkBody}>
       <p className={styles.kkText}>{body}</p>
@@ -169,7 +170,7 @@ export function ChatbotFab({ open: openProp, onOpenChange, children, panelWidth 
               <div className={styles.simpleList} ref={listRef} style={chat.listMaxHeight ? { maxHeight: chat.listMaxHeight } : undefined}>
                 {chat.messages.map((m, i) => (
                   <div key={i} className={cx(styles.simpleRow, 'me' in m && styles.simpleRowMe)}>
-                    <span className={cx(styles.simpleMsg, 'me' in m && styles.simpleMsgMe)}>{m.text}</span>
+                    <span className={cx(styles.simpleMsg, 'me' in m && styles.simpleMsgMe)}>{m.text || ('me' in m ? '' : '끼루가 답을 찾는 중...')}</span>
                   </div>
                 ))}
               </div>
