@@ -1,94 +1,145 @@
-// 장면 표와 시간 변환 — 원본 landing-journey.html의 R(), SCN, TOTAL (타임라인 시간 1 = 화면 1장)
+// 새 랜딩 장면 시점·위치값 — 원본 _design/returns-landing/app.js의 숫자를 그대로 모았다.
+// 타임라인 시간 단위는 원본과 같다(전체 TOTAL, 스크롤 길이 = TOTAL × 화면 높이 × SCROLL_PER_T).
+// 연출 코드(useLandingTimeline)에는 숫자를 직접 쓰지 않고 여기서 가져간다.
 
-/* S0–S4는 예전 시간 단위로 써 둔 것을 장면당 2.5 / 2.0장으로 늘려 쓴다 */
-export function R(t: number): number {
-  const O = [0, 2.95, 4.85, 6.85, 8.55, 11.75], N = [0, 2.5, 4.5, 6.5, 8.5, 10.5]
-  if (t >= O[5]) return N[5] + (t - O[5])
-  for (let i = 1; i < 6; i++) if (t <= O[i]) return N[i - 1] + (t - O[i - 1]) * (N[i] - N[i - 1]) / (O[i] - O[i - 1])
-  return t
+/* ===== 무대 ===== */
+export const STAGE_W = 1920
+export const STAGE_H = 1080
+export const FIT_MIN_W = 1800 // 배율 = min(max(폭/1920, 높이/1080), 폭/1800)
+
+/* ===== 스크롤·발표 ===== */
+export const LENIS_LERP = 0.07
+export const LENIS_WHEEL = 0.8
+export const SCRUB = 1.1 // 스크롤 → 타임라인 따라가는 시간(초)
+export const SCROLL_PER_T = 0.95 // 타임라인 1 = 화면 높이 × 0.95
+export const GLIDE_MIN = 1.6 // 발표 키·메뉴 이동 시간(초) = clamp(1.6 + 거리 × 0.3, 1.6, 4.2)
+export const GLIDE_PER_T = 0.3
+export const GLIDE_MAX = 4.2
+export const PAST_END_BACK_SEC = 1.6 // 핀이 끝난 뒤(푸터)에서 ↑ 키로 돌아갈 때
+export const TO_FOOTER_SEC = 1.4 // 마지막 장면에서 ↓ 키로 푸터까지
+export const HDR_TOP_Y = 40 // 이 높이 안이면 "맨 위"(상단 바 그대로)
+export const HDR_HOVER_Y = 90 // 마우스가 이 높이 안으로 오면 상단 바가 다시 나타남
+export const HDR_DIR_EPS = 2 // 스크롤 방향 판정 여유(px)
+
+/* ===== 노트북·지구본·금액 위치(무대 px) ===== */
+export const CLIP_BLEED = 300 // 배경 레이어가 무대 밖으로 늘어난 폭(.bleed inset:-300px)
+export const LAP_SCREEN = { t: 318, r: 480, b: 162, l: 480 } // 첫 사진이 줄어들어 노트북 화면 자리가 되는 안쪽 여백
+export const AMT_FONT = 56 // 화면 속 금액 글자 크기
+export const AMT_BIG = 3.6 // 가운데로 날아왔을 때 배율
+export const AMT_CENTER_Y = 410
+export const GLOBE = { x: 310, y: 330, size: 1300, view: 2200 } // 지구본 위치·크기, SVG viewBox 크기
+export const TAG_FONT = 22 // 지구본 위 금액 꼬리표 글자 크기
+export const TAG_LIFT = 44 // 꼬리표가 점 위로 떠 있는 높이
+export const LAP_DROP_Y = 920 // 노트북이 내려가 숨는 위치
+export const LAP_SVC = { x: 250, y: 40, scale: 0.9 } // 서비스 장면에서 노트북 위치
+export const GLOBE_ZOOM = 2.4 // 1년 장면으로 넘어갈 때 서울 쪽으로 확대
+export const DATE_FROM_SCALE = 0.08 // 1년 날짜가 서울 점에서 커지며 나올 때 시작 배율
+
+/* ===== 장면 시점(타임라인 초) ===== */
+export const O = 4.1 // 매도 장면 뒤로 밀린 시간(원본 const O)
+export const T = {
+  heroOut: 0,
+  photoShrink: 0.2,
+  shadeOut: 0.3,
+  lapIn: 1.15,
+  photoOut: 1.5,
+  hOpen: 1.45,
+  seal: 1.85,
+  limitFill: 2.0,
+  // S2 입고
+  deposit: 3.3,
+  hDeposit: 3.5,
+  qtyBars: 3.7,
+  qtyDim: 4.35,
+  qtyResult: 4.4,
+  // S3 매도
+  sell: 5.0,
+  hSell: 5.2,
+  steps: 5.5,
+  // 환전(여기부터 + O)
+  sellOut: 2.6 + O,
+  amtShow: 2.65 + O,
+  amtFly: 2.7 + O,
+  night: 2.85 + O,
+  amtWhite: 3.0 + O,
+  hExchange: 3.55 + O,
+  usdOut: 4.0 + O,
+  krwRoll: 4.2 + O,
+  fx: 5.0 + O,
+  // 귀환
+  homecoming: 6.0 + O,
+  amtToNY: 6.6 + O,
+  hHome: 6.7 + O,
+  cityLabels: 7.2 + O,
+  gch: 7.3 + O,
+  amtWeight: 7.4 + O,
+  tag: 7.5 + O,
+  arcNY: 7.7 + O,
+  arcTK: 8.0 + O,
+  seoul: 9.2 + O,
+  // 1년
+  year: 9.9 + O,
+  globeZoom: 10.0 + O,
+  dateSet: 10.4 + O,
+  dateIn: 10.45 + O,
+  hYear: 10.9 + O,
+  dateRow: 11.0 + O,
+  dawnImgReset: 11.2 + O,
+  dawnOn: 11.25 + O,
+  dawn: 11.3 + O,
+  // 세금·서비스·FAQ·마무리
+  t7: 17.8,
+  t8: 21.0,
+  t9: 27.4,
+  t10: 30.0,
+}
+export const TOTAL = T.t10 + 2.3
+export const STEP_COUNT_DUR = 1.1 // 매도 진행 단계 4칸이 켜지는 시간
+export const KRW_DIGIT_GAP = 0.05 // 원화 숫자 굴림 칸마다 늦게 시작
+
+/* ===== 서비스 장면: 끼루가 노트북 위를 걷는다 ===== */
+export const SVC = {
+  firstWalk: 1.2, // t8 + 1.2에 첫 칸으로
+  firstArrive: 1.8, // 첫 멈춤(발표 키)
+  start: 1.9, // 두 번째 화면부터 t8 + 1.9 + (i - 1) × gap
+  gap: 0.75,
+  walk: 0.5, // 한 칸 걷는 시간
+  stopAfter: 0.15, // 도착 뒤 발표 멈춤
+  count: 7,
+  exitW: 7.3, // FAQ로 넘어갈 때 걸어 나가는 위치
+}
+export const KK_WALK = {
+  left0: 8, // 첫 칸 왼쪽(%)
+  span: 84, // 7칸이 차지하는 폭(%)
+  offset: 6.35, // 끼루 폭 절반(%)
+  lastW: 6, // 이 칸부터는 걸음 멈춤
+  fadeEnd: 7.2, // 이 위치에서 사라짐
+  tilt: 5, // 몸 기울기(도)
+  bob: 6, // 몸 들썩임(px)
+  stepX: 8, // 발 앞뒤(px)
+  stepY: 7, // 발 들기(px)
+  faceK: 3.2, // 걷기 정도 → 앞모습/옆모습 전환
 }
 
-export const TOTAL = 21.9
+/* ===== 발표 멈춤 지점·메뉴 이동 ===== */
+export const STOPS_BEFORE_SVC = [0, 3.1, 4.8, 6.6, 9.8, 13.6, 17.4, 20.7]
+export const FAQ_STOP = T.t9 + 2.2
+// FAQ 영역이 클릭을 받는 구간(원본에 없는 추가): FAQ 칸이 나타나기 시작할 때 ~ 마무리 장면으로 넘어갈 때.
+// 그 밖에는 pointer-events:none — 원본은 FAQ 상자가 늘 보이는 상태라(내용만 숨김) 세금 장면의 공제율 버튼을 덮었다
+export const FAQ_CLICK = { on: T.t9 + 0.8, off: T.t10 }
+export const NAV_TARGETS = { flow: 3.1, tax: 20.7, faq: FAQ_STOP } // 서비스는 첫 도착 지점(코드에서 계산)
 
-export interface Scene {
-  k: string
-  n: string
-  a: number
-  b: number
-  done: number
+/** 상단 바 글자를 진하게(밝은 장면) 둘 시간 구간 */
+export const inkAt = (t: number): boolean => (t > 0.5 && t < 6.95) || (t > T.t7 + 0.35 && t < T.t10 + 0.6)
+
+/* ===== 오프닝(스크롤과 무관하게 한 번 재생) ===== */
+export const OPENING = { delay: 0.1, photo: 2.8, en: 0.3, title: 0.4, rest: 1.0 }
+
+/* ===== 화면 예시 값 ===== */
+export const EX_GAIN = 10000000 // 세금 예시 양도차익(매도 3,000만 원 중). 세액 계산은 landingDates.ts
+// 예시 날짜 — RIA 출시(2026.03.23) 이후: 매도 체결 → 2영업일 뒤 원화 확정 → 1년 뒤 인출 가능
+export const EX_DATES = {
+  sold: '2026.04.08 09:31', // 노트북 매도 화면 체결 시각
+  confirmed: '2026.04.10', // 원화 확정일(환전 정보 줄·지구본·1년 장면)
+  withdraw: '2027.04.10', // 1년 장면 큰 날짜(인출 가능일)
 }
-
-export const SCN: Scene[] = [
-  { k: 'S0', n: '해외 자산', a: 0, b: 2.5, done: 0 }, // 움직임 줄이기 맞춤 위치: 오프닝이 끝난 화면(지도 + 슬로건)
-  { k: 'S1', n: '계좌 개설', a: 2.5, b: 4.5, done: 4.25 },
-  { k: 'S2', n: '입고', a: 4.5, b: 6.5, done: 5.15 },
-  { k: 'S3', n: '매도', a: 6.5, b: 8.5, done: 8.3 },
-  { k: 'S4', n: '국내 복귀', a: 8.5, b: 10.5, done: 10.0 },
-  { k: 'S5', n: '1년 유지', a: 10.5, b: 12.5, done: 12.2 },
-  { k: 'S6', n: '외부감시', a: 12.5, b: 14.5, done: 14.15 },
-  { k: 'S7', n: '공제율·세액', a: 14.5, b: 16.5, done: 16.15 },
-  { k: 'S8', n: '국내 투자', a: 16.5, b: 18.5, done: 18.15 },
-  { k: 'S9', n: '서비스', a: 18.5, b: 21.9, done: 21.7 },
-]
-
-/* ===== 장면별 스크롤 길이(화면 수) =====
-   타임라인 시간(각 장면의 a~b)과 연출 코드는 그대로 두고, "스크롤 위치 → 타임라인 시간" 변환만 장면마다 다르게 한다.
-   예전에는 시간 1 = 스크롤 1화면으로 고정이라, 연출이 몰린 장면(S1 화면당 8개, S2 7개, S4 6개)은 빨리 지나가고
-   느린 확대 하나뿐인 S0(3.6개)은 느리게 느껴졌다. 몰린 장면은 길게, S0은 짧게 해서 화면당 연출 양을 고르게 맞춘다.
-   PACE는 전체 속도 배율(아래 조정 값 모음 참고) */
-
-/* ===== 속도 조정 값 — 숫자만 바꿔서 조절한다 ===== */
-/** 전체 스크롤 길이 배율. 1.5면 모든 장면이 1.5배 길어진다(같은 스크롤에 연출이 덜 진행 = 느려짐). 장면별 길이는 아래 SCREENS */
-export const PACE = 1
-/** 휠·트랙패드 한 번에 움직이는 양(1 = 브라우저 기본). 작을수록 둔해진다 */
-export const WHEEL_MULT = 0.6
-/** 부드러운 스크롤이 목표 위치를 따라가는 정도(0~1). 작을수록 더 미끄러지듯 천천히 따라간다(기본 0.1) */
-export const SMOOTH_LERP = 0.07
-/** 휠을 세게 돌려도 스크롤 목표가 현재 위치보다 최대 몇 화면까지만 앞서 갈 수 있는지 — 사실상 휠 최고 속도.
- *  0.3이면 최고 초당 약 1.3화면이라, 세게 1초 돌려도 한 장면(2~3화면) 안에서 멈춘다. 키우면 빨리 넘길 수 있다 */
-export const WHEEL_MAX_AHEAD = 0.3
-/** 장면 연출이 스크롤 위치를 따라잡는 시간(초). 클수록 부드럽지만 늦게 따라온다 */
-export const FOLLOW_SEC = 0.6
-/** 발표 모드: 키 한 번에 다음(이전) 박자 지점까지 이동하는 시간(초) */
-export const BEAT_SEC = 1.1
-/** 발표 모드: 키를 누른 뒤 다음 입력을 무시하는 시간(초). 연타로 건너뛰지 않게 이동 시간보다 조금 길게 */
-export const BEAT_LOCK_SEC = 1.3
-const SCREENS: Record<string, number> = { S0: 1.6, S1: 3.0, S2: 1.8, S3: 3.0, S4: 2.5, S5: 2.0, S6: 2.0, S7: 2.0, S8: 2.0, S9: 3.4 }
-const U0: number[] = [] // 각 장면이 시작하는 스크롤 위치(화면 수)
-const LEN: number[] = SCN.map((sc) => SCREENS[sc.k] * PACE)
-LEN.reduce((u, l) => { U0.push(u); return u + l }, 0)
-/** 고정 장면 전체 스크롤 길이(화면 수) */
-export const SCROLL_TOTAL = LEN.reduce((u, l) => u + l, 0)
-const cl = (v: number) => Math.min(1, Math.max(0, v))
-/** 스크롤 위치(화면 수) → 타임라인 시간 */
-export function tOfU(u: number): number {
-  if (u <= 0) return 0
-  for (let i = 0; i < SCN.length; i++) if (u <= U0[i] + LEN[i] || i === SCN.length - 1) return SCN[i].a + cl((u - U0[i]) / LEN[i]) * (SCN[i].b - SCN[i].a)
-  return TOTAL
-}
-/** 타임라인 시간 → 스크롤 위치(화면 수) */
-export function uOfT(t: number): number {
-  if (t <= 0) return 0
-  for (let i = 0; i < SCN.length; i++) if (t <= SCN[i].b || i === SCN.length - 1) return U0[i] + cl((t - SCN[i].a) / (SCN[i].b - SCN[i].a)) * LEN[i]
-  return SCROLL_TOTAL
-}
-
-/* ===== 발표 모드 박자 지점(타임라인 시간) =====
-   ↓ → Space PageDown = 다음 지점, ↑ ← PageUp = 이전 지점. 각 지점은 연출이 끝나 화면이 멈춰 있는 순간(엔진의 타임라인·renderLate 구간에서 뽑음) */
-export const BEATS: Record<string, number[]> = {
-  S0: [0, 2.34], //                             첫 화면(둥근 사진 카드) · 사진이 화면 가득
-  S1: [3.02, 3.45, 4.25], //                     기기가 사진 위로 · 사진이 카드로 줄어듦 · 흰 바탕에 기기·제목, 확인서 채움
-  S2: [5.15], //                                입고 카드·제목 — 세 수량과 입고 수량 100주가 함께
-  S3: [6.75, 7.45, 7.8, 8.3], //               노트북 매도 주문 화면·문장 · 화면이 전광판으로 · 상태 넘어가는 중 · 전부 출발
-  S4: [8.9, 9.1, 9.4, 9.7, 10.1, 10.45], //       모니터 · 제목 · 비행 중 · 도착 · ₩ 켜짐 · 서울 야경
-  S5: [10.75, 11.1, 11.55, 12.0, 12.17], //       제목 · 인출일 · 보유일 세는 중 · 1년 · 도장
-  S6: [12.8, 13.25, 13.7, 14.05], //              제목·설명 · 스캔 중 · 스캔 끝 · 공제 인정 비율
-  S7: [14.8, 15.15, 15.5, 15.75, 16.05], //       큰 숫자 · 눈금자·오늘 · 영수증 · 일반계좌 줄 긋기 · 절세액
-  S8: [16.75, 17.2, 17.7, 18.05], //              제목 · 흐름 진행 · 흐름 끝 · 합계
-  S9: [18.85, 19.25, 19.65, 20.05, 20.45, 20.85, 21.25], // 서비스 7줄 하나씩
-}
-/** 마무리 장면(S11, 별도 타임라인 0~2): 사진 · 문구 완성 · 요약 카드. S9 다음에는 FAQ 맨 위 → S11 시작 → 이 지점들 순서 */
-export const S11_BEATS = [0.3, 1.12, 1.5]
-
-// 패스포트 장면 이동 목록: 장면 이름 + FAQ
-export const NAV_NAMES: string[] = [...SCN.map((s) => s.n), 'FAQ']
