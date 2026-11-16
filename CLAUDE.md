@@ -5,19 +5,20 @@ Returns(리턴증권, 교육용 가상 증권사) RIA 고객 웹. Claude Design 
 ## 스택·실행
 - Vite 8 + React 19 + TypeScript + react-router-dom v7, axios(`src/api/client.ts`, `VITE_API_BASE_URL`, 기본 http://localhost:10000), oxlint
 - Node 22(conda 환경 `returns-web`). `npm run dev`(5173), `npm run build`, `npm run lint`
-- 랜딩 전용 라이브러리: gsap 3.12.5, lenis 1.1.13, d3-geo 3.1.1, d3-array 3.2.4, topojson-client 3.1.0 (버전 고정, ^ 없음)
+- 랜딩 전용 라이브러리: gsap 3.12.5, lenis 1.1.13 (버전 고정, ^ 없음). d3-geo 3.1.1, d3-array 3.2.4, topojson-client 3.1.0은 보관 중인 옛 랜딩만 씀
+- 랜딩 원본: `_design/returns-landing/returns-landing/`(index.html + app.js, 읽기 전용). 옛 랜딩(landing-journey.html 전환본)은 `src/components/landing-legacy/`에 보관하고 라우트에서 쓰지 않는다
 
 ## 폴더·라우트
 - `/` 랜딩, `/login`, `/home`, `/account`, `/invest`, `/community`, `/myinfo` (`/mypage` → `/myinfo`). 모든 페이지는 `src/routes/AppRouter.tsx`에서 lazy 로딩
 - 레이아웃: `BareLayout`(랜딩·로그인), `AppLayout`(상단 바·푸터·챗봇). 페이지 → 레이아웃 전달은 `src/layouts/appShell.ts`의 `useAppShell`
-- 페이지 부품: `src/components/<home|account|invest|community|myinfo|login|landing>/`
+- 페이지 부품: `src/components/<home|account|invest|community|myinfo|login|landing>/` (`landing-legacy/`는 보관용)
 - 공통 부품: `src/components/common/` (TopBar, SiteFooter, StockLabel, StockIcon, KkiruAvatar, ChatbotFab, Box, Tabs, Modal, Toast, useDocumentTitle 등)
 
 ## 꼭 지킬 것
 1. 디자인 원본 `_design/Returns_프론트_최종/`은 읽기 전용(gitignore 대상). 화면을 바꿀 때는 원본과 같은지 먼저 확인한다.
 2. 요청받은 파일·범위만 바꾼다. 공통 파일(`src/components/common`, `src/layouts`, `src/routes`, `src/data/returns.ts`, `src/lib`, `src/styles/tokens.css`, `index.html`)은 이유와 선택지를 먼저 묻고 승인받은 뒤 바꾼다.
 3. `package.json`·`package-lock.json` 변경은 팀 합의 후에만. `npm install` 뒤 lock 파일이 혼자 바뀌면(Windows libc 줄 등) `git restore package-lock.json`.
-4. 색은 `tokens.css` 변수만 쓴다. 컴포넌트에 HEX 금지. 새 색은 원본 값과 함께 먼저 묻는다. 랜딩 색은 `--landing-*` 구역. 그림자·반투명 rgba는 원본 값 허용.
+4. 색은 `tokens.css` 변수만 쓴다. 컴포넌트에 HEX 금지. 새 색은 원본 값과 함께 먼저 묻는다. 랜딩 색은 `--landing-*` 구역(새 랜딩은 `--landing-v2-*`, 그 위쪽은 옛 랜딩 보관용). 그림자·반투명 rgba는 원본 값 허용.
 5. 스타일은 CSS Module. 랜딩만 예외로 `landing.css` 하나를 `.landing` 범위로 가둠.
 6. 커밋은 사람이 직접 한다. Claude Code는 커밋하지 않는다.
 
@@ -42,13 +43,14 @@ Returns(리턴증권, 교육용 가상 증권사) RIA 고객 웹. Claude Design 
 ## 원본과 일부러 다르게 둔 것
 - 업무일 2026-11-18 고정, 홈 패키지 숫자는 공용 데이터 기준, 시연 설정 위젯 폭 260·"날짜 바꿔 보기" 없음
 - 커뮤니티: 여러 글 펼침 시 답글 입력 커서가 방금 연 칸으로 감
-- 랜딩: S4 진행률 100%에서 "D-0 · 확정 원화 금액"으로 끝남, S7 창 크기 변경 시 줄바꿈 유지, 눈금자 오늘 표시는 날짜 단위
-- 랜딩(발표용 개선 1단계): S0~S9·S11은 1920×1080 무대(`.stg`)를 화면에 맞춰 통째로 확대·축소한다(`--ss`). 무대 안은 px만 쓰고(원본의 vw·vh·clamp는 1920×1080에서의 값으로 고정), 폭 760 이하 모바일 전용 배치는 없앴다(휴대폰도 무대 축소). 16:9가 아니면 배경 레이어가 레터박스까지 늘어나 채운다(`--bx`·`--by`). 상단 바(#hdr2)·패스포트 탭은 무대 밖이라 `--ui`(=max(0.75, 무대 배율))로 키운다. S3 안내판은 무대 밖에서 대기하는 동안 숨긴다. FAQ·푸터는 가로 1920px 기준 레이아웃에 폭 배율(`--fw` = 화면 폭/1920, CSS `zoom`)을 적용하고, `--pad`는 96px 고정(폭 미디어 쿼리 제거). `#faq`에 zoom이 걸려 `offsetTop`이 어긋나므로 FAQ 위치는 `faqY()`(화면 좌표)로 잰다
-- 랜딩(발표용 개선 2단계): 지도 캔버스 내부 해상도는 `표시 크기 × devicePixelRatio`(가로 3840px 상한)이고 배율·모니터가 바뀌면 다시 그린다. 통화 기호는 2배 크기로 그려 두었다가 절반으로 줄여 찍는다(원본은 바로 작은 글자로 그림)
-- 랜딩(발표용 개선 2.5단계): S0 지도는 2단계 모습(통화 기호 격자) 그대로 두고, 기호 스프라이트만 정돈했다 — 잉크가 큰 기호는 최대 0.85배까지 줄이고(키우지는 않음), 글자 칸이 아니라 잉크 가운데를 칸 가운데에 맞춘다. (점·벌집 배열·깜빡임 시안은 되돌림)
-- 랜딩 스크롤 속도: 장면별 스크롤 길이를 `landingScenes.ts`의 `SCREENS`로 따로 정한다(타임라인 시간은 그대로, 스크롤→시간 변환 `tOfU`/`uOfT`). 연출이 몰린 S1·S2(3화면)·S4(2.5화면)는 늘리고 S0(2화면)는 줄여 화면당 연출 양을 맞췄다. 전체 속도는 `PACE` 하나로 조정
-- 랜딩 발표 모드(3단계): ↓ → Space PageDown = 다음 박자, ↑ ← PageUp = 이전 박자(`landingScenes.ts`의 `BEATS`, S9 다음은 FAQ·S11). 이동 중 입력 무시, 입력창·FAQ 포커스 시 동작 안 함. 휠 배율 0.6·부드러움 0.07·휠 최고 속도 제한(`WHEEL_MAX_AHEAD`) 등 조정 값은 `landingScenes.ts` 위쪽 한 곳에 모았다. 왼쪽 아래에 발표자용 장면 번호(`#sceneNo`). 창 크기를 바꿔도 같은 장면 위치를 유지한다
-- 랜딩 S9(발표용 개선 4단계): 휴대폰 프레임 대신 16:10 노트북(브라우저 창) 프레임(무대 기준 848×530, 위 주소창 줄 = 점 3개 + 주소). 화면 7장은 가로 웹 배치로 다시 짠 목업이며('예시' 표기 유지), 실제 캡처로 바꿀 때는 `LandingS9.tsx`의 `SHOTS`에 이미지 경로를 넣는다. 화면마다 켜지는 머리글 탭·주소창 경로는 각 화면의 `data-tab`·`data-path`로 정한다(알림·뉴스·챗봇 = 홈, 매도 가이드 = 내 계좌, 오늘의 종목·패키지 = 주식 패키지, 커뮤니티 = 커뮤니티). 화면 안 글자는 무대 기준 16px 이상. 끼루는 노트북 오른쪽 아래 모서리에, 말풍선은 그 왼쪽 노트북 바깥 아래에 둔다(화면 내용을 가리지 않게)
+- 랜딩(새 원본 `_design/returns-landing`): 화면·애니메이션·타이밍은 원본 그대로이고 다음만 다르다 — gsap·lenis는 설치된 3.12.5·1.1.13(원본 vendor는 3.15.1·1.3.27), 글꼴은 index.html의 Pretendard Variable(원본 woff2 안 씀), "오늘"은 `getBusinessToday()`(원본은 컴퓨터 날짜 — 공제율 구간·D-day·예상 절세가 업무일 기준), 상단 바 오른쪽·마지막 버튼은 로그인 상태면 "○○ 님 · 홈으로"·"홈으로 가기"(/home), 아니면 /login·/login#signup, 창 크기를 바꾸면 원본처럼 새로고침하지 않고 무대·타임라인을 다시 만들어 같은 장면에서 이어간다, 뒤로 가기 스크롤 복원·로그아웃 안내(`#ntc`)는 기존 랜딩 동작 유지, 발표 키는 입력칸에 포커스가 있으면 동작 안 함. 값 수정: 세금 예시는 공제율을 기본공제 전 양도차익에 곱한다(RIA 세액 = max(0, 차익 − 차익×공제율 − 250만)×22%, 절세 = 1,650,000 − RIA 세액 — 원본은 일반 세액×공제율을 절세로 씀), 예시 날짜는 출시 후로(체결 2026.04.08, 원화 확정 2026.04.10, 1년 뒤 2027.04.10), 나의 RIA 카드 인출 가능일은 업무일에 매도 → 2영업일 뒤 확정 + 1년, 첫 화면 "가입 마감" → "혜택 마감". FAQ 영역(`#faq`)은 FAQ 장면에서만 클릭을 받는다(`FAQ_CLICK`, 그 밖에는 pointer-events:none — 원본은 숨은 FAQ 상자가 세금 장면 공제율 버튼을 덮어 클릭이 안 됨). 장면 시점·위치값은 `landingScenes.ts`, 연출은 `landingTimeline.ts`(요소는 ref 표 `landingRefs.ts`로만 접근), 스크롤·키·상단 바·정리는 `useLandingMotion.ts`(useLayoutEffect + gsap.context, @gsap/react 미설치)
+- [옛 랜딩·보관] 랜딩: S4 진행률 100%에서 "D-0 · 확정 원화 금액"으로 끝남, S7 창 크기 변경 시 줄바꿈 유지, 눈금자 오늘 표시는 날짜 단위
+- [옛 랜딩·보관] 랜딩(발표용 개선 1단계): S0~S9·S11은 1920×1080 무대(`.stg`)를 화면에 맞춰 통째로 확대·축소한다(`--ss`). 무대 안은 px만 쓰고(원본의 vw·vh·clamp는 1920×1080에서의 값으로 고정), 폭 760 이하 모바일 전용 배치는 없앴다(휴대폰도 무대 축소). 16:9가 아니면 배경 레이어가 레터박스까지 늘어나 채운다(`--bx`·`--by`). 상단 바(#hdr2)·패스포트 탭은 무대 밖이라 `--ui`(=max(0.75, 무대 배율))로 키운다. S3 안내판은 무대 밖에서 대기하는 동안 숨긴다. FAQ·푸터는 가로 1920px 기준 레이아웃에 폭 배율(`--fw` = 화면 폭/1920, CSS `zoom`)을 적용하고, `--pad`는 96px 고정(폭 미디어 쿼리 제거). `#faq`에 zoom이 걸려 `offsetTop`이 어긋나므로 FAQ 위치는 `faqY()`(화면 좌표)로 잰다
+- [옛 랜딩·보관] 랜딩(발표용 개선 2단계): 지도 캔버스 내부 해상도는 `표시 크기 × devicePixelRatio`(가로 3840px 상한)이고 배율·모니터가 바뀌면 다시 그린다. 통화 기호는 2배 크기로 그려 두었다가 절반으로 줄여 찍는다(원본은 바로 작은 글자로 그림)
+- [옛 랜딩·보관] 랜딩(발표용 개선 2.5단계): S0 지도는 2단계 모습(통화 기호 격자) 그대로 두고, 기호 스프라이트만 정돈했다 — 잉크가 큰 기호는 최대 0.85배까지 줄이고(키우지는 않음), 글자 칸이 아니라 잉크 가운데를 칸 가운데에 맞춘다. (점·벌집 배열·깜빡임 시안은 되돌림)
+- [옛 랜딩·보관] 랜딩 스크롤 속도: 장면별 스크롤 길이를 `landingScenes.ts`의 `SCREENS`로 따로 정한다(타임라인 시간은 그대로, 스크롤→시간 변환 `tOfU`/`uOfT`). 연출이 몰린 S1·S2(3화면)·S4(2.5화면)는 늘리고 S0(2화면)는 줄여 화면당 연출 양을 맞췄다. 전체 속도는 `PACE` 하나로 조정
+- [옛 랜딩·보관] 랜딩 발표 모드(3단계): ↓ → Space PageDown = 다음 박자, ↑ ← PageUp = 이전 박자(`landingScenes.ts`의 `BEATS`, S9 다음은 FAQ·S11). 이동 중 입력 무시, 입력창·FAQ 포커스 시 동작 안 함. 휠 배율 0.6·부드러움 0.07·휠 최고 속도 제한(`WHEEL_MAX_AHEAD`) 등 조정 값은 `landingScenes.ts` 위쪽 한 곳에 모았다. 왼쪽 아래에 발표자용 장면 번호(`#sceneNo`). 창 크기를 바꿔도 같은 장면 위치를 유지한다
+- [옛 랜딩·보관] 랜딩 S9(발표용 개선 4단계): 휴대폰 프레임 대신 16:10 노트북(브라우저 창) 프레임(무대 기준 848×530, 위 주소창 줄 = 점 3개 + 주소). 화면 7장은 가로 웹 배치로 다시 짠 목업이며('예시' 표기 유지), 실제 캡처로 바꿀 때는 `LandingS9.tsx`의 `SHOTS`에 이미지 경로를 넣는다. 화면마다 켜지는 머리글 탭·주소창 경로는 각 화면의 `data-tab`·`data-path`로 정한다(알림·뉴스·챗봇 = 홈, 매도 가이드 = 내 계좌, 오늘의 종목·패키지 = 주식 패키지, 커뮤니티 = 커뮤니티). 화면 안 글자는 무대 기준 16px 이상. 끼루는 노트북 오른쪽 아래 모서리에, 말풍선은 그 왼쪽 노트북 바깥 아래에 둔다(화면 내용을 가리지 않게)
 - 홈·주식 패키지: 원본에서 국내 9종목이 코드만 깨져 보이던 곳을 종목명·코드 정상 표시
 - 오늘의 종목: 홈 "오늘의 종목"(`HomeRecBox`)과 투자 탭 "오늘의 종목"(`InvestRec`)은 서버 추천 API(`/recommendations`, `/recommendations/ask`)에 연결돼 있다. 설문 투자성향 허용 범위 안의 종목만(보유 종목 제외) 보여 주고, 설문·거래 기준을 바꿔 볼 수 있으며, 투자 권유가 아닌 정보 제공 안내 문구를 함께 표시한다. 추천 종목(홈은 3종목)·이유·끼루 답변은 서버 값이고, 20일 추이·30일 차트는 서버 종가 이력(`/price-history`)을 쓴다. 서버에 없는 시가총액·PER은 유형·업종·연 변동성·테마와 안내 문구로 바꿨다. "패키지에 담기"는 홈에서 `/invest?rec=종목코드`로 넘어가 "어느 패키지에 담을까요?" 창으로 이어진다. 화면에 연결되지 않던 후보 보기 화면(`InvestCandidateTab`, `HomeTendencyBox`)은 지웠다(git 기록에서 복구할 수 있다)
 - 주식 패키지: 서버에 이력이 없는 수익률 차트는 안내 문구로, 목록 미니 그래프는 뺐고, 종목 펼침의 시가총액·PER 등 재무 정보는 위험등급과 안내만 남겼다
