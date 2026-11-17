@@ -20,8 +20,8 @@ export interface LimitValues {
 
 export function limitValues(): LimitValues {
   const biz = RD.C.BUSINESS_DATE
-  const b = F.band(biz)
-  const e = F.bandEnd(biz)
+  const b = F.saleBand(biz) // 오늘 팔면 확정일 기준으로 들어가는 구간
+  const e = F.saleBandLast(biz) // 그 구간을 받는 마지막 매도일
   const plan = F.plan({ biz })
   return {
     remain: F.man(F.remaining()),
@@ -29,7 +29,7 @@ export function limitValues(): LimitValues {
     usedPct: (RD.C.SOLD.amount / RD.C.SELL_LIMIT) * 100 + '%',
     used: F.man(RD.C.SOLD.amount),
     soldShort: F.short(RD.SOLD.filled),
-    bandLabel: b.from + '~' + b.to + '월 ' + Math.round(b.rate * 100) + '%',
+    bandLabel: b.rate === 0 ? '공제 없음' : b.from + '~' + b.to + '월 ' + Math.round(b.rate * 100) + '%', // 확정일이 2027년 이후면 공제 없음
     bandEnd: F.short(e),
     bandD: F.days(biz, e),
     guideLine: '남은 한도 ' + F.man(F.remaining()) + ' 원을 다 쓰면 예상 공제 ' + F.man(plan.ded) + ' 원 · 예상 절세 약 ' + F.man(plan.save) + ' 원'

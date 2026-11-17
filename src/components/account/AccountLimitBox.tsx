@@ -16,7 +16,7 @@ const floorMan = (n: number): string => Math.floor(Math.max(0, n) / 1e4).toLocal
 // 남은 한도: 1만 원 미만은 원 단위 그대로(1,000), 1만 원 이상은 만원 단위로 자른다. 단위가 섞이는 건 의도: "0만"이면 남은 1,000원이 안 보인다
 const remainText = (n: number): string => (n < 1e4 ? Math.round(n).toLocaleString('ko-KR') : floorMan(n))
 
-// 매도 한도 박스(data-box="limit") — 사용 한도·한도(서버 값)·남은 한도·지금 공제율 구간·구간 마감
+// 매도 한도 박스(data-box="limit") — 사용 한도·한도(서버 값)·남은 한도·지금 공제율 구간·마지막 매도일(확정일 기준)
 export function AccountLimitBox({ className, onApply, limit, onRetryLimit }: AccountLimitBoxProps) {
   const v = limitValues()
 
@@ -61,7 +61,7 @@ export function AccountLimitBox({ className, onApply, limit, onRetryLimit }: Acc
           <span className={styles.val}>{v.bandLabel}</span>
         </div>
         <div className={styles.row}>
-          <span className={styles.key}>구간 마감</span>
+          <span className={styles.key}>마지막 매도일</span>
           <span className={styles.val}>
             {v.bandEnd} (<span className={styles.dday}>D-{v.bandD}</span>)
           </span>

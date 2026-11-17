@@ -1,5 +1,6 @@
 import { ALLOWED_GRADE, BUY_POS, C, ETF, FIXED, GRADE_NAMES, META, OFF, PROFILE_SCORE, RETURNS_DATA as D } from '../data/returns'
 import type { BizDates, DeductionBand, ProfileKey, StockMeta } from '../data/returns'
+import holidayCsv from '../data/korean-holidays.csv?raw'
 import { getBusinessToday } from './clock'
 
 // 세액·날짜 계산 — 원본 returns-data.js의 날짜 헬퍼 + F를 옮긴 것.
@@ -16,11 +17,14 @@ const iso = (t: number): string => {
   return x.getUTCFullYear() + '-' + p2(x.getUTCMonth() + 1) + '-' + p2(x.getUTCDate())
 }
 export const addDays = (d: string, n: number): string => iso(ms(d) + n * 864e5)
+// 공휴일 — 백엔드 maria의 settlement/korean-holidays.csv와 같은 파일(src/data/korean-holidays.csv). 백엔드 목록과 똑같이 유지한다(프론트에서만 날짜를 추가하거나 빼지 않는다)
+const HOLIDAYS = new Set(holidayCsv.split(/\r?\n/).map((l) => l.trim()).filter((l) => /^\d{4}-\d{2}-\d{2}$/.test(l)))
+// 영업일: 주말·공휴일이 아닌 날(백엔드 SettlementBusinessDayCalculator와 같은 기준)
 export const isBiz = (d: string): boolean => {
   const w = new Date(ms(d)).getUTCDay()
-  return w !== 0 && w !== 6
+  return w !== 0 && w !== 6 && !HOLIDAYS.has(d)
 }
-// 영업일 더하기·빼기 — 목업은 주말만 건너뜀(공휴일 달력은 실제 앱에서 반영)
+// 영업일 더하기·빼기 — 주말과 공휴일을 건너뜀
 export const bizAdd = (d: string, n: number): string => {
   let x = d, k = Math.abs(n)
   const st = n < 0 ? -1 : 1
@@ -37,6 +41,17 @@ export const addMonths = (d: string, n: number): string => {
   return t.getUTCFullYear() + '-' + p2(t.getUTCMonth() + 1) + '-' + p2(Math.min(dd, last))
 }
 export const addYears = (d: string, n: number): string => addMonths(d, n * 12)
+// 매도일 → 확정일(결제일): 2영업일 뒤. 백엔드 SettlementBusinessDayCalculator(SETTLEMENT_BUSINESS_DAYS = 2)와 같은 규칙
+export const SETTLE_BIZ_DAYS = 2
+// 공제 없음(확정일이 2027년 이후). from·to 0은 "해당 구간 없음"
+export const NO_DEDUCTION: DeductionBand = { from: 0, to: 0, rate: 0 }
+export const settleOf = (sold: string): string => bizAdd(sold, SETTLE_BIZ_DAYS)
+// 확정일이 end(구간 마지막 날) 안에 들어가는 마지막 매도일(영업일). 예: 2026-12-31 → 12-29(12-30에 팔면 2027-01-04 확정)
+export const lastSaleDay = (end: string): string => {
+  let x = end
+  while (!isBiz(x) || settleOf(x) > end) x = addDays(x, -1)
+  return x
+}
 const capEnd = (d: string): string => d > FIXED.JOIN_END ? FIXED.JOIN_END : d // 가입 마감 뒤에는 업무일을 12-31로 보고 계산
 
 // 기준 영업일: 토·일이면 직전 금요일
@@ -107,7 +122,7 @@ export const F = {
   // 기준 영업일(토·일 → 직전 금요일). 예시 데이터·감면 구간 계산용이라 가입 마감일(12-31)에서 자른다
   biz: (): string => bizDay(capEnd(F.today())),
   bizDay,
-  anchor, bizAdd, addDays, addMonths, isBiz,
+  anchor, bizAdd, addDays, addMonths, isBiz, settleOf, lastSaleDay,
   prevBiz: (d?: string): string => bizAdd(d || F.biz(), -1),
   days: (a: string, b: string): number => Math.round((ms(b) - ms(a)) / 864e5),
   addYears,
@@ -117,10 +132,19 @@ export const F = {
     return F.short(d) + ' 기준 · ' + F.short(bizAdd(d, -1)) + '까지 반영'
   },
   ago: (k: number): string => bizAdd(anchor(), -k), // 기준일로부터 k영업일 전
+  // 공제 구간은 확정일(결제일)로 정한다(백엔드 TaxCalculator가 final_at으로 구간을 찾음). d는 확정일
   band: (d: string): DeductionBand => {
     const m = Number(capEnd(d).split('-')[1]) // 가입 마감 뒤에는 12월 구간
     return C.DEDUCTION_BANDS.find((b) => m >= b.from && m <= b.to)! // 1~12월 전 구간이 정의돼 있음
   },
+  // d(매도일)에 팔면 들어가는 공제 구간 — 확정일 기준
+  // 확정일이 공제 마지막 해(2026)를 넘으면 공제 없음 — 백엔드는 YEAR(final_at)이 그 해인 건만 그 해 세액에 넣는다(예: 12-30 매도 → 2027-01-04 확정 → 0%)
+  saleBand: (sold: string): DeductionBand => {
+    const s = settleOf(sold)
+    return s > FIXED.JOIN_END ? NO_DEDUCTION : F.band(s)
+  },
+  // d(매도일)에 팔 때 그 공제 구간을 받을 수 있는 마지막 매도일
+  saleBandLast: (sold: string): string => lastSaleDay(F.bandEnd(settleOf(sold))),
   bandEnd: (d: string): string => {
     const b = F.band(d), y = +capEnd(d).slice(0, 4), last = new Date(Date.UTC(y, b.to, 0)).getUTCDate()
     return y + '-' + String(b.to).padStart(2, '0') + '-' + String(last).padStart(2, '0')
@@ -161,18 +185,18 @@ export const F = {
     return g.length ? Math.min(...g) : null
   },
   // ===== 세액 =====
-  // 공제액 = 양도차익 × 공제율(매도 체결일 구간) × 조정비율 / 일반 = max(0, 차익 − 250만) × 22% / RIA = max(0, 차익 − 250만 − 공제액) × 22% / 감면 = 일반 − RIA
+  // 공제액 = 양도차익 × 공제율(확정일(결제일) 구간) × 조정비율 / 일반 = max(0, 차익 − 250만) × 22% / RIA = max(0, 차익 − 250만 − 공제액) × 22% / 감면 = 일반 − RIA
   tax: (planGain?: number, biz?: string, adj?: number): TaxResult => {
     const pg = planGain || 0, ad = adj == null ? 1 : adj, bz = biz || F.today()
     const g = C.SOLD.gain + pg
-    const ded = Math.round(C.SOLD.gain * F.band(C.SOLD.filled).rate * ad) + Math.round(pg * F.band(bz).rate * ad)
+    const ded = Math.round(C.SOLD.gain * F.saleBand(C.SOLD.filled).rate * ad) + Math.round(pg * F.saleBand(bz).rate * ad)
     const general = Math.round(Math.max(0, g - C.BASIC_DEDUCTION) * C.TAX_RATE)
     const ria = Math.round(Math.max(0, g - C.BASIC_DEDUCTION - ded) * C.TAX_RATE)
     return { gain: g, ded, general, ria, cut: general - ria }
   },
   // 남은 한도까지 차익률 높은 순으로 매도하는 안(기본: TSLA 10 + AAPL 20 + NVDA 3 / 진행 중 매도 예시: TSLA 10 + AAPL 15 + NVDA 3)
   plan: (o?: PlanOptions): PlanResult => {
-    const opt = o || {}, biz = opt.biz || F.today(), rate = F.band(biz).rate
+    const opt = o || {}, biz = opt.biz || F.today(), rate = F.saleBand(biz).rate
     const hs = C.HOLDINGS.filter((h) => !(opt.exclude || []).includes(h.t)).slice().sort((a, b) => opt.asc ? a.rate - b.rate : b.rate - a.rate)
     let left = Math.min(opt.cap || Infinity, F.remaining())
     const rows: PlanRow[] = []

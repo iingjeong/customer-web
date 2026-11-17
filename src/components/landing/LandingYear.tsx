@@ -1,7 +1,9 @@
 import type { Reg } from './landingRefs'
 import { EX_DATES } from './landingScenes'
 
-// 환전 정보 줄(#fx), 지구본 위 환전 정보(#gch), 1년 날짜(#date) — 원본 그대로(예시 값)
+// 환전 정보 줄(#fx), 지구본 위 환전 정보(#gch), 1년 날짜(#date) — 예시 값.
+// 환율은 넷째 자리까지: $21,130.00 × 1,419.7823 = ₩30,000,000(원본 1,419.78이면 ₩29,999,951이라 안 맞음).
+// 지구본 금액은 "(가환전)"을 뺌: 가환전은 전일 종가 × 환율 −1%라 확정 금액(₩30,000,000)과 같을 수 없다
 
 export function LandingFx({ reg }: { reg: Reg }) {
   return (
@@ -11,7 +13,7 @@ export function LandingFx({ reg }: { reg: Reg }) {
           <span>
             적용 환율 (USD/KRW)<em className="exm">예시</em>
           </span>
-          <b className="num">1,419.78</b>
+          <b className="num">1,419.7823</b>
         </div>
         <div>
           <span>환전</span>
@@ -57,7 +59,7 @@ export function LandingGch({ reg }: { reg: Reg }) {
   return (
     <div className="gch" id="gch" ref={reg('gch')}>
       <div>
-        <span>예상 원화 금액 (가환전)</span>
+        <span>예상 원화 금액</span>
         <b className="num">₩30,000,000</b>
       </div>
       <div>

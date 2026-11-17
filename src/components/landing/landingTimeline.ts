@@ -1,7 +1,7 @@
 import gsap from 'gsap'
 import type { LandingEls } from './landingRefs'
 import {
-  AMT_BIG, AMT_CENTER_Y, AMT_FONT, CLIP_BLEED, DATE_FROM_SCALE, GLOBE, GLOBE_ZOOM, KK_WALK, KRW_DIGIT_GAP, LAP_DROP_Y, LAP_SCREEN, LAP_SVC,
+  AMT_BIG, AMT_CENTER_Y, CITY_LIFT, AMT_FONT, CLIP_BLEED, DATE_FROM_SCALE, GLOBE, GLOBE_ZOOM, KK_WALK, KRW_DIGIT_GAP, LAP_DROP_Y, LAP_SCREEN, LAP_SVC,
   FAQ_CLICK, OPENING, STAGE_H, STAGE_W, STEP_COUNT_DUR, SVC, T, TAG_FONT, TAG_LIFT, TOTAL, inkAt,
 } from './landingScenes'
 
@@ -66,6 +66,11 @@ export function buildTimeline(E: LandingEls, S: number): BuiltTimeline {
   gsap.set(E.tax, { autoAlpha: 0 })
   gsap.set(E.save, { autoAlpha: 0, y: 24 })
   gsap.set(E.cA, { autoAlpha: 0, y: 24 })
+  // 세액을 가르는 금색 선 폭 = 숫자의 실제 폭(원본에 없는 보정). 원본은 900px 고정이라 ₩1,650,000(약 1,160px)의 가운데만 지나갔다
+  const numRange = document.createRange()
+  numRange.selectNodeContents(E.cA)
+  const cutW = numRange.getBoundingClientRect().width / S
+  gsap.set(E.cutl, { width: cutW, marginLeft: -cutW / 2 })
   gsap.set(E.sLbl, { autoAlpha: 0 })
   gsap.set([...Array.from(E.taxRow.children), E.note], { autoAlpha: 0, y: 16 })
   gsap.set(E.svl, { autoAlpha: 0, y: 20 })
@@ -167,7 +172,7 @@ export function buildTimeline(E: LandingEls, S: number): BuiltTimeline {
   Tw(E.fx, { autoAlpha: 0, y: 20, duration: 0.4, ease: 'power2.in' }, T.homecoming)
   Tw(E.globe, { autoAlpha: 1, y: 0, scale: 1, duration: 1.2, ease: 'expo.out' }, T.homecoming)
   head(E.h3, T.hHome)
-  const nyS = { x: G.x + ny.x * G.s, y: G.y + ny.y * G.s }
+  const nyS = { x: G.x + ny.x * G.s, y: G.y + ny.y * G.s - CITY_LIFT } // 도시 묶음을 올린 만큼
   Tw(amt, { x: nyS.x - (kw * TAGS) / 2, y: nyS.y - TAG_LIFT, scale: TAGS, duration: 0.9 }, T.amtToNY)
   Tw(amt, { fontWeight: 600, duration: 0.01 }, T.amtWeight)
   Tw([E.lNY, E.lTK], { autoAlpha: 1, duration: 0.3, stagger: 0.1 }, T.cityLabels)
@@ -184,8 +189,8 @@ export function buildTimeline(E: LandingEls, S: number): BuiltTimeline {
   headOut(E.h3, T.year)
   Tw(E.gch, { autoAlpha: 0, duration: 0.3 }, T.year)
   Tw(q(E.tag, '.t'), { autoAlpha: 0, duration: 0.3 }, T.year)
-  Tw(E.globe, { scale: GLOBE_ZOOM, autoAlpha: 0, transformOrigin: `${(se.x / GLOBE.view) * 100}% ${(se.y / GLOBE.view) * 100}%`, duration: 0.9, ease: 'power2.in' }, T.globeZoom)
-  const seS = { x: G.x + se.x * G.s, y: G.y + se.y * G.s }
+  Tw(E.globe, { scale: GLOBE_ZOOM, autoAlpha: 0, transformOrigin: `${(se.x / GLOBE.view) * 100}% ${((se.y * G.s - CITY_LIFT) / GLOBE.size) * 100}%`, duration: 0.9, ease: 'power2.in' }, T.globeZoom)
+  const seS = { x: G.x + se.x * G.s, y: G.y + se.y * G.s - CITY_LIFT }
   tl.set(E.date, { autoAlpha: 1, x: seS.x - STAGE_W / 2, y: seS.y - STAGE_H / 2, scale: DATE_FROM_SCALE }, T.dateSet)
   Tw(E.date, { x: 0, y: 0, scale: 1, duration: 0.9, ease: 'expo.out' }, T.dateIn)
   head(E.h4, T.hYear)
