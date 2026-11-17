@@ -136,7 +136,7 @@
   left: 5%;
   width: 30%;
   bottom: 0;
-  background: var(--color-chart-general);
+  background: var(--color-line-strong); /* 비교 기준이라 회색으로 한 발 물러남 — 강조는 RIA 막대(남색·금색) */
   border-radius: var(--radius-2) var(--radius-2) 0 0;
   transition: height var(--chart-motion-duration) ease;
 }
@@ -357,7 +357,7 @@
   font-variant-numeric: tabular-nums;
   transition: bottom var(--chart-motion-duration) ease;
 }
-.amountGeneral { left: 5%; }
+.amountGeneral { left: 5%; color: var(--color-sub); font-weight: var(--font-weight-medium); }
 .amountRia { right: 5%; }
 .reliefLabel {
   left: 36%;
