@@ -28,6 +28,9 @@ export const AMT_FONT = 56 // 화면 속 금액 글자 크기
 export const AMT_BIG = 3.6 // 가운데로 날아왔을 때 배율
 export const AMT_CENTER_Y = 410
 export const GLOBE = { x: 310, y: 330, size: 1300, view: 2200 } // 지구본 위치·크기, SVG viewBox 크기
+// 도시 점·이름·항로·금액 꼬리표를 지구본 이미지보다 이만큼 위로 올린다(원본에 없는 조정, 무대 px).
+// 원본 위치는 도쿄가 무대 아래 끝(약 1030px)에 걸려, 16:9보다 가로가 긴 브라우저 창에서 잘렸다
+export const CITY_LIFT = 60
 export const TAG_FONT = 22 // 지구본 위 금액 꼬리표 글자 크기
 export const TAG_LIFT = 44 // 꼬리표가 점 위로 떠 있는 높이
 export const LAP_DROP_Y = 920 // 노트북이 내려가 숨는 위치
