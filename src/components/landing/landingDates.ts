@@ -1,4 +1,4 @@
-import { C } from '../../data/returns'
+import { C, FIXED } from '../../data/returns'
 import { F } from '../../lib/calc'
 import { getBusinessToday } from '../../lib/clock'
 import { EX_GAIN } from './landingScenes'
@@ -15,31 +15,27 @@ export const riaTax = (rate: number): number => Math.round(Math.max(0, EX_GAIN -
 export const taxSave = (rate: number): number => TAX_GENERAL - riaTax(rate)
 
 export interface LandingDates {
-  rate: number // 오늘 결제분 공제율(1 / 0.8 / 0.5)
+  rate: number // 오늘 팔면 받는 공제율(1 / 0.8 / 0.5) — 확정일(결제일) 구간
   rateText: string // "50%"
-  dday: string // 혜택 마감(2026-12-31)까지 "D-43"
+  lastSale: string // 2026년 혜택을 받는 마지막 매도일 "12/29"
+  dday: string // 마지막 매도일까지 "D-41"
   mySave: string // 나의 RIA 카드의 예상 절세 "1,100,000원"
-  withdraw: string // 나의 RIA 카드의 인출 가능일 "2027.11.20" — 오늘 매도 → 결제·환전 확정(2영업일 뒤) + 1년
+  withdraw: string // 나의 RIA 카드의 인출 가능일 "2027.11.20" — 오늘 매도 → 확정일(2영업일 뒤) + 1년
 }
 
+// 기존 웹 계산(calc.ts)을 그대로 쓴다 — 백엔드와 같은 규칙: 확정일 = 매도일 + 2영업일(주말·공휴일 제외), 공제 구간·세액 연도는 확정일 기준
 export function landingDates(today: string = getBusinessToday()): LandingDates {
-  const [y, m, d] = today.split('-').map(Number)
-  const now = new Date(y, m - 1, d)
-  let frac: number
-  if (y < 2026) frac = 0.01
-  else if (y > 2026) frac = 0.995
-  else frac = (now.getMonth() + (now.getDate() - 1) / new Date(2026, now.getMonth() + 1, 0).getDate()) / 12
-  const month = Math.floor(frac * 12) + 1
-  const rate = month <= 5 ? 1 : month <= 7 ? 0.8 : 0.5
-  const days = Math.max(0, Math.ceil((new Date(2026, 11, 31).getTime() - now.getTime()) / 864e5))
-  // 기존 웹 날짜 규칙(calc.ts dates()): 체결일(기준 영업일) → 2영업일 뒤 결제·환전 확정 → 1년 뒤 인출 가능
-  const confirmed = F.bizAdd(F.biz(), 2)
+  const rate = F.saleBand(F.biz()).rate
+  // 2026년 확정분까지 공제(백엔드 YEAR(final_at)) → 확정일이 12-31(가입 마감일) 안에 드는 마지막 매도일
+  const last = F.lastSaleDay(FIXED.JOIN_END)
+  const [, lm, ld] = last.split('-').map(Number)
   return {
     rate,
     rateText: Math.round(rate * 100) + '%',
-    dday: 'D-' + days,
+    lastSale: lm + '/' + ld,
+    dday: 'D-' + Math.max(0, F.days(today, last)),
     mySave: F.won(taxSave(rate)) + '원',
-    withdraw: F.dot(F.addYears(confirmed, 1)),
+    withdraw: F.dot(F.addYears(F.settleOf(F.biz()), 1)),
   }
 }
 

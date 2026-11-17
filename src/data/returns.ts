@@ -348,7 +348,7 @@ const setServerState = (patch: Partial<ServerState>): ServerState => {
 }
 
 // 상대 날짜 표(영업일 전) — 괄호는 업무일 = 2026-11-18일 때
-export const OFF = { opened: 33, assessed: 23, deposit: 21, filled: 20 } // 개설(10.02) · 성향 진단(10.16) · 입고(10.20) · 매도 체결(10.21)
+export const OFF = { opened: 33, assessed: 23, deposit: 21, filled: 20 } // 개설(09.30) · 성향 진단(10.16) · 입고(10.20) · 매도 체결(10.21)
 export const BUY_POS = [0, 0, 1 / 16, 6 / 16, 13 / 16, 1] // 국내 매수 6건: 원화 확정 다음 영업일 ~ 전 영업일 사이 위치(10.26 · 10.26 · 10.27 · 11.03 · 11.12 · 11.17)
 const BUY_TXT = ['반도체 밸류체인 담기', '꾸준한 배당 담기', '자동차·부품 담기', '현대차·셀트리온', '반도체 밸류체인 추가', '꾸준한 배당 추가']
 
@@ -401,7 +401,7 @@ export const C: Constants = {
       { t: 'MSFT', name: '마이크로소프트', price: 700000, qty: 5, rate: 0.24 }
     ]
   },
-  DEDUCTION_BANDS: [{ from: 1, to: 5, rate: 1 }, { from: 6, to: 7, rate: 0.8 }, { from: 8, to: 12, rate: 0.5 }], // 매도 체결일이 들어가는 구간
+  DEDUCTION_BANDS: [{ from: 1, to: 5, rate: 1 }, { from: 6, to: 7, rate: 0.8 }, { from: 8, to: 12, rate: 0.5 }], // 확정일(결제일)이 들어가는 구간
   BASIC_DEDUCTION: 2500000,
   TAX_RATE: 0.22,
   FEE_RATE: 0.00015, // 매매 수수료 0.015% (예시)
@@ -963,7 +963,7 @@ const D: ReturnsData = {
     },
     get SOLD() {
       const t = dates()
-      return { amount: 38000000, filled: t.filled, confirmed: t.confirmed, settled: t.settled, gain: 14000000, bandRate: F.band(t.filled).rate }
+      return { amount: 38000000, filled: t.filled, confirmed: t.confirmed, settled: t.settled, gain: 14000000, bandRate: F.saleBand(t.filled).rate }
     },
     get WITHDRAW() {
       const t = dates()
