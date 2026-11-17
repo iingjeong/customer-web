@@ -127,13 +127,13 @@ export const KK_WALK = {
 /* ===== 서비스 장면: 목록 7줄과 노트북 화면 7장(같은 순서로 짝지음) =====
    shot = public/assets/landing/svc/의 캡처 번호(v0 매도 가이드, v1 절세 브리핑, v2 오늘의 종목, v3 패키지 도우미, v4 뉴스 브리핑, v5 챗봇, v6 커뮤니티) */
 export const SERVICES = [
-  { name: '끼루 절세 브리핑 · 놓치지 않는 알림', shot: 1 },
-  { name: '끼루 뉴스 브리핑', shot: 4 },
   { name: '매도 가이드', shot: 0 },
-  { name: '주식 패키지 만들기 도우미', shot: 3 },
+  { name: '끼루 절세 브리핑 · 정산 알림', shot: 1 },
   { name: '오늘의 종목', shot: 2 },
-  { name: '끼루AI 챗봇', shot: 5 },
-  { name: '커뮤니티와 끼루AI 답변', shot: 6 },
+  { name: '주식 패키지 만들기 도우미', shot: 3 },
+  { name: '끼루 뉴스 브리핑', shot: 4 },
+  { name: '끼루 AI 챗봇', shot: 5 },
+  { name: '커뮤니티 · 끼루 AI 답변', shot: 6 },
 ]
 
 /* ===== 발표 멈춤 지점·메뉴 이동 ===== */
